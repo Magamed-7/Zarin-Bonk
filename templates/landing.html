@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}ZarinPay — Будущее банкинга{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/landing.css' %}" />
+{% endblock %}
+
+{% block content %}
+  <section class="hero parallax-layer" data-speed="0.18">
+    <div class="hero-card glass card-3d reveal">
+      <div class="hero-kicker">ZarinPay</div>
+      <h1 class="hero-title">
+        Умный банкинг в стиле
+        <span class="hero-accent">Dark Gold</span>
+      </h1>
+      <p class="hero-subtitle">
+        Управляйте финансами красиво: 3D интерфейс, быстрые переводы и контроль
+        бюджета в одном месте.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-gold" href="#">Открыть счёт</a>
+        <a class="btn btn-ghost" href="#">Войти</a>
+      </div>
+    </div>
+
+    <div class="hero-card glass card-3d reveal delay-1">
+      <div class="hero-kicker">3D Analytics</div>
+      <div class="chart-wrap">
+        <canvas id="miniChart" height="150"></canvas>
+      </div>
+      <div class="hero-metrics">
+        <div class="metric">
+          <div class="metric-label">Активные клиенты</div>
+          <div class="metric-value">12,4K</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Транзакций сегодня</div>
+          <div class="metric-value metric-good">+8.1%</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Доступность</div>
+          <div class="metric-value">99.98%</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="landing-section reveal" id="advantages">
+    <h2 class="landing-title">Наши преимущества</h2>
+    <div class="feature-grid">
+      <article class="glass feature-card card-3d reveal">
+        <span class="feature-icon">🔐</span>
+        <h3>Максимальная безопасность</h3>
+        <p>Многоуровневая защита данных и подтверждение операций.</p>
+      </article>
+      <article class="glass feature-card card-3d reveal delay-1">
+        <span class="feature-icon">⚡</span>
+        <h3>Мгновенные переводы</h3>
+        <p>Переводите средства внутри банка за секунды 24/7.</p>
+      </article>
+      <article class="glass feature-card card-3d reveal delay-2">
+        <span class="feature-icon">📊</span>
+        <h3>Умная аналитика</h3>
+        <p>Визуальные отчёты и прогнозы по расходам в реальном времени.</p>
+      </article>
+      <article class="glass feature-card card-3d reveal delay-3">
+        <span class="feature-icon">🌍</span>
+        <h3>Международные платежи</h3>
+        <p>Удобные платежи и выгодные курсы в разных валютах.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="landing-section reveal parallax-layer" data-speed="0.08" id="how-it-works">
+    <h2 class="landing-title">Как это работает</h2>
+    <div class="steps-grid">
+      <article class="glass step-card card-3d reveal">
+        <span class="step-index">01</span>
+        <h3>Регистрация</h3>
+        <p>Создайте аккаунт и подтвердите личность за пару минут.</p>
+      </article>
+      <article class="glass step-card card-3d reveal delay-1">
+        <span class="step-index">02</span>
+        <h3>Открытие счёта</h3>
+        <p>Выберите подходящий счёт и настройте лимиты и уведомления.</p>
+      </article>
+      <article class="glass step-card card-3d reveal delay-2">
+        <span class="step-index">03</span>
+        <h3>Управление</h3>
+        <p>Платежи, переводы и финансовые цели в одном дашборде.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="landing-section reveal" id="pricing">
+    <h2 class="landing-title">Тарифы</h2>
+    <div class="pricing-grid">
+      <article class="glass price-card card-3d reveal">
+        <h3>Start</h3>
+        <div class="price">$0<span>/мес</span></div>
+        <ul>
+          <li>Базовый счёт</li>
+          <li>Переводы внутри банка</li>
+          <li>Email уведомления</li>
+        </ul>
+        <a class="btn btn-ghost" href="#">Выбрать</a>
+      </article>
+      <article class="glass price-card card-3d reveal delay-1 featured">
+        <div class="badge">Популярный</div>
+        <h3>Gold</h3>
+        <div class="price">$12<span>/мес</span></div>
+        <ul>
+          <li>Все возможности Start</li>
+          <li>Международные платежи</li>
+          <li>Расширенная аналитика</li>
+        </ul>
+        <a class="btn btn-gold" href="#">Открыть счёт</a>
+      </article>
+      <article class="glass price-card card-3d reveal delay-2">
+        <h3>Business</h3>
+        <div class="price">$29<span>/мес</span></div>
+        <ul>
+          <li>Мульти-аккаунты</li>
+          <li>Приоритетная поддержка</li>
+          <li>API интеграции</li>
+        </ul>
+        <a class="btn btn-ghost" href="#">Войти</a>
+      </article>
+    </div>
+  </section>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/landing.js' %}"></script>
+{% endblock %}
