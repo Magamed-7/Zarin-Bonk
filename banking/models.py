@@ -60,3 +60,56 @@ class Account(models.Model):
         if not self.account_number:
             self.account_number = self.generate_account_number()
         super().save(*args, **kwargs)
+
+
+class Card(models.Model):
+    class CardType(models.TextChoices):
+        VIRTUAL = 'virtual', 'Виртуальная'
+
+    account = models.ForeignKey(
+        Account,
+        on_delete=models.CASCADE,
+        related_name='cards',
+    )
+    card_number = models.CharField(max_length=16, unique=True, editable=False)
+    cvv = models.CharField(max_length=3, editable=False)
+    expiry_date = models.DateField()
+    is_frozen = models.BooleanField(default=False)
+    card_type = models.CharField(
+        max_length=20,
+        choices=CardType.choices,
+        default=CardType.VIRTUAL,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'карта'
+        verbose_name_plural = 'карты'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.masked_number} ({self.get_card_type_display()})'
+
+    @property
+    def masked_number(self):
+        return f'**** **** **** {self.card_number[-4:]}'
+
+    @classmethod
+    def generate_card_number(cls):
+        while True:
+            prefix = '4'
+            body = ''.join(str(secrets.randbelow(10)) for _ in range(15))
+            number = f'{prefix}{body}'
+            if not cls.objects.filter(card_number=number).exists():
+                return number
+
+    @classmethod
+    def generate_cvv(cls):
+        return f'{secrets.randbelow(1000):03d}'
+
+    def save(self, *args, **kwargs):
+        if not self.card_number:
+            self.card_number = self.generate_card_number()
+        if not self.cvv:
+            self.cvv = self.generate_cvv()
+        super().save(*args, **kwargs)
