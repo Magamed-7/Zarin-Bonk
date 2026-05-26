@@ -9,6 +9,8 @@ class CardInline(admin.TabularInline):
     readonly_fields = ('card_number', 'cvv', 'created_at')
 
 
+
+# Account panel 
 @admin.register(Account)
 class AccountAdmin(admin.ModelAdmin):
     inlines = [CardInline]
@@ -26,6 +28,8 @@ class AccountAdmin(admin.ModelAdmin):
     readonly_fields = ('account_number', 'created_at')
 
 
+
+# Card panel
 @admin.register(Card)
 class CardAdmin(admin.ModelAdmin):
     list_display = (

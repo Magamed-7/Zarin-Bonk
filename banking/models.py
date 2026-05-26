@@ -6,6 +6,7 @@ from django.conf import settings
 from django.db import models
 
 
+# Creating Account
 class Account(models.Model):
     class AccountType(models.TextChoices):
         CHECKING = 'checking', 'Расчётный'
@@ -62,6 +63,8 @@ class Account(models.Model):
         super().save(*args, **kwargs)
 
 
+
+# Creating Card
 class Card(models.Model):
     class CardType(models.TextChoices):
         VIRTUAL = 'virtual', 'Виртуальная'
