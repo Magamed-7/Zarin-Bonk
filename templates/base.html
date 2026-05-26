@@ -1,0 +1,152 @@
+{% load static %}
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0b1020" />
+    <title>{% block title %}ZarinPay{% endblock %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+    {% block extra_css %}{% endblock %}
+  </head>
+  <body>
+    <div id="bg3d" aria-hidden="true"></div>
+    <div class="bg-glow" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <nav class="nav">
+        <a class="brand" href="/">
+          <span class="brand-mark" aria-hidden="true">Z</span>
+          <span class="brand-text">
+            <span class="brand-name">ZarinPay</span>
+            <span class="brand-tag">Banking • Dark • Gold</span>
+          </span>
+        </a>
+
+        <div class="nav-links">
+          <a class="nav-link" href="/">Главная</a>
+          <a class="nav-link" href="#">Счета</a>
+          <a class="nav-link" href="#">Транзакции</a>
+          <a class="nav-link" href="#">Поддержка</a>
+        </div>
+
+        <div class="nav-actions">
+          <button id="ui-tilt-toggle" class="btn btn-ghost" type="button">
+            3D
+          </button>
+          <a class="btn btn-gold" href="#">Войти</a>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container">
+      {% if messages %}
+        <section class="flash-stack" aria-live="polite" aria-atomic="true">
+          {% for message in messages %}
+            <div class="flash flash-{{ message.tags|default:'info' }}">
+              <div class="flash-dot" aria-hidden="true"></div>
+              <div class="flash-text">{{ message }}</div>
+              <button class="flash-close" type="button" aria-label="Закрыть">
+                ✕
+              </button>
+            </div>
+          {% endfor %}
+        </section>
+      {% endif %}
+
+      <section class="hero">
+        <div class="hero-card glass card-3d">
+          <div class="hero-kicker">ZarinPay</div>
+          <h1 class="hero-title">
+            Темный банк с золотым акцентом
+            <span class="hero-accent">zarin</span>
+          </h1>
+          <p class="hero-subtitle">
+            Glassmorphism, плавные анимации и 3D‑эффекты на каждой странице.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-gold" href="#">Открыть счет</a>
+            <a class="btn btn-ghost" href="#">Посмотреть дашборд</a>
+          </div>
+        </div>
+
+        <div class="hero-card glass card-3d">
+          <div class="hero-kicker">Live Charts</div>
+          <div class="chart-wrap">
+            <canvas id="miniChart" height="140"></canvas>
+          </div>
+          <div class="hero-metrics">
+            <div class="metric">
+              <div class="metric-label">Баланс</div>
+              <div class="metric-value">$ 12,480</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Рост</div>
+              <div class="metric-value metric-good">+ 8.4%</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Риск</div>
+              <div class="metric-value">Низкий</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page">
+        {% block content %}
+          <div class="glass pad card-3d">
+            <h2 class="section-title">Готово для следующих частей</h2>
+            <p class="muted">
+              Этот шаблон — база для всех страниц. Дальше подключим реальные URL,
+              формы, модели и красивые страницы модулей.
+            </p>
+          </div>
+        {% endblock %}
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner glass">
+        <div class="footer-col">
+          <div class="footer-brand">
+            <span class="brand-mark small" aria-hidden="true">Z</span>
+            <span class="footer-title">ZarinPay</span>
+          </div>
+          <p class="muted">
+            Демонстрационный банковский сайт. Темная тема, золото и аккуратная
+            анимация — фирменный стиль.
+          </p>
+        </div>
+        <div class="footer-col">
+          <div class="footer-head">Инфо</div>
+          <a class="footer-link" href="#">Лицензии</a>
+          <a class="footer-link" href="#">Политика</a>
+          <a class="footer-link" href="#">Безопасность</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-head">Контакты</div>
+          <div class="footer-text">Asia/Dushanbe</div>
+          <div class="footer-text">support@zarinpay.local</div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© {% now 'Y' %} ZarinPay</span>
+        <span class="sep">•</span>
+        <span class="muted">Dark • Glass • Gold</span>
+      </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/three@0.165.0/build/three.min.js"></script>
+    <script src="{% static 'js/base.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+  </body>
+</html>
