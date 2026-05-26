@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}500 — Ошибка сервера | ZarinPay{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/errors.css' %}" />
+{% endblock %}
+
+{% block content %}
+  <section class="error-page error-500">
+    <div class="error-visual glass card-3d reveal">
+      <div class="error-code error-code-pulse">500</div>
+      <div class="error-ring" aria-hidden="true"></div>
+      <div class="error-ring delay" aria-hidden="true"></div>
+    </div>
+
+    <div class="error-body glass card-3d reveal delay-1">
+      <p class="error-kicker">ZarinPay</p>
+      <h1 class="error-title">Ошибка сервера</h1>
+      <p class="error-text muted">
+        На сервере произошла непредвиденная ошибка. Мы уже работаем над
+        исправлением. Попробуйте обновить страницу или вернитесь на главную.
+      </p>
+      <div class="error-actions">
+        <a class="btn btn-gold" href="/">На главную</a>
+        <button class="btn btn-ghost" type="button" onclick="location.reload()">
+          Обновить
+        </button>
+      </div>
+    </div>
+  </section>
+{% endblock %}

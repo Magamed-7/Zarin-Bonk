@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}404 — Страница не найдена | ZarinPay{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/errors.css' %}" />
+{% endblock %}
+
+{% block content %}
+  <section class="error-page error-404">
+    <div class="error-visual glass card-3d reveal">
+      <div id="error3d" class="error-canvas-wrap" aria-hidden="true"></div>
+      <div class="error-code">404</div>
+    </div>
+
+    <div class="error-body glass card-3d reveal delay-1">
+      <p class="error-kicker">ZarinPay</p>
+      <h1 class="error-title">Страница не найдена</h1>
+      <p class="error-text muted">
+        Похоже, вы перешли по неверной ссылке или страница была удалена.
+        Вернитесь на главную и продолжите работу с банком.
+      </p>
+      <div class="error-actions">
+        <a class="btn btn-gold" href="/">На главную</a>
+        <a class="btn btn-ghost" href="javascript:history.back()">Назад</a>
+      </div>
+    </div>
+  </section>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/errors.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,160 @@
+.error-page {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 16px;
+  align-items: stretch;
+  min-height: 58vh;
+  padding: 10px 0 20px;
+}
+
+.error-visual {
+  position: relative;
+  min-height: 320px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 24px;
+}
+
+.error-canvas-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.error-canvas-wrap canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+.error-code {
+  position: relative;
+  z-index: 2;
+  font-size: clamp(72px, 12vw, 120px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--gold);
+  text-shadow: 0 0 40px rgba(255, 215, 0, 0.35),
+    0 0 80px rgba(255, 215, 0, 0.15);
+  transform-style: preserve-3d;
+  animation: errorFloat 4s ease-in-out infinite;
+}
+
+.error-404 .error-code {
+  animation: errorFloat3d 5s ease-in-out infinite;
+}
+
+.error-code-pulse {
+  animation: errorPulse 2.4s ease-in-out infinite;
+}
+
+.error-ring {
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 215, 0, 0.25);
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.12);
+  animation: ringSpin 8s linear infinite;
+}
+
+.error-ring.delay {
+  width: 240px;
+  height: 240px;
+  border-color: rgba(90, 140, 255, 0.22);
+  animation-duration: 12s;
+  animation-direction: reverse;
+}
+
+.error-body {
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.error-kicker {
+  margin: 0 0 8px;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.error-title {
+  margin: 0 0 12px;
+  font-size: clamp(24px, 3vw, 34px);
+  line-height: 1.15;
+}
+
+.error-text {
+  margin: 0 0 20px;
+  max-width: 48ch;
+  line-height: 1.6;
+}
+
+.error-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+@keyframes errorFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes errorFloat3d {
+  0%,
+  100% {
+    transform: perspective(600px) rotateX(8deg) rotateY(-6deg) translateY(0);
+  }
+  50% {
+    transform: perspective(600px) rotateX(-6deg) rotateY(8deg) translateY(-12px);
+  }
+}
+
+@keyframes errorPulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes ringSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 900px) {
+  .error-page {
+    grid-template-columns: 1fr;
+  }
+
+  .error-visual {
+    min-height: 260px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .error-code,
+  .error-ring {
+    animation: none !important;
+  }
+}
