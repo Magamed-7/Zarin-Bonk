@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import User
+from .models import User, LoginHistory
 
 
 @admin.register(User)
@@ -41,3 +41,40 @@ class UserAdmin(BaseUserAdmin):
             },
         ),
     )
+
+
+
+
+
+
+
+
+
+@admin.register(LoginHistory)
+class LoginHistoryAdmin(admin.ModelAdmin):
+    list_display = ('user', 'ip_address', 'device', 'browser', 'is_successful', 'created_at')
+    list_filter = ('is_successful', 'created_at')
+    search_fields = ('user__username', 'user__email', 'ip_address', 'device', 'browser')
+    readonly_fields = ('user', 'ip_address', 'device', 'browser', 'is_successful', 'created_at')
+ 
+    fieldsets = (
+        (
+            'Основное',
+            {
+                'fields': ('user', 'ip_address', 'device', 'browser'),
+            },
+        ),
+        (
+            'Статус',
+            {
+                'fields': ('is_successful', 'created_at'),
+            },
+        ),
+    )
+ 
+    def has_add_permission(self, request):
+        return False
+ 
+    def has_change_permission(self, request, obj=None):
+        return False
+ 

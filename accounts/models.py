@@ -1,7 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
-
+from django.conf import settings
 class User(AbstractUser):
     class Role(models.TextChoices):
         CLIENT = 'client', 'Клиент'
@@ -25,3 +24,30 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.get_username()
+    
+
+
+
+
+
+
+class LoginHistory(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='login_history',
+    )
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
+    device = models.CharField(max_length=200, blank=True)
+    browser = models.CharField(max_length=200, blank=True)
+    is_successful = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+ 
+    class Meta:
+        verbose_name = 'история входа'
+        verbose_name_plural = 'история входов'
+        ordering = ['-created_at']
+ 
+    def __str__(self):
+        status = 'успешно' if self.is_successful else 'неудачно'
+        return f'{self.user} — {self.ip_address} ({status}) {self.created_at:%d.%m.%Y %H:%M}'
