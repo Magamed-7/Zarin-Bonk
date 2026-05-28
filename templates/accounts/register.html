@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Регистрация — ZarinPay{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/register.css' %}">
+{% endblock %}
+
+{% block content %}
+<main class="register-page">
+  <div class="register-wrapper">
+    <div class="register-card">
+
+      {# Header #}
+      <div class="register-header">
+        <a href="{% url 'landing' %}" class="register-logo">
+          <span class="register-logo-icon">₸</span>
+          ZarinPay
+        </a>
+        <h1 class="register-title">Создать аккаунт</h1>
+        <p class="register-subtitle">Присоединяйтесь к современному банкингу</p>
+      </div>
+
+      {# Django non-field errors #}
+      {% if form.non_field_errors %}
+        <div class="django-errors">
+          <ul>
+            {% for error in form.non_field_errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+
+      {# Form #}
+      <form class="register-form" method="post" novalidate>
+        {% csrf_token %}
+
+        {# Row: first_name + last_name #}
+        <div class="form-row">
+          <div class="field {% if form.first_name.errors %}is-invalid{% endif %}">
+            <label class="field-label" for="{{ form.first_name.id_for_label }}">Имя</label>
+            <div class="field-input-wrap">
+              <input
+                id="id_first_name"
+                class="field-input"
+                type="text"
+                name="{{ form.first_name.html_name }}"
+                value="{{ form.first_name.value|default:'' }}"
+                placeholder="Иван"
+                autocomplete="given-name"
+              >
+              <span class="field-icon">👤</span>
+            </div>
+            <span class="field-hint">
+              {% if form.first_name.errors %}{{ form.first_name.errors.0 }}{% endif %}
+            </span>
+          </div>
+
+          <div class="field {% if form.last_name.errors %}is-invalid{% endif %}">
+            <label class="field-label" for="{{ form.last_name.id_for_label }}">Фамилия</label>
+            <div class="field-input-wrap">
+              <input
+                id="id_last_name"
+                class="field-input"
+                type="text"
+                name="{{ form.last_name.html_name }}"
+                value="{{ form.last_name.value|default:'' }}"
+                placeholder="Иванов"
+                autocomplete="family-name"
+              >
+              <span class="field-icon">👤</span>
+            </div>
+            <span class="field-hint">
+              {% if form.last_name.errors %}{{ form.last_name.errors.0 }}{% endif %}
+            </span>
+          </div>
+        </div>
+
+        {# Email #}
+        <div class="field {% if form.email.errors %}is-invalid{% endif %}">
+          <label class="field-label" for="{{ form.email.id_for_label }}">Email</label>
+          <div class="field-input-wrap">
+            <input
+              id="id_email"
+              class="field-input"
+              type="email"
+              name="{{ form.email.html_name }}"
+              value="{{ form.email.value|default:'' }}"
+              placeholder="ivan@example.com"
+              autocomplete="email"
+            >
+            <span class="field-icon">✉️</span>
+          </div>
+          <span class="field-hint">
+            {% if form.email.errors %}{{ form.email.errors.0 }}{% endif %}
+          </span>
+        </div>
+
+        {# Phone #}
+        <div class="field {% if form.phone.errors %}is-invalid{% endif %}">
+          <label class="field-label" for="{{ form.phone.id_for_label }}">
+            Телефон <small style="opacity:.5">(необязательно)</small>
+          </label>
+          <div class="field-input-wrap">
+            <input
+              id="id_phone"
+              class="field-input"
+              type="tel"
+              name="{{ form.phone.html_name }}"
+              value="{{ form.phone.value|default:'' }}"
+              placeholder="+7 900 000 00 00"
+              autocomplete="tel"
+            >
+            <span class="field-icon">📱</span>
+          </div>
+          <span class="field-hint">
+            {% if form.phone.errors %}{{ form.phone.errors.0 }}{% endif %}
+          </span>
+        </div>
+
+        {# Password #}
+        <div class="field {% if form.password.errors %}is-invalid{% endif %}">
+          <label class="field-label" for="{{ form.password.id_for_label }}">Пароль</label>
+          <div class="field-input-wrap">
+            <input
+              id="id_password"
+              class="field-input"
+              type="password"
+              name="{{ form.password.html_name }}"
+              placeholder="Минимум 8 символов"
+              autocomplete="new-password"
+            >
+            <span class="field-icon">🔒</span>
+          </div>
+          <div class="password-strength">
+            <div class="strength-bar">
+              <div class="strength-fill"></div>
+            </div>
+          </div>
+          <span class="field-hint">
+            {% if form.password.errors %}{{ form.password.errors.0 }}{% endif %}
+          </span>
+        </div>
+
+        {# Confirm password #}
+        <div class="field {% if form.password_confirm.errors %}is-invalid{% endif %}">
+          <label class="field-label" for="{{ form.password_confirm.id_for_label }}">Повторите пароль</label>
+          <div class="field-input-wrap">
+            <input
+              id="id_password_confirm"
+              class="field-input"
+              type="password"
+              name="{{ form.password_confirm.html_name }}"
+              placeholder="Повторите пароль"
+              autocomplete="new-password"
+            >
+            <span class="field-icon">🔒</span>
+          </div>
+          <span class="field-hint">
+            {% if form.password_confirm.errors %}{{ form.password_confirm.errors.0 }}{% endif %}
+          </span>
+        </div>
+
+        {# Submit #}
+        <button type="submit" class="register-btn">
+          <span class="btn-text">Создать аккаунт</span>
+          <span class="btn-spinner"></span>
+        </button>
+      </form>
+
+      {# Footer #}
+      <p class="register-footer">
+        Уже есть аккаунт? <a href="">Войти</a>  {# Url for login #}
+      </p>
+
+    </div>
+  </div>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/register.js' %}"></script>
+{% endblock %}
