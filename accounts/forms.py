@@ -64,3 +64,20 @@ class RegisterForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+    
+
+
+
+class LoginForm(forms.Form):
+    email = forms.EmailField(
+        label='Email',
+        widget=forms.EmailInput,
+    )
+    password = forms.CharField(
+        label='Пароль',
+        widget=forms.PasswordInput,
+    )
+ 
+    def clean_email(self):
+        return self.cleaned_data.get('email', '').lower()
+ 
