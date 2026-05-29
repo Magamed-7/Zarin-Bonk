@@ -22,70 +22,82 @@
         <p class="login-subtitle">Войдите в свой аккаунт</p>
       </div>
 
+      {# Lockout banner #}
+      {% if lockout_minutes %}
+        <div class="login-error visible login-lockout">
+          🔒 Слишком много неудачных попыток.<br>
+          Повторите через <strong>{{ lockout_minutes }} мин.</strong>
+        </div>
+      {% endif %}
+
       {# Server error banner #}
-      <div
-        class="login-error"
-        data-has-errors="{% if form.non_field_errors %}true{% else %}false{% endif %}"
-      >
-        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
-      </div>
-
-      {# Form #}
-      <form class="login-form" method="post" novalidate>
-        {% csrf_token %}
-
-        {# Email #}
-        <div class="field {% if form.email.errors %}is-invalid{% endif %}">
-          <label class="field-label" for="{{ form.email.id_for_label }}">Email</label>
-          <div class="field-input-wrap">
-            <input
-              id="id_email"
-              class="field-input"
-              type="email"
-              name="{{ form.email.html_name }}"
-              value="{{ form.email.value|default:'' }}"
-              placeholder="ivan@example.com"
-              autocomplete="email"
-              autofocus
-            >
-            <span class="field-icon">✉️</span>
-          </div>
-          <span class="field-hint">
-            {% if form.email.errors %}{{ form.email.errors.0 }}{% endif %}
-          </span>
+      {% if not lockout_minutes %}
+        <div
+          class="login-error"
+          data-has-errors="{% if form.non_field_errors %}true{% else %}false{% endif %}"
+        >
+          {% for error in form.non_field_errors %}{{ error }}{% endfor %}
         </div>
+      {% endif %}
 
-        {# Password #}
-        <div class="field {% if form.password.errors %}is-invalid{% endif %}">
-          <div class="field-row">
-            <label class="field-label" for="{{ form.password.id_for_label }}">Пароль</label>
-            <a href="#" class="forgot-link">  {# TODO: url 'accounts:password_reset' #}
-              Забыл пароль?
-            </a>
-          </div>
-          <div class="field-input-wrap">
-            <input
-              id="id_password"
-              class="field-input"
-              type="password"
-              name="{{ form.password.html_name }}"
-              placeholder="Введите пароль"
-              autocomplete="current-password"
-            >
-            <span class="field-icon">🔒</span>
-            <button type="button" class="field-toggle" aria-label="Показать пароль">👁️</button>
-          </div>
-          <span class="field-hint">
-            {% if form.password.errors %}{{ form.password.errors.0 }}{% endif %}
-          </span>
-        </div>
+      {# Form — скрываем при блокировке #}
+      {% if not lockout_minutes %}
+        <form class="login-form" method="post" novalidate>
+          {% csrf_token %}
 
-        {# Submit #}
-        <button type="submit" class="login-btn">
-          <span class="btn-text">Войти</span>
-          <span class="btn-spinner"></span>
-        </button>
-      </form>
+          {# Email #}
+          <div class="field {% if form.email.errors %}is-invalid{% endif %}">
+            <label class="field-label" for="{{ form.email.id_for_label }}">Email</label>
+            <div class="field-input-wrap">
+              <input
+                id="id_email"
+                class="field-input"
+                type="email"
+                name="{{ form.email.html_name }}"
+                value="{{ form.email.value|default:'' }}"
+                placeholder="ivan@example.com"
+                autocomplete="email"
+                autofocus
+              >
+              <span class="field-icon">✉️</span>
+            </div>
+            <span class="field-hint">
+              {% if form.email.errors %}{{ form.email.errors.0 }}{% endif %}
+            </span>
+          </div>
+
+          {# Password #}
+          <div class="field {% if form.password.errors %}is-invalid{% endif %}">
+            <div class="field-row">
+              <label class="field-label" for="{{ form.password.id_for_label }}">Пароль</label>
+              <a href="#" class="forgot-link">
+                Забыл пароль?  {# TODO: {% url 'accounts:password_reset' %} #}
+              </a>
+            </div>
+            <div class="field-input-wrap">
+              <input
+                id="id_password"
+                class="field-input"
+                type="password"
+                name="{{ form.password.html_name }}"
+                placeholder="Введите пароль"
+                autocomplete="current-password"
+              >
+              <span class="field-icon">🔒</span>
+              <button type="button" class="field-toggle" aria-label="Показать пароль">👁️</button>
+            </div>
+            <span class="field-hint">
+              {% if form.password.errors %}{{ form.password.errors.0 }}{% endif %}
+            </span>
+          </div>
+
+          {# Submit #}
+          <button type="submit" class="login-btn">
+            <span class="btn-text">Войти</span>
+            <span class="btn-spinner"></span>
+          </button>
+        </form>
+      {% endif %}
 
       {# Footer #}
       <p class="login-footer">

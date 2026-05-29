@@ -81,3 +81,17 @@ class LoginForm(forms.Form):
     def clean_email(self):
         return self.cleaned_data.get('email', '').lower()
  
+
+class TwoFactorForm(forms.Form):
+    code = forms.CharField(
+        label='Код подтверждения',
+        max_length=6,
+        min_length=6,
+        widget=forms.TextInput,
+    )
+ 
+    def clean_code(self):
+        code = self.cleaned_data.get('code', '').strip()
+        if not code.isdigit():
+            raise forms.ValidationError('Код должен состоять из 6 цифр.')
+        return code

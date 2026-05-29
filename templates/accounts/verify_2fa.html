@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Подтверждение входа — ZarinPay{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/verify_2fa.css' %}">
+{% endblock %}
+
+{% block content %}
+<main class="twofa-page">
+  <div class="twofa-wrapper">
+    <div class="twofa-card">
+
+      <span class="twofa-icon">🔐</span>
+      <h1 class="twofa-title">Подтверждение входа</h1>
+      <p class="twofa-subtitle">
+        Мы отправили 6-значный код на ваш email.<br>
+        Введите его ниже. Код действителен <span class="twofa-email">5 минут</span>.
+      </p>
+
+      {# Django messages (успех/предупреждение переотправки) #}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="twofa-message twofa-message--{{ message.tags }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      {# Ошибка кода #}
+      <div
+        class="twofa-error"
+        data-has-errors="{% if form.code.errors %}true{% else %}false{% endif %}"
+      >
+        {% for error in form.code.errors %}{{ error }}{% endfor %}
+      </div>
+
+      {# Код истёк #}
+      {% if expired %}
+        <p class="twofa-expired">
+          Код истёк.
+          <a href="{% url 'accounts:login' %}">Войти снова</a>
+        </p>
+      {% else %}
+        <form class="twofa-form" method="post" novalidate>
+          {% csrf_token %}
+
+          {# 6 отдельных инпутов — JS собирает их в скрытое поле #}
+          <div class="code-inputs">
+            <input class="code-input" type="text" inputmode="numeric" maxlength="1" autocomplete="off">
+            <input class="code-input" type="text" inputmode="numeric" maxlength="1" autocomplete="off">
+            <input class="code-input" type="text" inputmode="numeric" maxlength="1" autocomplete="off">
+            <input class="code-input" type="text" inputmode="numeric" maxlength="1" autocomplete="off">
+            <input class="code-input" type="text" inputmode="numeric" maxlength="1" autocomplete="off">
+            <input class="code-input" type="text" inputmode="numeric" maxlength="1" autocomplete="off">
+          </div>
+
+          <input
+            id="id_code"
+            class="code-hidden"
+            type="text"
+            name="{{ form.code.html_name }}"
+            value="{{ form.code.value|default:'' }}"
+          >
+
+          <button type="submit" class="twofa-btn">Подтвердить</button>
+        </form>
+
+        {# Переотправка кода #}
+        <div class="twofa-resend">
+          {% if can_resend_in > 0 %}
+            {# Ещё нельзя — показываем обратный отсчёт #}
+            Отправить снова через
+            <span class="resend-timer" data-seconds="{{ can_resend_in }}">
+              {{ can_resend_in }}
+            </span> сек.
+          {% else %}
+            {# Можно переотправить #}
+            Не получили код?
+            <a href="{% url 'accounts:resend_2fa' %}">Отправить снова</a>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <p class="twofa-back">
+        <a href="{% url 'accounts:login' %}">← Вернуться ко входу</a>
+      </p>
+
+    </div>
+  </div>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/verify_2fa.js' %}"></script>
+{% endblock %}
