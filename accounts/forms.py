@@ -51,9 +51,7 @@ class RegisterForm(forms.ModelForm):
     def save(self, commit=True):
         user = super().save(commit=False)
         raw = self.cleaned_data['password']
-        # username = email prefix, guaranteed unique by clean_email
         user.username = self.cleaned_data['email'].split('@')[0]
-        # ensure username uniqueness
         base = user.username
         counter = 1
         while User.objects.filter(username=user.username).exists():

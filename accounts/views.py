@@ -29,7 +29,6 @@ def register_view(request):
     if request.method == 'POST' and form.is_valid():
         user = form.save()
 
-        # Создаём счёт и карту автоматически
         account = Account.objects.create(
             user=user,
             account_type=Account.AccountType.CHECKING,
@@ -41,7 +40,6 @@ def register_view(request):
             card_type=Card.CardType.VIRTUAL,
         )
 
-        # Приветственное уведомление
         Notification.objects.create(
             user=user,
             title='Добро пожаловать в ZarinPay!',
@@ -60,16 +58,15 @@ def login_view(request):
     if request.user.is_authenticated:
         return redirect('landing')  # TODO: заменить на 'banking:dashboard'
 
-    # Получаем IP пользователя
     ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', ''))
     if ',' in ip:
         ip = ip.split(',')[0].strip()
 
-    # Ключи для кэша
+
     attempts_key = f'login_attempts_{ip}'
     lockout_key  = f'login_lockout_{ip}'
 
-    # Проверяем блокировку
+   
     locked_until = cache.get(lockout_key)
     if locked_until:
         remaining_seconds = (locked_until - timezone.now()).total_seconds()
@@ -80,7 +77,7 @@ def login_view(request):
                 'lockout_minutes': minutes,
             })
         else:
-            # Время блокировки вышло — сбрасываем
+            
             cache.delete(lockout_key)
             cache.delete(attempts_key)
 
@@ -90,7 +87,6 @@ def login_view(request):
         email    = form.cleaned_data['email']
         password = form.cleaned_data['password']
 
-        # Ищем пользователя по email, так как authenticate работает по username
         try:
             user_obj = User.objects.get(email=email)
             user = authenticate(request, username=user_obj.username, password=password)
@@ -136,7 +132,6 @@ def login_view(request):
             except User.DoesNotExist:
                 pass
 
-            # Блокируем после 5 неудачных попыток
             if attempts >= 5:
                 cache.set(lockout_key, timezone.now() + timedelta(minutes=15), 15 * 60)
                 return render(request, 'accounts/login.html', {
@@ -237,7 +232,6 @@ def resend_2fa_view(request):
             )
             return redirect('accounts:verify_2fa')
  
-    # Можно переотправить — отправляем и ставим ожидание 3 минуты
     user = User.objects.get(id=user_id)
     _send_2fa_code(user, ip)
     messages.success(request, 'Новый код отправлен на ваш email.')
@@ -266,3 +260,100 @@ def _send_2fa_code(user, ip):
 def logout_view(request):
     logout(request)
     return redirect('landing')
+
+
+
+
+def forgot_password_view(request):
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip().lower()
+ 
+        if not email:
+            messages.error(request, 'Введите email.')
+        else:
+            user = User.objects.filter(email=email).first()
+ 
+            if user is None:
+                # Не раскрываем существование аккаунта
+                messages.success(request, 'Если email зарегистрирован — код отправлен.')
+            else:
+                code = ''.join(random.choices(string.digits, k=6))
+                cache.set(f'reset_code_{user.id}',  code,    10 * 60)  # 10 минут
+                cache.set(f'reset_user_{email}', user.id, 10 * 60)
+ 
+                send_mail(
+                    subject='ZarinPay — восстановление пароля',
+                    message=f'Ваш код для сброса пароля: {code}\n\nКод действителен 10 минут.',
+                    from_email='noreply@zarinpay.tj',
+                    recipient_list=[user.email],
+                    fail_silently=False,
+                )
+                messages.success(request, 'Если email зарегистрирован — код отправлен.')
+ 
+            request.session['reset_email'] = email
+            return redirect('accounts:password_reset_verify')
+ 
+    return render(request, 'accounts/forgot_password.html')
+ 
+ 
+def password_reset_verify_view(request):
+    email = request.session.get('reset_email')
+    if not email:
+        return redirect('accounts:forgot_password')
+ 
+    user = User.objects.filter(email=email).first()
+ 
+    if request.method == 'POST':
+        entered_code = request.POST.get('code', '').strip()
+ 
+        if user is None:
+            messages.error(request, 'Неверный или просроченный код.')
+        else:
+            saved_code = cache.get(f'reset_code_{user.id}')
+ 
+            if saved_code and entered_code == saved_code:
+                cache.delete(f'reset_code_{user.id}')
+                request.session['reset_verified_user_id'] = user.id
+                return redirect('accounts:password_reset_new')
+            else:
+                messages.error(request, 'Неверный или просроченный код.')
+ 
+    return render(request, 'accounts/password_reset_verify.html', {'email': email})
+ 
+ 
+def password_reset_new_view(request):
+    user_id = request.session.get('reset_verified_user_id')
+    if not user_id:
+        return redirect('accounts:forgot_password')
+ 
+    user = User.objects.filter(id=user_id).first()
+    if user is None:
+        return redirect('accounts:forgot_password')
+ 
+    if request.method == 'POST':
+        password         = request.POST.get('password', '')
+        password_confirm = request.POST.get('password_confirm', '')
+ 
+        if len(password) < 8:
+            messages.error(request, 'Пароль должен быть не менее 8 символов.')
+        elif password != password_confirm:
+            messages.error(request, 'Пароли не совпадают.')
+        else:
+            user.set_password(password)
+            user.save()
+ 
+            # Чистим сессию
+            request.session.pop('reset_email', None)
+            request.session.pop('reset_verified_user_id', None)
+ 
+            Notification.objects.create(
+                user=user,
+                title='Пароль изменён',
+                message='Ваш пароль был успешно изменён.',
+                notification_type=Notification.NotificationType.SECURITY,
+            )
+ 
+            messages.success(request, 'Пароль успешно изменён! Войдите с новым паролем.')
+            return redirect('accounts:login')
+ 
+    return render(request, 'accounts/password_reset_new.html')
