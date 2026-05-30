@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load static %}
+<div class="glass currency-card">
+
+<h2>
+
+Конвертация валют
+
+</h2>
+
+<form method="post">
+
+{% csrf_token %}
+
+{{ form.amount }}
+
+{{ form.from_currency }}
+
+{{ form.to_currency }}
+
+<div class="live-result">
+
+≈
+
+<span id="liveResult">
+
+0
+
+</span>
+
+</div>
+
+<button>
+
+Конвертировать
+
+</button>
+
+</form>
+
+{% if converted %}
+
+<div class="result-box">
+
+Курс:
+
+{{ rate }}
+
+<br>
+
+Результат:
+
+{{ converted }}
+
+</div>
+
+{% endif %}
+
+</div>
+
+<script src="/static/js/currency.js"></script>
+
+{% endblock %}

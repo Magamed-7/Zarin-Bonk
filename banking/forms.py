@@ -14,3 +14,27 @@ class TopUpForm(forms.Form):
             }
         )
     )
+
+
+class CurrencyConvertForm(forms.Form):
+
+    CURRENCIES = [
+
+        ('TJS','TJS'),
+        ('USD','USD'),
+        ('EUR','EUR'),
+        ('RUB','RUB'),
+
+    ]
+
+    amount = forms.DecimalField(
+        min_value=1
+    )
+
+    from_currency = forms.ChoiceField(
+        choices=CURRENCIES
+    )
+
+    to_currency = forms.ChoiceField(
+        choices=CURRENCIES
+    )

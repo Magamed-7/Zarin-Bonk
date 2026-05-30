@@ -12,6 +12,8 @@ from django.utils import timezone
 from transactions.models import Transaction
 from .models import Account, Card
 from .forms import TopUpForm
+from .constants import EXCHANGE_RATES
+from .forms import CurrencyConvertForm
 
 
 @login_required
@@ -224,4 +226,78 @@ def topup_account_view(request):
 
     return redirect(
         'banking:dashboard'
+    )
+
+
+
+@login_required
+def currency_convert_view(request):
+
+    converted = None
+    rate = None
+
+    form = CurrencyConvertForm(
+        request.POST or None
+    )
+
+    if request.method == 'POST':
+
+        if form.is_valid():
+
+            amount = form.cleaned_data[
+                'amount'
+            ]
+
+            source = form.cleaned_data[
+                'from_currency'
+            ]
+
+            target = form.cleaned_data[
+                'to_currency'
+            ]
+
+            rate = EXCHANGE_RATES[
+                source
+            ][target]
+
+            converted = round(
+                float(amount)*rate,
+                2
+            )
+
+    context = {
+
+        'form':form,
+        'converted':converted,
+        'rate':rate,
+        'rates':EXCHANGE_RATES,
+
+    }
+
+    return render(
+
+        request,
+
+        'banking/currency.html',
+
+        context
+
+    )
+
+
+@login_required
+def currency_rates_view(request):
+
+    return render(
+
+        request,
+
+        'banking/rates.html',
+
+        {
+
+            'rates':EXCHANGE_RATES
+
+        }
+
     )

@@ -11,4 +11,6 @@ urlpatterns = [
     path('accounts/<int:account_id>/',   views.account_detail_view,  name='account_detail'),
     path('cards/<int:card_id>/freeze/', views.toggle_card_freeze_view, name='toggle_card_freeze'),
     path('topup/', views.topup_account_view, name='topup'),
+    path('currency/', views.currency_convert_view, name='currency'),
+    path('rates/', views.currency_rates_view, name='rates'),
 ]

@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load static %}
+<div class="glass rates-page">
+
+<h1>
+
+Курсы валют
+
+</h1>
+
+{% for base,data in rates.items %}
+
+<div class="rate-card">
+
+<h3>
+
+{{ base }}
+
+</h3>
+
+{% for cur,value in data.items %}
+
+<div>
+
+{{ cur }}
+
+:
+
+{{ value }}
+
+</div>
+
+{% endfor %}
+
+</div>
+
+{% endfor %}
+
+</div>
+
+{% endblock %}
