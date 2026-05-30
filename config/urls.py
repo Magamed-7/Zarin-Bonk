@@ -9,6 +9,7 @@ urlpatterns = [
     path('', TemplateView.as_view(template_name='landing.html'), name='landing'),
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
+    path('banking/', include('banking.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if not settings.DEBUG:

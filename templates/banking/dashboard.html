@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Дашборд — ZarinPay{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+
+  <h1 class="dashboard-title">
+    Привет, <span>{{ request.user.first_name }}</span> 👋
+  </h1>
+
+  {# ── Верхний ряд: баланс + карта ── #}
+  <div class="dashboard-top">
+
+    {# Баланс #}
+    <div class="balance-card">
+      <p class="balance-label">Общий баланс</p>
+      {% if account %}
+        <div
+          class="balance-amount"
+          data-value="{{ account.balance }}"
+          data-currency="{{ account.currency }}"
+        >
+          {{ account.balance }} {{ account.currency }}
+        </div>
+        <p class="balance-account">{{ account.account_number }}</p>
+      {% else %}
+        <div class="balance-amount">0.00 TJS</div>
+        <p class="balance-account">Счёт не найден</p>
+      {% endif %}
+    </div>
+
+    {# 3D Виртуальная карта #}
+    <div class="card-3d-wrap">
+      {% if card %}
+        <div class="virtual-card">
+          <span class="card-type-badge">{{ card.get_card_type_display }}</span>
+          <div class="card-chip"></div>
+          <div class="card-number">{{ card.masked_number }}</div>
+          <div class="card-bottom">
+            <div>
+              <div class="card-holder">
+                {{ request.user.get_full_name|upper }}
+              </div>
+            </div>
+            <div>
+              <div class="card-expiry-label">Действует до</div>
+              <div class="card-expiry">
+                {{ card.expiry_date|date:"m/y" }}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <div class="virtual-card">
+          <div class="card-chip"></div>
+          <div class="card-number">**** **** **** ****</div>
+          <div class="card-bottom">
+            <div class="card-holder">Карта не найдена</div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  {# ── Нижний ряд: транзакции + график ── #}
+  <div class="dashboard-bottom">
+
+    {# Последние транзакции #}
+    <div class="dash-panel">
+      <h2>Последние транзакции</h2>
+
+      {% if recent_transactions %}
+        <div class="tx-list">
+          {% for tx in recent_transactions %}
+            {% if tx.sender_account == account %}
+              {# Исходящая #}
+              <div class="tx-item">
+                <div class="tx-icon tx-icon--out">↑</div>
+                <div class="tx-info">
+                  <div class="tx-desc">{{ tx.description|default:"Перевод" }}</div>
+                  <div class="tx-date">{{ tx.created_at|date:"d.m.Y H:i" }}</div>
+                </div>
+                <div class="tx-amount tx-amount--out">− {{ tx.amount }}</div>
+              </div>
+            {% else %}
+              {# Входящая #}
+              <div class="tx-item">
+                <div class="tx-icon tx-icon--in">↓</div>
+                <div class="tx-info">
+                  <div class="tx-desc">{{ tx.description|default:"Получение" }}</div>
+                  <div class="tx-date">{{ tx.created_at|date:"d.m.Y H:i" }}</div>
+                </div>
+                <div class="tx-amount tx-amount--in">+ {{ tx.amount }}</div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="tx-empty">Транзакций пока нет.</p>
+      {% endif %}
+    </div>
+
+    {# График расходов #}
+    <div class="dash-panel">
+      <h2>Расходы за неделю</h2>
+      <div class="chart-wrap">
+        <canvas
+          id="weeklyChart"
+          data-labels='{{ week_labels|safe }}'
+          data-values='{{ week_data|safe }}'
+        ></canvas>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}

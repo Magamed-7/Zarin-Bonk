@@ -26,7 +26,7 @@ User = get_user_model()
 
 def register_view(request):
     if request.user.is_authenticated:
-        return redirect('landing')  # TODO: заменить на 'banking:dashboard'
+        return redirect('banking:dashboard') 
 
     form = RegisterForm(request.POST or None)
 
@@ -124,7 +124,7 @@ def resend_verification_view(request):
 
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect('landing')  # TODO: заменить на 'banking:dashboard'
+        return redirect('banking:dashboard') 
 
     ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', ''))
     if ',' in ip:
@@ -181,7 +181,7 @@ def login_view(request):
             )
 
             login(request, user)
-            next_url = request.GET.get('next') or 'landing'  # TODO: 'banking:dashboard'
+            next_url = request.GET.get('next') or 'banking:dashboard' 
             return redirect(next_url)
 
         else:
@@ -266,7 +266,7 @@ def verify_2fa_view(request):
                 notification_type=Notification.NotificationType.SECURITY,
             )
  
-            return redirect('landing')  # TODO: заменить на 'banking:dashboard'
+            return redirect('banking:dashboard') 
  
         else:
             form.add_error('code', 'Неверный код. Попробуйте ещё раз.')

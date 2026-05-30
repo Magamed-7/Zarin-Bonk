@@ -1,0 +1,293 @@
+/* ── Dashboard ──────────────────────────────────────────────── */
+.dashboard {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.dashboard-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-primary, #e8eaf6);
+  margin: 0 0 2rem;
+}
+
+.dashboard-title span {
+  color: var(--gold, #ffd700);
+}
+
+/* ── Top row: balance + card ────────────────────────────────── */
+.dashboard-top {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Balance card */
+.balance-card {
+  background: linear-gradient(135deg, rgba(255,215,0,0.12), rgba(30,80,200,0.12));
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 20px;
+  padding: 1.75rem;
+  backdrop-filter: blur(12px);
+  position: relative;
+  overflow: hidden;
+  animation: fadeUp 0.5s ease both;
+}
+
+.balance-card::before {
+  content: '';
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(255,215,0,0.1), transparent 70%);
+  top: -60px;
+  right: -60px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.balance-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary, #8892b0);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.5rem;
+}
+
+.balance-amount {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--text-primary, #e8eaf6);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  margin-bottom: 0.3rem;
+}
+
+.balance-currency {
+  font-size: 1.2rem;
+  color: var(--gold, #ffd700);
+  margin-left: 0.3rem;
+}
+
+.balance-account {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #8892b0);
+  margin-top: 0.75rem;
+  font-family: monospace;
+  letter-spacing: 0.05em;
+}
+
+/* ── 3D Virtual card ────────────────────────────────────────── */
+.card-3d-wrap {
+  perspective: 1000px;
+  animation: fadeUp 0.5s 0.1s ease both;
+}
+
+.virtual-card {
+  background: linear-gradient(135deg, #1a237e, #0d47a1, #1565c0);
+  border-radius: 18px;
+  padding: 1.5rem 1.75rem;
+  height: 100%;
+  min-height: 160px;
+  position: relative;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: default;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+.virtual-card:hover {
+  transform: rotateY(-6deg) rotateX(3deg);
+  box-shadow: 10px 24px 60px rgba(0,0,0,0.6);
+}
+
+/* Блик на карте */
+.virtual-card::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  left: -20%;
+  width: 80%;
+  height: 150%;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255,255,255,0.06) 50%,
+    transparent 60%
+  );
+  transform: rotate(-10deg);
+  pointer-events: none;
+}
+
+.virtual-card::after {
+  content: '';
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 50%;
+  bottom: -60px;
+  right: -40px;
+}
+
+.card-chip {
+  width: 36px;
+  height: 28px;
+  background: linear-gradient(135deg, #ffd700, #b8860b);
+  border-radius: 5px;
+  margin-bottom: 1.2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.card-number {
+  font-size: 0.95rem;
+  letter-spacing: 0.18em;
+  color: rgba(255,255,255,0.9);
+  font-family: monospace;
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.card-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  position: relative;
+  z-index: 1;
+}
+
+.card-holder {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.card-expiry-label {
+  font-size: 0.6rem;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  margin-bottom: 0.1rem;
+}
+
+.card-expiry {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.9);
+  font-family: monospace;
+}
+
+.card-type-badge {
+  font-size: 0.7rem;
+  background: rgba(255,215,0,0.2);
+  color: var(--gold, #ffd700);
+  border: 1px solid rgba(255,215,0,0.3);
+  border-radius: 20px;
+  padding: 0.15rem 0.6rem;
+  position: absolute;
+  top: 1.5rem;
+  right: 1.75rem;
+}
+
+/* ── Bottom row: transactions + chart ───────────────────────── */
+.dashboard-bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+/* Glass panel */
+.dash-panel {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 1.5rem;
+  backdrop-filter: blur(12px);
+  animation: fadeUp 0.5s 0.2s ease both;
+}
+
+.dash-panel h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary, #e8eaf6);
+  margin: 0 0 1.2rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+/* Transaction list */
+.tx-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tx-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tx-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.tx-icon--out { background: rgba(255, 80, 80, 0.12); }
+.tx-icon--in  { background: rgba(72, 199, 116, 0.12); }
+
+.tx-info { flex: 1; min-width: 0; }
+
+.tx-desc {
+  font-size: 0.875rem;
+  color: var(--text-primary, #e8eaf6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tx-date {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #8892b0);
+}
+
+.tx-amount { font-size: 0.9rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.tx-amount--out { color: #ff6b6b; }
+.tx-amount--in  { color: #48c774; }
+
+.tx-empty {
+  font-size: 0.875rem;
+  color: var(--text-secondary, #8892b0);
+  text-align: center;
+  padding: 1rem 0;
+}
+
+/* Chart */
+.chart-wrap {
+  position: relative;
+  height: 200px;
+}
+
+/* Entrance */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dashboard-top    { grid-template-columns: 1fr; }
+  .dashboard-bottom { grid-template-columns: 1fr; }
+  .balance-amount   { font-size: 1.8rem; }
+}
