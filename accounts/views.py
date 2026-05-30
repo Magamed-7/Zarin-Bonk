@@ -158,7 +158,7 @@ def verify_2fa_view(request):
         return redirect('accounts:login')
  
     resend_key      = f'2fa_resend_wait_{user_id}'
-    resend_wait     = cache.get(resend_key)  # timestamp когда можно переотправить
+    resend_wait     = cache.get(resend_key)  
     can_resend_in   = 0
     if resend_wait:
         seconds_left = (resend_wait - timezone.now()).total_seconds()
@@ -275,7 +275,6 @@ def forgot_password_view(request):
             user = User.objects.filter(email=email).first()
  
             if user is None:
-                # Не раскрываем существование аккаунта
                 messages.success(request, 'Если email зарегистрирован — код отправлен.')
             else:
                 code = ''.join(random.choices(string.digits, k=6))
@@ -398,3 +397,55 @@ def profile_view(request):
     })
  
  
+
+
+@login_required
+def change_password_view(request):
+    user = request.user
+ 
+    if request.method == 'POST':
+        old_password     = request.POST.get('old_password', '')
+        new_password     = request.POST.get('new_password', '')
+        password_confirm = request.POST.get('password_confirm', '')
+ 
+        if not user.check_password(old_password):
+            messages.error(request, 'Старый пароль введён неверно.')
+ 
+        elif len(new_password) < 8:
+            messages.error(request, 'Новый пароль должен быть не менее 8 символов.')
+ 
+        elif new_password == old_password:
+            messages.error(request, 'Новый пароль совпадает со старым.')
+ 
+        elif new_password != password_confirm:
+            messages.error(request, 'Пароли не совпадают.')
+ 
+        else:
+            user.set_password(new_password)
+            user.save()
+ 
+            login(request, user)
+ 
+            Notification.objects.create(
+                user=user,
+                title='Пароль изменён',
+                message='Ваш пароль был успешно изменён. Если это были не вы — обратитесь в поддержку.',
+                notification_type=Notification.NotificationType.SECURITY,
+            )
+ 
+            send_mail(
+                subject='ZarinPay — пароль изменён',
+                message=(
+                    f'Здравствуйте, {user.first_name}!\n\n'
+                    'Ваш пароль в ZarinPay был успешно изменён.\n\n'
+                    'Если это были не вы — немедленно обратитесь в службу поддержки.'
+                ),
+                from_email='noreply@zarinpay.tj',
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+ 
+            messages.success(request, 'Пароль успешно изменён!')
+            return redirect('accounts:change_password')
+ 
+    return render(request, 'accounts/change_password.html')
