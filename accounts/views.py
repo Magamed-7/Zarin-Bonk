@@ -16,6 +16,7 @@ from banking.models import Account, Card
 from notifications.models import Notification
 from .forms import LoginForm, RegisterForm, TwoFactorForm
 from .models import LoginHistory
+from .decorators import client_required, manager_required, admin_required
 
 
 User = get_user_model()
