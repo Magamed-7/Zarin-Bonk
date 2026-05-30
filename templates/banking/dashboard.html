@@ -37,35 +37,106 @@
 
     {# 3D Виртуальная карта #}
     <div class="card-3d-wrap">
-      {% if card %}
-        <div class="virtual-card">
-          <span class="card-type-badge">{{ card.get_card_type_display }}</span>
-          <div class="card-chip"></div>
-          <div class="card-number">{{ card.masked_number }}</div>
-          <div class="card-bottom">
-            <div>
-              <div class="card-holder">
-                {{ request.user.get_full_name|upper }}
-              </div>
-            </div>
-            <div>
-              <div class="card-expiry-label">Действует до</div>
-              <div class="card-expiry">
-                {{ card.expiry_date|date:"m/y" }}
-              </div>
-            </div>
-          </div>
+
+{% if card %}
+
+<div class="card-scene">
+
+<div class="virtual-card {% if card.is_frozen %}card-frozen{% endif %}" id="bankCard">
+
+    <div class="card-face card-front">
+
+        <span class="card-type-badge">
+            {{ card.get_card_type_display }}
+        </span>
+
+        <div class="card-chip"></div>
+
+        <div class="card-number-full">
+
+            {{ card.card_number|slice:":4" }}
+            {{ card.card_number|slice:"4:8" }}
+            {{ card.card_number|slice:"8:12" }}
+            {{ card.card_number|slice:"12:16" }}
+
         </div>
-      {% else %}
-        <div class="virtual-card">
-          <div class="card-chip"></div>
-          <div class="card-number">**** **** **** ****</div>
-          <div class="card-bottom">
-            <div class="card-holder">Карта не найдена</div>
-          </div>
+
+        <div class="card-bottom">
+
+            <div>
+
+                <div class="card-expiry-label">
+                    HOLDER
+                </div>
+
+                <div class="card-holder">
+                    {{ request.user.get_full_name|upper }}
+                </div>
+
+            </div>
+
+            <div>
+
+                <div class="card-expiry-label">
+                    VALID THRU
+                </div>
+
+                <div class="card-expiry">
+                    {{ card.expiry_date|date:"m/y" }}
+                </div>
+
+            </div>
+
         </div>
-      {% endif %}
+
     </div>
+
+    <div class="card-face card-back">
+
+        <div class="black-strip"></div>
+
+        <div class="cvv-box">
+
+            <span>CVV</span>
+
+            <strong>{{ card.cvv }}</strong>
+
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+<div class="card-controls">
+
+
+
+<form method="post"
+      action="{% url 'banking:toggle_card_freeze' card.id %}">
+
+{% csrf_token %}
+
+<button class="freeze-btn {% if card.is_frozen %}active{% endif %}">
+
+❄
+
+{% if card.is_frozen %}
+Разморозить
+{% else %}
+Заморозить
+{% endif %}
+
+</button>
+
+</form>
+
+</div>
+
+{% endif %}
+
+</div>
 
   </div>
 

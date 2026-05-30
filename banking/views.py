@@ -164,3 +164,20 @@ def account_detail_view(request, account_id):
         'balance_data':   json.dumps(balance_data),
     })
  
+
+
+@login_required
+def toggle_card_freeze_view(request, card_id):
+    if request.method != 'POST':
+        return redirect('banking:dashboard')
+
+    card = get_object_or_404(
+        Card.objects.select_related('account'),
+        id=card_id,
+        account__user=request.user,
+    )
+
+    card.is_frozen = not card.is_frozen
+    card.save(update_fields=['is_frozen'])
+
+    return redirect('banking:dashboard')

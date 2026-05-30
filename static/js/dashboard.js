@@ -82,3 +82,60 @@
     });
   }
 })();
+
+
+const flipBtn = document.getElementById('flipBtn');
+const bankCard = document.getElementById('bankCard');
+
+if (flipBtn && bankCard){
+
+let flipped = false;
+
+let rx = 0;
+let ry = 0;
+
+function updateTransform(){
+
+const flipRotation = flipped ? 180 : 0;
+
+bankCard.style.transform =
+`rotateX(${rx}deg)
+ rotateY(${ry + flipRotation}deg)`;
+
+}
+
+flipBtn.addEventListener('click',()=>{
+
+flipped = !flipped;
+
+updateTransform();
+
+});
+
+bankCard.addEventListener('mousemove',(e)=>{
+
+const rect = bankCard.getBoundingClientRect();
+
+const x = e.clientX - rect.left;
+const y = e.clientY - rect.top;
+
+rx = -(y - rect.height/2) / 18;
+
+ry = (x - rect.width/2) / 18;
+
+updateTransform();
+
+});
+
+bankCard.addEventListener('mouseleave',()=>{
+
+rx = 0;
+ry = 0;
+
+updateTransform();
+
+});
+
+updateTransform();
+
+}
