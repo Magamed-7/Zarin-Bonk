@@ -1,7 +1,9 @@
 import random
 import string
 from datetime import date, timedelta
- 
+import os 
+import uuid
+
 from dateutil.relativedelta import relativedelta
  
 from django.contrib import messages
@@ -50,10 +52,74 @@ def register_view(request):
         )
 
         login(request, user)
+        send_verification_email(user, request)
         messages.success(request, f'Добро пожаловать, {user.first_name}!')
         return redirect('accounts:login')
 
     return render(request, 'accounts/register.html', {'form': form})
+
+
+
+
+def send_verification_email(user, request):
+    token = str(uuid.uuid4())
+    cache.set(f'email_verify_{token}', user.id, 24 * 60 * 60) 
+
+    verify_url = request.build_absolute_uri(
+        f'/accounts/verify-email/{token}/'
+    )
+
+    send_mail(
+        subject='ZarinPay — подтвердите email',
+        message=(
+            f'Здравствуйте, {user.first_name}!\n\n'
+            f'Для подтверждения email перейдите по ссылке:\n{verify_url}\n\n'
+            'Ссылка действительна 24 часа.'
+        ),
+        from_email='noreply@zarinpay.tj',
+        recipient_list=[user.email],
+        fail_silently=False,
+    )
+
+
+def verify_email_view(request, token):
+    user_id = cache.get(f'email_verify_{token}')
+
+    if not user_id:
+        return render(request, 'accounts/verify_email.html', {'invalid': True})
+
+    user = User.objects.filter(id=user_id).first()
+    if not user:
+        return render(request, 'accounts/verify_email.html', {'invalid': True})
+
+    if user.is_verified:
+        return render(request, 'accounts/verify_email.html', {'already': True})
+
+    user.is_verified = True
+    user.save()
+    cache.delete(f'email_verify_{token}')
+
+    Notification.objects.create(
+        user=user,
+        title='Email подтверждён',
+        message='Ваш email успешно подтверждён.',
+        notification_type=Notification.NotificationType.SYSTEM,
+    )
+
+    return render(request, 'accounts/verify_email.html', {'success': True})
+
+
+def resend_verification_view(request):
+    if not request.user.is_authenticated:
+        return redirect('accounts:login')
+
+    if request.user.is_verified:
+        messages.info(request, 'Ваш email уже подтверждён.')
+        return redirect('accounts:profile')
+
+    send_verification_email(request.user, request)
+    messages.success(request, 'Письмо отправлено повторно. Проверьте почту.')
+    return redirect('accounts:profile')
 
 
 def login_view(request):
@@ -383,7 +449,6 @@ def profile_view(request):
             user.address    = address
  
             if avatar:
-                # Удаляем старый аватар если есть
                 if user.avatar and os.path.isfile(user.avatar.path):
                     os.remove(user.avatar.path)
                 user.avatar = avatar

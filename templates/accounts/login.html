@@ -70,7 +70,7 @@
           <div class="field {% if form.password.errors %}is-invalid{% endif %}">
             <div class="field-row">
               <label class="field-label" for="{{ form.password.id_for_label }}">Пароль</label>
-              <a href="#" class="forgot-link">
+              <a href="{% url 'accounts:forgot_password' %}" class="forgot-link">
                 Забыл пароль?  {# TODO: {% url 'accounts:password_reset' %} #}
               </a>
             </div>

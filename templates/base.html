@@ -16,9 +16,16 @@
 
     <link rel="stylesheet" href="{% static 'css/main.css' %}" />
     <link rel="stylesheet" href="{% static 'css/animations.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/verify_email.css' %}">
     {% block extra_css %}{% endblock %}
   </head>
   <body>
+    {% if user.is_authenticated and not user.is_verified %}
+      <div class="unverified-banner">
+      ⚠️ Подтвердите ваш email, чтобы получить полный доступ.
+      <a href="{% url 'accounts:resend_verification' %}">Отправить письмо</a>
+    </div>
+    {% endif %}
     <div id="bg3d" aria-hidden="true"></div>
     <div class="bg-glow" aria-hidden="true"></div>
 
@@ -43,7 +50,7 @@
           <button id="ui-tilt-toggle" class="btn btn-ghost" type="button">
             3D
           </button>
-          <a class="btn btn-gold" href="">Войти</a>
+          <a class="btn btn-gold" href="{% url 'accounts:login' %}">Войти</a>
         </div>
       </nav>
     </header>
