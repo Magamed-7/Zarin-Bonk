@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Счёт {{ account.account_number }} — ZarinPay{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/account_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="detail-page">
+
+  {# ── Кнопка назад + заголовок ────────────────────────────── #}
+  <div class="detail-header">
+    <a href="{% url 'banking:accounts' %}" class="back-btn">← Мои счета</a>
+    <h1 class="detail-title">
+      {% if account.account_type == 'checking' %}🏦
+      {% elif account.account_type == 'saving' %}💰
+      {% else %}💱{% endif %}
+      {{ account.get_account_type_display }}
+    </h1>
+    <span class="detail-status {% if account.is_active %}detail-status--active{% else %}detail-status--inactive{% endif %}">
+      {% if account.is_active %}Активен{% else %}Закрыт{% endif %}
+    </span>
+  </div>
+
+  <div class="detail-grid">
+
+    {# ── Левая колонка ─────────────────────────────────────── #}
+    <div class="detail-left">
+
+      {# Карточка с основной информацией о счёте #}
+      <div class="info-card detail-card">
+        <div class="info-balance">
+          {{ account.balance|floatformat:2 }}
+          <span class="info-currency">{{ account.currency }}</span>
+        </div>
+        <div class="info-label">Текущий баланс</div>
+
+        <div class="info-rows">
+          <div class="info-row">
+            <span class="info-row-label">Номер счёта</span>
+            <span class="info-row-value mono">{{ account.account_number }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-row-label">Тип счёта</span>
+            <span class="info-row-value">{{ account.get_account_type_display }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-row-label">Валюта</span>
+            <span class="info-row-value">{{ account.currency }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-row-label">Дата открытия</span>
+            <span class="info-row-value">{{ account.created_at|date:"d.m.Y" }}</span>
+          </div>
+        </div>
+      </div>
+
+      {# Привязанные карты #}
+      <div class="detail-card">
+        <h2 class="section-heading">Карты</h2>
+
+        {% if cards %}
+          {% for card in cards %}
+            <div class="card-item card-item--{{ account.account_type }}">
+              <div class="card-item-top">
+                <span class="card-item-type">{{ card.get_card_type_display }}</span>
+                <span class="card-item-frozen {% if card.is_frozen %}visible{% endif %}">
+                  🔒 Заморожена
+                </span>
+              </div>
+              <div class="card-item-number">{{ card.masked_number }}</div>
+              <div class="card-item-bottom">
+                <span class="card-item-label">Срок действия</span>
+                <span class="card-item-expiry">{{ card.expiry_date|date:"m/Y" }}</span>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p class="empty-text">Карты не привязаны.</p>
+        {% endif %}
+      </div>
+
+    </div>
+
+    {# ── Правая колонка ────────────────────────────────────── #}
+    <div class="detail-right">
+
+      {# График баланса #}
+      <div class="detail-card chart-card">
+        <h2 class="section-heading">
+          График баланса
+          <span class="section-heading-sub">за последние 30 дней</span>
+        </h2>
+        <div class="chart-wrap">
+          <canvas id="balanceChart"></canvas>
+        </div>
+      </div>
+
+      {# Последние транзакции #}
+      <div class="detail-card">
+        <h2 class="section-heading">Последние транзакции</h2>
+
+        {% if transactions %}
+          <div class="tx-list">
+            {% for tx in transactions %}
+              <div class="tx-item">
+
+                {# Иконка типа #}
+                <div class="tx-icon tx-icon--{{ tx.transaction_type }}">
+                  {% if tx.transaction_type == 'transfer' %}↔
+                  {% elif tx.transaction_type == 'payment' %}🧾
+                  {% elif tx.transaction_type == 'deposit' %}↓
+                  {% else %}↑{% endif %}
+                </div>
+
+                {# Описание #}
+                <div class="tx-info">
+                  <div class="tx-type">{{ tx.get_transaction_type_display }}</div>
+                  <div class="tx-date">{{ tx.created_at|date:"d.m.Y H:i" }}</div>
+                </div>
+
+                {# Статус #}
+                <div class="tx-status tx-status--{{ tx.status }}">
+                  {{ tx.get_status_display }}
+                </div>
+
+                {# Сумма: минус если отправили, плюс если получили #}
+                <div class="tx-amount {% if tx.sender_account == account %}tx-amount--out{% else %}tx-amount--in{% endif %}">
+                  {% if tx.sender_account == account %}-{% else %}+{% endif %}
+                  {{ tx.amount|floatformat:2 }}
+                </div>
+
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="empty-text">Транзакций пока нет.</p>
+        {% endif %}
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{# Передаём данные для графика в JS #}
+<script>
+  window.BALANCE_LABELS = {{ balance_labels|safe }};
+  window.BALANCE_DATA   = {{ balance_data|safe }};
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/account_detail.js' %}"></script>
+{% endblock %}

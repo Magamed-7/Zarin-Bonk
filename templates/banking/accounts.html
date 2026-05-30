@@ -31,7 +31,7 @@
   {% if accounts %}
     <div class="accounts-grid">
       {% for acc in accounts %}
-        <a href="#" class="account-card account-card--{{ acc.account_type }}">
+        <a href="{% url 'banking:account_detail' acc.id %}" class="account-card account-card--{{ acc.account_type }}">
 
           <div class="account-card-top">
             <div class="account-type-icon account-type-icon--{{ acc.account_type }}">

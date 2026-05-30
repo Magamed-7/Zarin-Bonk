@@ -1,11 +1,12 @@
 from datetime import date, timedelta
- 
+import json
+
 from dateutil.relativedelta import relativedelta
  
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.utils import timezone
  
 from transactions.models import Transaction
@@ -105,3 +106,61 @@ def create_account_view(request):
         'account_types': Account.AccountType.choices,
         'currencies':    Account.Currency.choices,
     })
+
+
+
+@login_required
+def account_detail_view(request, account_id):
+    account = get_object_or_404(Account, id=account_id, user=request.user)
+ 
+    cards = Card.objects.filter(account=account)
+ 
+    sent     = Transaction.objects.filter(sender_account=account)
+    received = Transaction.objects.filter(receiver_account=account)
+    transactions = (sent | received).order_by('-created_at')[:10]
+ 
+    today      = timezone.now().date()
+    start_date = today - timedelta(days=29)
+ 
+    sent_30     = Transaction.objects.filter(
+        sender_account=account,
+        status=Transaction.Status.COMPLETED,
+        created_at__date__gte=start_date,
+    )
+    received_30 = Transaction.objects.filter(
+        receiver_account=account,
+        status=Transaction.Status.COMPLETED,
+        created_at__date__gte=start_date,
+    )
+ 
+    total_received = received_30.aggregate(t=Sum('amount'))['t'] or 0
+    total_sent     = sent_30.aggregate(t=Sum('amount'))['t'] or 0
+    balance_30_days_ago = float(account.balance) - float(total_received) + float(total_sent)
+ 
+    balance_labels = []
+    balance_data   = []
+    running_balance = balance_30_days_ago
+ 
+    for i in range(30):
+        day = start_date + timedelta(days=i)
+        balance_labels.append(day.strftime('%d.%m'))
+ 
+        day_received = received_30.filter(
+            created_at__date=day
+        ).aggregate(t=Sum('amount'))['t'] or 0
+ 
+        day_sent = sent_30.filter(
+            created_at__date=day
+        ).aggregate(t=Sum('amount'))['t'] or 0
+ 
+        running_balance += float(day_received) - float(day_sent)
+        balance_data.append(round(running_balance, 2))
+ 
+    return render(request, 'banking/account_detail.html', {
+        'account':      account,
+        'cards':        cards,
+        'transactions': transactions,
+        'balance_labels': json.dumps(balance_labels),
+        'balance_data':   json.dumps(balance_data),
+    })
+ 
