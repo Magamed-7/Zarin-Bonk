@@ -139,3 +139,25 @@ updateTransform();
 updateTransform();
 
 }
+
+const amountInput =
+document.getElementById(
+'amountInput'
+);
+
+document
+.querySelectorAll(
+'.quick-btn'
+)
+.forEach(btn=>{
+
+btn.addEventListener(
+'click',
+()=>{
+
+amountInput.value=
+btn.dataset.value;
+
+});
+
+});

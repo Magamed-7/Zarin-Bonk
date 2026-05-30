@@ -11,6 +11,7 @@ from django.utils import timezone
  
 from transactions.models import Transaction
 from .models import Account, Card
+from .forms import TopUpForm
 
 
 @login_required
@@ -181,3 +182,46 @@ def toggle_card_freeze_view(request, card_id):
     card.save(update_fields=['is_frozen'])
 
     return redirect('banking:dashboard')
+
+
+
+@login_required
+def topup_account_view(request):
+
+    account = request.user.accounts.first()
+
+    if not account:
+
+        messages.error(
+            request,
+            'Счёт не найден'
+        )
+
+        return redirect(
+            'banking:dashboard'
+        )
+
+    if request.method == 'POST':
+
+        form = TopUpForm(
+            request.POST
+        )
+
+        if form.is_valid():
+
+            amount = form.cleaned_data[
+                'amount'
+            ]
+
+            account.balance += amount
+
+            account.save()
+
+            messages.success(
+                request,
+                f'Счёт пополнен на {amount}'
+            )
+
+    return redirect(
+        'banking:dashboard'
+    )
