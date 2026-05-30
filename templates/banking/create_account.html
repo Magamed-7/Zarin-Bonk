@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Открыть счёт — ZarinPay{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/accounts.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="create-account-page">
+  <div class="create-account-card">
+
+    <h1>Открыть новый счёт</h1>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="ca-message ca-message--{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      <div class="select-field">
+        <label class="select-label" for="id_account_type">Тип счёта</label>
+        <select id="id_account_type" class="select-input" name="account_type">
+          {% for value, label in account_types %}
+            <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="select-field">
+        <label class="select-label" for="id_currency">Валюта</label>
+        <select id="id_currency" class="select-input" name="currency">
+          {% for value, label in currencies %}
+            <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <button type="submit" class="create-submit-btn">Открыть счёт</button>
+    </form>
+
+    <p class="create-back">
+      <a href="{% url 'banking:accounts' %}">← Назад к счетам</a>
+    </p>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,331 @@
+/* ── Accounts page ──────────────────────────────────────────── */
+.accounts-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+/* Header row */
+.accounts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.accounts-header h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-primary, #e8eaf6);
+  margin: 0;
+}
+
+.create-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.4rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--gold, #ffd700), #e6ac00);
+  color: #0b1020;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.create-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255, 215, 0, 0.35);
+}
+
+/* Total balance banner */
+.total-banner {
+  background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(30,80,200,0.1));
+  border: 1px solid rgba(255, 215, 0, 0.18);
+  border-radius: 16px;
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  animation: fadeUp 0.4s ease both;
+}
+
+.total-banner-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #8892b0);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.total-banner-amount {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--gold, #ffd700);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Accounts grid */
+.accounts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Account card */
+.account-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 1.5rem;
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  animation: fadeUp 0.5s ease both;
+  text-decoration: none;
+  display: block;
+}
+
+.account-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 215, 0, 0.25);
+}
+
+/* Цветная полоска сверху по типу счёта */
+.account-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 20px 20px 0 0;
+}
+
+.account-card--checking::before  { background: linear-gradient(90deg, #ffd700, #e6ac00); }
+.account-card--saving::before    { background: linear-gradient(90deg, #48c774, #2ecc71); }
+.account-card--currency::before  { background: linear-gradient(90deg, #3273dc, #209cee); }
+
+/* Glow при hover */
+.account-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.account-card--checking::after  { background: radial-gradient(circle at 50% 0%, rgba(255,215,0,0.06), transparent 70%); }
+.account-card--saving::after    { background: radial-gradient(circle at 50% 0%, rgba(72,199,116,0.06), transparent 70%); }
+.account-card--currency::after  { background: radial-gradient(circle at 50% 0%, rgba(50,115,220,0.06), transparent 70%); }
+
+.account-card:hover::after { opacity: 1; }
+
+/* Card content */
+.account-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.2rem;
+}
+
+.account-type-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.account-type-icon--checking { background: rgba(255, 215, 0,  0.12); }
+.account-type-icon--saving   { background: rgba(72,  199, 116, 0.12); }
+.account-type-icon--currency { background: rgba(50,  115, 220, 0.12); }
+
+.account-status {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.account-status--active {
+  background: rgba(72, 199, 116, 0.12);
+  color: #48c774;
+  border: 1px solid rgba(72, 199, 116, 0.2);
+}
+
+.account-status--inactive {
+  background: rgba(255, 80, 80, 0.1);
+  color: #ff6b6b;
+  border: 1px solid rgba(255, 80, 80, 0.2);
+}
+
+.account-balance {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-primary, #e8eaf6);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 0.2rem;
+}
+
+.account-currency {
+  font-size: 1rem;
+  color: var(--gold, #ffd700);
+  margin-left: 0.3rem;
+}
+
+.account-type-name {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #8892b0);
+  margin-bottom: 1rem;
+}
+
+.account-number {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: rgba(136, 146, 176, 0.6);
+  letter-spacing: 0.05em;
+}
+
+/* Empty state */
+.accounts-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-secondary, #8892b0);
+}
+
+.accounts-empty p { margin-bottom: 1.5rem; font-size: 0.95rem; }
+
+/* Stagger animation delay */
+.account-card:nth-child(1) { animation-delay: 0.05s; }
+.account-card:nth-child(2) { animation-delay: 0.10s; }
+.account-card:nth-child(3) { animation-delay: 0.15s; }
+.account-card:nth-child(4) { animation-delay: 0.20s; }
+.account-card:nth-child(5) { animation-delay: 0.25s; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+  .accounts-grid { grid-template-columns: 1fr; }
+  .accounts-header { flex-direction: column; align-items: flex-start; }
+}
+
+/* ── Create account page ────────────────────────────────────── */
+.create-account-page {
+  max-width: 480px;
+  margin: 3rem auto;
+  padding: 0 1.5rem;
+}
+
+.create-account-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 215, 0, 0.15);
+  border-radius: 24px;
+  padding: 2rem;
+  backdrop-filter: blur(20px);
+  animation: fadeUp 0.5s ease both;
+}
+
+.create-account-card h1 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text-primary, #e8eaf6);
+  margin: 0 0 1.5rem;
+}
+
+.select-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1.1rem;
+}
+
+.select-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary, #8892b0);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.select-input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  color: var(--text-primary, #e8eaf6);
+  font-size: 0.95rem;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.25s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.select-input:focus {
+  border-color: rgba(255, 215, 0, 0.5);
+  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.08);
+}
+
+.select-input option { background: #0f1428; }
+
+.create-submit-btn {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.9rem;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--gold, #ffd700), #e6ac00);
+  color: #0b1020;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.create-submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255, 215, 0, 0.35);
+}
+
+.create-back {
+  text-align: center;
+  margin-top: 1.2rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary, #8892b0);
+}
+
+.create-back a {
+  color: var(--gold, #ffd700);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.ca-message {
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  margin-bottom: 1.2rem;
+  text-align: center;
+}
+
+.ca-message--error {
+  background: rgba(255, 80, 80, 0.08);
+  border: 1px solid rgba(255, 80, 80, 0.25);
+  color: #ff6b6b;
+}

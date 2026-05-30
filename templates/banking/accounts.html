@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Мои счета — ZarinPay{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/accounts.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="accounts-page">
+
+  <div class="accounts-header">
+    <h1>Мои счета</h1>
+    <a href="{% url 'banking:create_account' %}" class="create-btn">
+      + Открыть новый счёт
+    </a>
+  </div>
+
+  {# Общий баланс по TJS счетам #}
+  {% if accounts %}
+    <div class="total-banner">
+      <span class="total-banner-label">Общий баланс (TJS)</span>
+      <span class="total-banner-amount">
+        {{ total_balance|floatformat:2 }} TJS
+      </span>
+    </div>
+  {% endif %}
+
+  {# Список счетов #}
+  {% if accounts %}
+    <div class="accounts-grid">
+      {% for acc in accounts %}
+        <a href="#" class="account-card account-card--{{ acc.account_type }}">
+
+          <div class="account-card-top">
+            <div class="account-type-icon account-type-icon--{{ acc.account_type }}">
+              {% if acc.account_type == 'checking' %}🏦
+              {% elif acc.account_type == 'saving' %}💰
+              {% else %}💱{% endif %}
+            </div>
+            <span class="account-status {% if acc.is_active %}account-status--active{% else %}account-status--inactive{% endif %}">
+              {% if acc.is_active %}Активен{% else %}Закрыт{% endif %}
+            </span>
+          </div>
+
+          <div class="account-balance">
+            {{ acc.balance|floatformat:2 }}
+            <span class="account-currency">{{ acc.currency }}</span>
+          </div>
+
+          <div class="account-type-name">{{ acc.get_account_type_display }}</div>
+          <div class="account-number">{{ acc.account_number }}</div>
+
+        </a>
+      {% endfor %}
+    </div>
+
+  {% else %}
+    <div class="accounts-empty">
+      <p>У вас пока нет счетов.</p>
+      <a href="{% url 'banking:create_account' %}" class="create-btn">
+        Открыть первый счёт
+      </a>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/accounts.js' %}"></script>
+{% endblock %}

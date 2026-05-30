@@ -41,7 +41,7 @@
 
         <div class="nav-links">
           <a class="nav-link" href="/">Главная</a>
-          <a class="nav-link" href="#">Счета</a>
+          <a class="nav-link" href="{% url 'banking:accounts' %}">Счета</a>
           <a class="nav-link" href="#">Транзакции</a>
           <a class="nav-link" href="#">Поддержка</a>
         </div>
@@ -50,7 +50,7 @@
           <button id="ui-tilt-toggle" class="btn btn-ghost" type="button">
             3D
           </button>
-          <a class="btn btn-gold" href="{% url 'accounts:login' %}">Войти</a>
+          <a class="btn btn-gold" href="{% url 'accounts:login' %}">Dashboard </a>
           <a class="btn btn-gold" href="{% url 'accounts:logout' %}"> Выйти</a>
         </div>
       </nav>
