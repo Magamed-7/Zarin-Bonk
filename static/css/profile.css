@@ -1,0 +1,267 @@
+/* ── Profile page ───────────────────────────────────────────── */
+.profile-page {
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.profile-page h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-primary, #e8eaf6);
+  margin: 0 0 2rem;
+}
+
+/* ── Avatar section ─────────────────────────────────────────── */
+.profile-avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 215, 0, 0.12);
+  border-radius: 20px;
+  padding: 1.5rem;
+  backdrop-filter: blur(12px);
+}
+
+.avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.avatar-img {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(255, 215, 0, 0.4);
+  display: block;
+}
+
+.avatar-placeholder {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(30, 80, 200, 0.2));
+  border: 3px solid rgba(255, 215, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: var(--gold, #ffd700);
+  font-weight: 700;
+}
+
+.avatar-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.avatar-wrap:hover .avatar-overlay { opacity: 1; }
+
+.avatar-input { display: none; }
+
+.avatar-info h2 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text-primary, #e8eaf6);
+  margin: 0 0 0.25rem;
+}
+
+.avatar-info p {
+  font-size: 0.875rem;
+  color: var(--text-secondary, #8892b0);
+  margin: 0;
+}
+
+.avatar-badge {
+  display: inline-block;
+  margin-top: 0.4rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(255, 215, 0, 0.12);
+  color: var(--gold, #ffd700);
+  border: 1px solid rgba(255, 215, 0, 0.25);
+  text-transform: capitalize;
+}
+
+/* ── Form card ──────────────────────────────────────────────── */
+.profile-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 215, 0, 0.12);
+  border-radius: 20px;
+  padding: 2rem;
+  backdrop-filter: blur(12px);
+  margin-bottom: 2rem;
+}
+
+.profile-card h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary, #e8eaf6);
+  margin: 0 0 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.1rem;
+}
+
+.form-grid .field-full {
+  grid-column: 1 / -1;
+}
+
+/* Field */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.field-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary, #8892b0);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.field-input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  color: var(--text-primary, #e8eaf6);
+  font-size: 0.95rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.field-input::placeholder { color: rgba(136, 146, 176, 0.5); }
+
+.field-input:focus {
+  border-color: rgba(255, 215, 0, 0.5);
+  background: rgba(255, 215, 0, 0.04);
+  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.08);
+}
+
+textarea.field-input {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.field-readonly {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  color: var(--text-secondary, #8892b0);
+  font-size: 0.95rem;
+}
+
+/* Save button */
+.profile-save-btn {
+  margin-top: 1.5rem;
+  padding: 0.85rem 2rem;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--gold, #ffd700), #e6ac00);
+  color: #0b1020;
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.profile-save-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255, 215, 0, 0.35);
+}
+
+/* ── Login history ──────────────────────────────────────────── */
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.history-table th {
+  text-align: left;
+  padding: 0.6rem 0.8rem;
+  color: var(--text-secondary, #8892b0);
+  font-weight: 500;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.history-table td {
+  padding: 0.75rem 0.8rem;
+  color: var(--text-primary, #e8eaf6);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.history-table tr:last-child td { border-bottom: none; }
+
+.status-ok  { color: #48c774; font-weight: 600; }
+.status-fail { color: #ff6b6b; font-weight: 600; }
+
+/* Messages */
+.profile-messages { margin-bottom: 1.5rem; }
+
+.profile-message {
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.profile-message--success {
+  background: rgba(72, 199, 116, 0.08);
+  border: 1px solid rgba(72, 199, 116, 0.25);
+  color: #48c774;
+}
+
+.profile-message--error {
+  background: rgba(255, 80, 80, 0.08);
+  border: 1px solid rgba(255, 80, 80, 0.25);
+  color: #ff6b6b;
+}
+
+/* Entrance */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.profile-avatar-section { animation: fadeUp 0.5s ease both; }
+.profile-card           { animation: fadeUp 0.5s 0.1s ease both; }
+
+@media (max-width: 600px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .profile-avatar-section { flex-direction: column; text-align: center; }
+  .history-table { font-size: 0.78rem; }
+  .history-table th,
+  .history-table td { padding: 0.5rem; }
+}

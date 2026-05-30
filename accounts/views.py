@@ -6,6 +6,7 @@ from dateutil.relativedelta import relativedelta
  
 from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model, login, logout
+from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.core.mail import send_mail
 from django.shortcuts import redirect, render
@@ -357,3 +358,43 @@ def password_reset_new_view(request):
             return redirect('accounts:login')
  
     return render(request, 'accounts/password_reset_new.html')
+
+
+
+
+@login_required
+def profile_view(request):
+    user = request.user
+    login_history = LoginHistory.objects.filter(user=user)[:10]
+ 
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name', '').strip()
+        last_name  = request.POST.get('last_name', '').strip()
+        phone      = request.POST.get('phone', '').strip()
+        address    = request.POST.get('address', '').strip()
+        avatar     = request.FILES.get('avatar')
+ 
+        if not first_name or not last_name:
+            messages.error(request, 'Имя и фамилия обязательны.')
+        else:
+            user.first_name = first_name
+            user.last_name  = last_name
+            user.phone      = phone
+            user.address    = address
+ 
+            if avatar:
+                # Удаляем старый аватар если есть
+                if user.avatar and os.path.isfile(user.avatar.path):
+                    os.remove(user.avatar.path)
+                user.avatar = avatar
+ 
+            user.save()
+            messages.success(request, 'Профиль успешно обновлён.')
+            return redirect('accounts:profile')
+ 
+    return render(request, 'accounts/profile.html', {
+        'user': user,
+        'login_history': login_history,
+    })
+ 
+ 
