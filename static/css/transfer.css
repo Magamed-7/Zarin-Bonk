@@ -513,3 +513,16 @@
   .account-radio-card,
   .transfer-icon-wrap { animation: none !important; transition: none !important; }
 }
+.conversion-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--gold, #ffd700);
+  background: rgba(255, 215, 0, 0.06);
+  border: 1px solid rgba(255, 215, 0, 0.15);
+  border-radius: 8px;
+  padding: 0.4rem 0.8rem;
+}
+.conversion-icon { font-size: 1rem; }

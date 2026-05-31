@@ -16,6 +16,17 @@
   const transferBtn    = document.getElementById('transferBtn');
   const transferForm   = document.getElementById('transferForm');
   const senderCards    = document.querySelectorAll('.account-radio-card');
+  const conversionHint = document.getElementById('conversionHint');
+  const conversionText = document.getElementById('conversionText');
+
+  // ── Курсы валют (те же что в views.py) ───────────────────
+  const EXCHANGE_RATES = { TJS: 1.0, USD: 10.92, EUR: 11.80 };
+
+  function convertCurrency(amount, from, to) {
+    if (from === to) return amount;
+    const inTjs = amount * EXCHANGE_RATES[from];
+    return inTjs / EXCHANGE_RATES[to];
+  }
 
   // ── Получаем данные выбранного счёта ─────────────────────
   function getSelectedAccount() {
@@ -29,7 +40,7 @@
     };
   }
 
-  // ── Обновляем отображение баланса и остатка ───────────────
+  // ── Обновляем отображение баланса, остатка и конвертации ─
   function updateBalanceDisplay() {
     const acc = getSelectedAccount();
     if (!acc) return;
@@ -41,6 +52,28 @@
 
     // Доступный баланс
     balanceAvail.textContent = `Доступно: ${acc.balance.toFixed(2)} ${acc.currency}`;
+
+    // Валюта получателя
+    const receiverCurrencyRaw  = receiverCur ? receiverCur.textContent.replace('Счёт в ', '').trim() : '';
+    const receiverCurrencyCode = receiverCurrencyRaw || acc.currency;
+
+    // Показываем конвертацию если валюты разные и получатель найден
+    if (
+      amount > 0 &&
+      receiverBox &&
+      receiverBox.dataset.state === 'found' &&
+      receiverCurrencyCode !== acc.currency &&
+      EXCHANGE_RATES[receiverCurrencyCode]
+    ) {
+      const converted = convertCurrency(amount, acc.currency, receiverCurrencyCode);
+      if (conversionText) {
+        conversionText.textContent =
+          `${amount.toFixed(2)} ${acc.currency} → ${converted.toFixed(2)} ${receiverCurrencyCode}`;
+      }
+      if (conversionHint) conversionHint.style.display = 'flex';
+    } else {
+      if (conversionHint) conversionHint.style.display = 'none';
+    }
 
     // Остаток после перевода
     if (amount <= 0) {
@@ -55,7 +88,6 @@
       balanceAfter.textContent = `Недостаточно средств на ${(amount - acc.balance).toFixed(2)} ${acc.currency}`;
       balanceAfter.className   = 'balance-hint-after is-error';
     } else if (after < acc.balance * 0.1) {
-      // Остаток меньше 10% — предупреждение
       balanceAfter.textContent = `Останется: ${after.toFixed(2)} ${acc.currency}`;
       balanceAfter.className   = 'balance-hint-after is-warning';
     } else {
@@ -70,20 +102,18 @@
   function lookupReceiver() {
     const number = receiverInput.value.trim();
 
-    // Меньше 10 символов — не ищем
     if (number.length < 10) {
       receiverBox.dataset.state = 'empty';
       lookupSpinner.classList.remove('visible');
+      if (conversionHint) conversionHint.style.display = 'none';
       return;
     }
 
-    // Показываем спиннер
     lookupSpinner.classList.add('visible');
     receiverBox.dataset.state = 'empty';
 
     clearTimeout(lookupTimer);
 
-    // Ждём 400мс после последнего нажатия — debounce
     lookupTimer = setTimeout(() => {
       fetch(`${window.LOOKUP_URL}?number=${encodeURIComponent(number)}`)
         .then((response) => response.json())
@@ -91,15 +121,17 @@
           lookupSpinner.classList.remove('visible');
 
           if (data.found) {
-            receiverName.textContent = data.name;
-            receiverCur.textContent  = data.currency ? `Счёт в ${data.currency}` : '';
+            receiverName.textContent  = data.name;
+            receiverCur.textContent   = data.currency ? `Счёт в ${data.currency}` : '';
             receiverBox.dataset.state = 'found';
           } else {
             receiverBox.dataset.state = 'notfound';
           }
+
+          // Пересчитываем конвертацию после получения данных о получателе
+          updateBalanceDisplay();
         })
         .catch(() => {
-          // Сеть недоступна — просто скрываем
           lookupSpinner.classList.remove('visible');
           receiverBox.dataset.state = 'empty';
         });
@@ -108,12 +140,10 @@
 
   // ── Обработчики событий ───────────────────────────────────
 
-  // Ввод номера получателя
   if (receiverInput) {
     receiverInput.addEventListener('input', lookupReceiver);
   }
 
-  // Смена счёта отправителя
   senderCards.forEach((card) => {
     const radio = card.querySelector('.account-radio-input');
     if (radio) {
@@ -121,12 +151,10 @@
     }
   });
 
-  // Ввод суммы
   if (amountInput) {
     amountInput.addEventListener('input', updateBalanceDisplay);
   }
 
-  // Отправка формы — показываем спиннер кнопки
   if (transferForm) {
     transferForm.addEventListener('submit', () => {
       if (transferBtn) {
@@ -139,7 +167,6 @@
   // ── Инициализация при загрузке ────────────────────────────
   updateBalanceDisplay();
 
-  // Если номер получателя уже заполнен (при ошибке формы) — запускаем поиск
   if (receiverInput && receiverInput.value.trim().length >= 10) {
     lookupReceiver();
   }

@@ -6,6 +6,7 @@ from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
+from decimal import Decimal
 from django.shortcuts import redirect, render, get_object_or_404
 from django.utils import timezone
  
@@ -343,10 +344,6 @@ def currency_rates_view(request):
 
 @login_required
 def receiver_lookup_view(request):
-    """
-    AJAX: ищем счёт по номеру и возвращаем имя владельца.
-    Используется JS-ом при вводе номера получателя.
-    """
     number = request.GET.get('number', '').strip()
     account = Account.objects.filter(
         account_number=number
@@ -362,9 +359,26 @@ def receiver_lookup_view(request):
     })
 
 
+EXCHANGE_RATES = {
+    'TJS': 1.0,
+    'USD': 10.92,  
+    'EUR': 11.80,   
+}
+ 
+ 
+def convert_currency(amount, from_currency, to_currency):
+    if from_currency == to_currency:
+        return amount
+ 
+    amount_in_tjs     = amount * Decimal(str(EXCHANGE_RATES[from_currency]))
+    converted_amount  = amount_in_tjs / Decimal(str(EXCHANGE_RATES[to_currency]))
+ 
+    return converted_amount.quantize(Decimal('0.01'))
+ 
+ 
+ 
 @login_required
 def transfer_money_view(request):
-    # Счета пользователя для кастомного селектора
     user_accounts = Account.objects.filter(user=request.user, is_active=True)
     form = TransferForm(request.POST or None, user=request.user)
  
@@ -389,20 +403,33 @@ def transfer_money_view(request):
             )
  
         else:
-            # Двигаем деньги
-            sender.balance   -= amount
-            receiver.balance += amount
+            received_amount = convert_currency(
+                amount,
+                from_currency=sender.currency,
+                to_currency=receiver.currency,
+            )
+ 
+            
+            sender.balance   -= amount           
+            receiver.balance += received_amount  
             sender.save()
             receiver.save()
  
-            # Сохраняем запись о транзакции
+            # Сохраняем транзакцию
             Transaction.objects.create(
                 sender_account=sender,
                 receiver_account=receiver,
                 amount=amount,
                 transaction_type=Transaction.TransactionType.TRANSFER,
                 status=Transaction.Status.COMPLETED,
-                description=description or f'Перевод на счёт {receiver_number}',
+                description=description or (
+                    f'Перевод на счёт {receiver_number}'
+                    + (
+                        f' (конвертация: {amount} {sender.currency} → '
+                        f'{received_amount} {receiver.currency})'
+                        if sender.currency != receiver.currency else ''
+                    )
+                ),
             )
  
             # Уведомляем отправителя
@@ -410,8 +437,8 @@ def transfer_money_view(request):
                 user=sender.user,
                 title='Перевод выполнен',
                 message=(
-                    f'Перевод {amount} {sender.currency} '
-                    f'на счёт {receiver_number} выполнен успешно.'
+                    f'Списано {amount} {sender.currency}. '
+                    f'Получатель получил {received_amount} {receiver.currency}.'
                 ),
                 notification_type=Notification.NotificationType.TRANSACTION,
             )
@@ -421,7 +448,7 @@ def transfer_money_view(request):
                 user=receiver.user,
                 title='Входящий перевод',
                 message=(
-                    f'Получен перевод {amount} {sender.currency} '
+                    f'Зачислено {received_amount} {receiver.currency} '
                     f'от {sender.user.get_full_name() or sender.user.username}.'
                 ),
                 notification_type=Notification.NotificationType.TRANSACTION,
@@ -429,7 +456,8 @@ def transfer_money_view(request):
  
             messages.success(
                 request,
-                f'Перевод {amount} {sender.currency} выполнен!'
+                f'Перевод выполнен! Списано {amount} {sender.currency}, '
+                f'зачислено {received_amount} {receiver.currency}.'
             )
             return redirect('banking:transfer')
  

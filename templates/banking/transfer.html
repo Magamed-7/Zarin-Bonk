@@ -147,6 +147,12 @@
           <span class="balance-hint-available" id="balanceAvailable"></span>
           <span class="balance-hint-after" id="balanceAfter"></span>
         </div>
+
+        {# Показывается только если валюты разные #}
+        <div class="conversion-hint" id="conversionHint" style="display:none;">
+          <span class="conversion-icon">🔄</span>
+          <span id="conversionText"></span>
+        </div>
       </div>
 
       {% if form.amount.errors %}
