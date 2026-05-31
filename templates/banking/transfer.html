@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="glass transfer-card">
+
+<h1>
+
+Перевод денег
+
+</h1>
+
+<form method="post">
+
+{% csrf_token %}
+
+{{ form.sender_account }}
+
+{{ form.receiver_number }}
+
+<div id="receiverBox">
+
+Получатель:
+
+—
+
+</div>
+
+{{ form.amount }}
+
+<div id="balanceCheck">
+
+</div>
+
+<button>
+
+Перевести
+
+</button>
+
+</form>
+
+</div>
+
+<script>
+
+window.lookupUrl=
+"{% url 'banking:lookup_account' %}"
+
+</script>
+
+<script src="{% static 'js/transfer.js' %}"></script>
+
+{% endblock %}

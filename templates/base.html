@@ -42,8 +42,7 @@
         <div class="nav-links">
           <a class="nav-link" href="/">Главная</a>
           <a class="nav-link" href="{% url 'banking:accounts' %}">Счета</a>
-          <a class="nav-link" href="#">Транзакции</a>
-          <a class="nav-link" href="#">Поддержка</a>
+          <a class="nav-link" href="{% url 'banking:transfer' %}">Транзакции</a>
           <a class="nav-link" href="{% url 'banking:currency' %}"> Калькулятор </a>
         </div>
 
@@ -52,7 +51,8 @@
             3D
           </button>
           <a class="btn btn-gold" href="{% url 'accounts:login' %}">Dashboard </a>
-          <a class="btn btn-gold" href="{% url 'accounts:logout' %}"> Выйти</a>
+          <a class="btn btn-gold" href="{% url 'accounts:logout' %}"> Log out</a>
+          <a class="btn btn-gold" href="{% url 'accounts:profile' %}"> Profile </a>
         </div>
       </nav>
     </header>

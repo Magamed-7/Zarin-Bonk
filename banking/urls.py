@@ -13,4 +13,6 @@ urlpatterns = [
     path('topup/', views.topup_account_view, name='topup'),
     path('currency/', views.currency_convert_view, name='currency'),
     path('rates/', views.currency_rates_view, name='rates'),
+    path('transfer/', views.transfer_money_view, name='transfer'),
+    path('lookup-account/', views.receiver_lookup_view, name='lookup_account'),
 ]

@@ -14,6 +14,8 @@ from .models import Account, Card
 from .forms import TopUpForm
 from .constants import EXCHANGE_RATES
 from .forms import CurrencyConvertForm
+from django.http import JsonResponse
+from .forms import TransferForm
 
 
 @login_required
@@ -297,6 +299,113 @@ def currency_rates_view(request):
         {
 
             'rates':EXCHANGE_RATES
+
+        }
+
+    )
+
+
+@login_required
+def receiver_lookup_view(request):
+
+    number = request.GET.get(
+        'number'
+    )
+
+    account = Account.objects.filter(
+        account_number=number
+    ).select_related(
+        'user'
+    ).first()
+
+    if not account:
+
+        return JsonResponse({
+
+            'found':False
+
+        })
+
+    return JsonResponse({
+
+        'found':True,
+
+        'name':
+        account.user.get_full_name()
+
+    })
+
+
+@login_required
+def transfer_money_view(request):
+
+    form = TransferForm(
+
+        request.POST or None,
+
+        user=request.user
+
+    )
+
+    if request.method=='POST':
+
+        if form.is_valid():
+
+            sender = form.cleaned_data[
+                'sender_account'
+            ]
+
+            receiver = Account.objects.filter(
+                account_number=
+                form.cleaned_data[
+                    'receiver_number'
+                ]
+            ).first()
+
+            amount = form.cleaned_data[
+                'amount'
+            ]
+
+            if not receiver:
+
+                messages.error(
+                    request,
+                    'Получатель не найден'
+                )
+
+            elif sender.balance < amount:
+
+                messages.error(
+                    request,
+                    'Недостаточно средств'
+                )
+
+            else:
+
+                sender.balance -= amount
+                receiver.balance += amount
+
+                sender.save()
+                receiver.save()
+
+                messages.success(
+                    request,
+                    'Перевод выполнен'
+                )
+
+                return redirect(
+                    'banking:transfer'
+                )
+
+    return render(
+
+        request,
+
+        'banking/transfer.html',
+
+        {
+
+            'form':form
 
         }
 
