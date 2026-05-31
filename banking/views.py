@@ -380,7 +380,15 @@ def convert_currency(amount, from_currency, to_currency):
 @login_required
 def transfer_money_view(request):
     user_accounts = Account.objects.filter(user=request.user, is_active=True)
-    form = TransferForm(request.POST or None, user=request.user)
+    initial_data = {}
+    if request.method == 'GET':
+        initial_data = {
+            'sender_account': request.GET.get('sender_account'),
+            'receiver_number': request.GET.get('receiver_number'),
+            'amount': request.GET.get('amount'),
+            'description': request.GET.get('description'),
+        }
+    form = TransferForm(request.POST or None, initial=initial_data, user=request.user)
  
     if request.method == 'POST' and form.is_valid():
         sender          = form.cleaned_data['sender_account']

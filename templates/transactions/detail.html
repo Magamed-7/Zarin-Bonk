@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Детали транзакции #{{ tx.id }} — ZarinPay{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/services.css' %}">
+<style>
+  .tx-detail-card {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+    overflow: hidden;
+  }
+  .tx-status-badge {
+    display: inline-block;
+    padding: 0.35rem 0.85rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .tx-status-badge.tx-status-completed {
+    background: rgba(72, 199, 116, 0.1);
+    border: 1px solid rgba(72, 199, 116, 0.25);
+    color: #48c774;
+  }
+  .tx-status-badge.tx-status-pending {
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.25);
+    color: var(--gold);
+  }
+  .tx-status-badge.tx-status-failed {
+    background: rgba(255, 80, 80, 0.1);
+    border: 1px solid rgba(255, 80, 80, 0.25);
+    color: #ff6b6b;
+  }
+  .tx-amount-large {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin: 1.5rem 0;
+    text-align: center;
+    color: var(--text);
+  }
+  .tx-amount-large.tx-out {
+    color: #ff6b6b;
+  }
+  .tx-amount-large.tx-in {
+    color: #48c774;
+  }
+  .detail-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 0.95rem;
+  }
+  .detail-row-label {
+    color: var(--muted);
+  }
+  .detail-row-value {
+    font-weight: 600;
+    color: var(--text);
+  }
+  .detail-row-value.mono {
+    font-family: monospace;
+  }
+  .tx-action-buttons {
+    display: flex;
+    gap: 1rem;
+  }
+  .tx-action-buttons .btn {
+    flex: 1;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="services-page">
+
+  <div class="services-header animate-fade-in">
+    <a href="javascript:history.back()" class="back-btn">← Назад</a>
+    <div class="services-header-text">
+      <h1 class="services-title">Детали операции</h1>
+      <p class="services-subtitle">Полная информация о транзакции #{{ tx.id }}</p>
+    </div>
+  </div>
+
+  <div class="tx-detail-card glass card-3d">
+    <div class="template-glow"></div>
+    <div style="text-align: center;">
+      <span class="tx-status-badge tx-status-{{ tx.status }}">
+        {{ tx.get_status_display }}
+      </span>
+    </div>
+
+    {# Показываем минус только если пользователь является отправителем, иначе плюс #}
+    <div class="tx-amount-large {% if is_sender %}tx-out{% else %}tx-in{% endif %}">
+      {% if is_sender %}-{% else %}+{% endif %}{{ tx.amount|floatformat:2 }} 
+      <span style="font-size: 1.5rem; color: var(--gold);">
+        {% if is_receiver and tx.receiver_account %}
+          {{ tx.receiver_account.currency }}
+        {% else %}
+          {{ tx.sender_account.currency|default:'TJS' }}
+        {% endif %}
+      </span>
+    </div>
+
+    <div class="detail-rows">
+      <div class="detail-row">
+        <span class="detail-row-label">Тип операции</span>
+        <span class="detail-row-value">{{ tx.get_transaction_type_display }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-row-label">Категория</span>
+        <span class="detail-row-value">{{ tx.category|default:"Перевод" }}</span>
+      </div>
+
+      {# Детали отправителя #}
+      <div class="detail-row">
+        <span class="detail-row-label">Отправитель (Счет списания)</span>
+        <span class="detail-row-value mono">
+          {{ tx.sender_account.account_number|default:"Внешний источник" }}
+          {% if is_sender %}
+            <span style="color: #ff6b6b; font-size: 0.8rem; font-weight: normal;">(Ваш счет)</span>
+          {% endif %}
+        </span>
+      </div>
+
+      {# Детали получателя #}
+      {% if tx.receiver_account %}
+        <div class="detail-row">
+          <span class="detail-row-label">Получатель (Счет зачисления)</span>
+          <span class="detail-row-value mono">
+            {{ tx.receiver_account.account_number }}
+            {% if is_receiver %}
+              <span style="color: #48c774; font-size: 0.8rem; font-weight: normal;">(Ваш счет)</span>
+            {% endif %}
+          </span>
+        </div>
+      {% else %}
+        <div class="detail-row">
+          <span class="detail-row-label">Получатель (Услуга)</span>
+          <span class="detail-row-value">{{ tx.description }}</span>
+        </div>
+      {% endif %}
+
+      <div class="detail-row">
+        <span class="detail-row-label">Дата и время</span>
+        <span class="detail-row-value">{{ tx.created_at|date:"d.m.Y H:i:s" }}</span>
+      </div>
+      {% if tx.description %}
+        <div class="detail-row">
+          <span class="detail-row-label">Назначение платежа</span>
+          <span class="detail-row-value">{{ tx.description }}</span>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="tx-action-buttons">
+      <a href="{% url 'transactions:transaction_pdf' tx.id %}" class="btn btn-gold">
+        <span>Скачать квитанцию</span>
+      </a>
+      <a href="{% url 'transactions:repeat_transaction' tx.id %}" class="btn btn-gold" style="background: rgba(255, 215, 0, 0.1); border: 1.5px solid var(--gold); color: var(--gold);">
+        <span>Повторить платёж</span>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Эффект 3D наклона (Tilt) для карточки
+  document.addEventListener('DOMContentLoaded', () => {
+    const card = document.querySelector('.card-3d');
+    if (card) {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const xc = rect.width / 2;
+        const yc = rect.height / 2;
+        const angleX = (yc - y) / 15;
+        const angleY = (x - xc) / 15;
+        card.style.transform = `perspective(1000px) rotateX(${angleX}deg) rotateY(${angleY}deg) scale3d(1.01, 1.01, 1.01)`;
+      });
+
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+      });
+    }
+  });
+</script>
+{% endblock %}

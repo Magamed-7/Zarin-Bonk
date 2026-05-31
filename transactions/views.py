@@ -1,18 +1,28 @@
 from decimal import Decimal
+import os
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.http import HttpResponse
 from banking.models import Account
 from notifications.models import Notification
 from .models import Transaction, PaymentTemplate
+import datetime
+
+# ReportLab imports for PDF generation
+from reportlab.lib.pagesizes import A4, A6
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib import colors
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+
 
 PROVIDERS = {
     'internet': [
         {'id': 'babilon_t', 'name': 'Babilon-T'},
         {'id': 'tojiktelecom', 'name': 'Tojiktelecom'},
         {'id': 'satn', 'name': 'Satn'},
-        {'id': 'megafon', 'name': 'MegaFon'},
-        {'id': 'zet_mobile', 'name': 'ZET-Mobile'},
     ],
     'phone': [
         {'id': 'megafon', 'name': 'MegaFon'},
@@ -39,6 +49,19 @@ CATEGORIES_LIST = [
     {'id': 'utilities', 'name': 'ЖКХ', 'icon': '⚡'},
 ]
 
+# Helper function to register Cyrillic font
+def get_pdf_font_name():
+    font_name = 'Helvetica'
+    # Windows system Arial font path
+    font_path = os.path.join(os.environ.get('WINDIR', 'C:\\Windows'), 'Fonts', 'arial.ttf')
+    if os.path.exists(font_path):
+        try:
+            pdfmetrics.registerFont(TTFont('Arial', font_path))
+            font_name = 'Arial'
+        except Exception:
+            pass
+    return font_name
+
 @login_required
 def services_view(request):
     user_accounts = Account.objects.filter(user=request.user, is_active=True)
@@ -60,11 +83,18 @@ def category_services_view(request, category_id):
     category_data = CATEGORIES[category_id]
     providers_list = PROVIDERS[category_id]
     
+    initial_provider = request.GET.get('provider', '')
+    initial_requisite = request.GET.get('requisite', '')
+    initial_amount = request.GET.get('amount', '')
+    
     return render(request, 'transactions/pay_service.html', {
         'accounts': user_accounts,
         'category_id': category_id,
         'category': category_data,
         'providers': providers_list,
+        'initial_provider': initial_provider,
+        'initial_requisite': initial_requisite,
+        'initial_amount': initial_amount,
     })
 
 @login_required
@@ -191,3 +221,232 @@ def delete_template_view(request, template_id):
     template.delete()
     messages.success(request, f'Шаблон "{name}" удален.')
     return redirect('transactions:services')
+
+@login_required
+def transaction_detail_view(request, transaction_id):
+    tx = get_object_or_404(
+        Transaction.objects.select_related('sender_account', 'receiver_account'),
+        id=transaction_id
+    )
+    # Security check: User must be sender or receiver
+    user_accounts = request.user.accounts.values_list('id', flat=True)
+    is_sender = tx.sender_account_id in user_accounts if tx.sender_account else False
+    is_receiver = tx.receiver_account_id in user_accounts if tx.receiver_account else False
+    
+    if not (is_sender or is_receiver or request.user.is_staff):
+        messages.error(request, 'Доступ запрещен.')
+        return redirect('banking:dashboard')
+        
+    return render(request, 'transactions/detail.html', {
+        'tx': tx,
+        'is_sender': is_sender,
+        'is_receiver': is_receiver,
+    })
+
+@login_required
+def repeat_transaction_view(request, transaction_id):
+    tx = get_object_or_404(Transaction, id=transaction_id)
+    
+    if tx.transaction_type == Transaction.TransactionType.TRANSFER:
+        url = f"/banking/transfer/?sender_account={tx.sender_account_id if tx.sender_account else ''}&receiver_number={tx.receiver_account.account_number if tx.receiver_account else ''}&amount={tx.amount}&description={tx.description}"
+        return redirect(url)
+        
+    elif tx.transaction_type == Transaction.TransactionType.PAYMENT:
+        provider_name = ""
+        requisite = ""
+        desc = tx.description
+        if "Реквизит:" in desc:
+            parts = desc.split("Реквизит:")
+            requisite = parts[1].replace(")", "").strip()
+            provider_part = parts[0]
+            if "Оплата услуги:" in provider_part:
+                provider_name = provider_part.split("Оплата услуги:")[1].strip()
+            elif "Быстрая оплата:" in provider_part:
+                provider_name = provider_part.split("Быстрая оплата:")[1].strip()
+                
+        provider_id = provider_name.lower().replace(" ", "_")
+        url = f"/transactions/services/{tx.category}/?provider={provider_id}&requisite={requisite}&amount={tx.amount}"
+        return redirect(url)
+        
+    messages.error(request, 'Повторить операцию данного типа невозможно.')
+    return redirect('banking:dashboard')
+
+@login_required
+def transaction_pdf_view(request, transaction_id):
+    tx = get_object_or_404(Transaction, id=transaction_id)
+    
+    # Check permissions
+    user_accounts = request.user.accounts.values_list('id', flat=True)
+    is_sender = tx.sender_account_id in user_accounts if tx.sender_account else False
+    is_receiver = tx.receiver_account_id in user_accounts if tx.receiver_account else False
+    if not (is_sender or is_receiver or request.user.is_staff):
+        return HttpResponse("Доступ запрещен", status=403)
+        
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="receipt_{tx.id}.pdf"'
+    
+    doc = SimpleDocTemplate(response, pagesize=A6, rightMargin=20, leftMargin=20, topMargin=20, bottomMargin=20)
+    story = []
+    
+    font_name = get_pdf_font_name()
+    styles = getSampleStyleSheet()
+    
+    title_style = ParagraphStyle(
+        'ReceiptTitle',
+        parent=styles['Heading2'],
+        fontName=font_name,
+        fontSize=14,
+        textColor=colors.HexColor('#ffd700'),
+        alignment=1,
+        spaceAfter=15
+    )
+    
+    label_style = ParagraphStyle(
+        'ReceiptLabel',
+        parent=styles['Normal'],
+        fontName=font_name,
+        fontSize=8,
+        textColor=colors.HexColor('#8a99ad')
+    )
+    
+    value_style = ParagraphStyle(
+        'ReceiptValue',
+        parent=styles['Normal'],
+        fontName=font_name,
+        fontSize=9,
+        textColor=colors.black
+    )
+    
+    story.append(Paragraph("ZarinPay Receipt", title_style))
+    story.append(Spacer(1, 5))
+    
+    currency = tx.sender_account.currency if tx.sender_account else 'TJS'
+    
+    data = [
+        [Paragraph("ID Операции:", label_style), Paragraph(str(tx.id), value_style)],
+        [Paragraph("Дата и время:", label_style), Paragraph(tx.created_at.strftime('%d.%m.%Y %H:%M'), value_style)],
+        [Paragraph("Тип операции:", label_style), Paragraph(tx.get_transaction_type_display(), value_style)],
+        [Paragraph("Статус:", label_style), Paragraph(tx.get_status_display(), value_style)],
+        [Paragraph("Счет отправителя:", label_style), Paragraph(tx.sender_account.account_number if tx.sender_account else "Внешний источник", value_style)],
+        [Paragraph("Счет получателя:", label_style), Paragraph(tx.receiver_account.account_number if tx.receiver_account else "Внешний получатель", value_style)],
+        [Paragraph("Описание:", label_style), Paragraph(tx.description or "-", value_style)],
+        [Paragraph("Сумма:", label_style), Paragraph(f"{tx.amount:.2f} {currency}", value_style)],
+    ]
+    
+    t = Table(data, colWidths=[100, 150])
+    t.setStyle(TableStyle([
+        ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+        ('LINEBELOW', (0,0), (-1,-1), 0.5, colors.HexColor('#eeeeee')),
+    ]))
+    
+    story.append(t)
+    doc.build(story)
+    return response
+
+@login_required
+def export_statement_pdf_view(request):
+    account_id = request.GET.get('account_id')
+    start_str = request.GET.get('start_date')
+    end_str = request.GET.get('end_date')
+    
+    if not all([account_id, start_str, end_str]):
+        messages.error(request, 'Укажите все параметры для выписки.')
+        return redirect('banking:accounts')
+        
+    account = get_object_or_404(Account, id=account_id, user=request.user)
+    
+    try:
+        start_date = datetime.datetime.strptime(start_str, '%Y-%m-%d').date()
+        end_date = datetime.datetime.strptime(end_str, '%Y-%m-%d').date()
+    except ValueError:
+        messages.error(request, 'Некорректный формат дат.')
+        return redirect('banking:account_detail', account_id=account.id)
+        
+    sent = Transaction.objects.filter(sender_account=account, created_at__date__gte=start_date, created_at__date__lte=end_date)
+    received = Transaction.objects.filter(receiver_account=account, created_at__date__gte=start_date, created_at__date__lte=end_date)
+    transactions = (sent | received).order_by('created_at')
+    
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="statement_{account.account_number}.pdf"'
+    
+    doc = SimpleDocTemplate(response, pagesize=A4, rightMargin=30, leftMargin=30, topMargin=30, bottomMargin=30)
+    story = []
+    
+    font_name = get_pdf_font_name()
+    styles = getSampleStyleSheet()
+    
+    title_style = ParagraphStyle(
+        'DocTitle',
+        parent=styles['Heading1'],
+        fontName=font_name,
+        fontSize=18,
+        textColor=colors.HexColor('#ffd700'),
+        alignment=0,
+        spaceAfter=5
+    )
+    
+    meta_style = ParagraphStyle(
+        'DocMeta',
+        parent=styles['Normal'],
+        fontName=font_name,
+        fontSize=10,
+        textColor=colors.HexColor('#4a5568'),
+        spaceAfter=15
+    )
+    
+    th_style = ParagraphStyle(
+        'TableHeader',
+        parent=styles['Normal'],
+        fontName=font_name,
+        fontSize=9,
+        fontWeight='bold',
+        textColor=colors.white
+    )
+    
+    td_style = ParagraphStyle(
+        'TableCell',
+        parent=styles['Normal'],
+        fontName=font_name,
+        fontSize=9,
+        textColor=colors.black
+    )
+    
+    story.append(Paragraph("Выписка по счету ZarinPay", title_style))
+    story.append(Paragraph(f"Счет: {account.account_number} ({account.get_account_type_display()})<br/>"
+                           f"Период: {start_date.strftime('%d.%m.%Y')} — {end_date.strftime('%d.%m.%Y')}<br/>"
+                           f"Владелец: {request.user.get_full_name() or request.user.username}", meta_style))
+    
+    table_data = [[
+        Paragraph("Дата", th_style),
+        Paragraph("Тип", th_style),
+        Paragraph("Описание", th_style),
+        Paragraph("Сумма", th_style),
+        Paragraph("Статус", th_style)
+    ]]
+    
+    for tx in transactions:
+        is_out = tx.sender_account == account
+        amount_sign = f"-{tx.amount:.2f}" if is_out else f"+{tx.amount:.2f}"
+        table_data.append([
+            Paragraph(tx.created_at.strftime('%d.%m.%Y %H:%M'), td_style),
+            Paragraph(tx.get_transaction_type_display(), td_style),
+            Paragraph(tx.description or "-", td_style),
+            Paragraph(f"{amount_sign} {account.currency}", td_style),
+            Paragraph(tx.get_status_display(), td_style)
+        ])
+        
+    t = Table(table_data, colWidths=[90, 80, 200, 90, 70])
+    t.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0b1020')),
+        ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('TOPPADDING', (0,0), (-1,-1), 8),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 8),
+        ('LINEBELOW', (0,0), (-1,-1), 0.5, colors.HexColor('#e2e8f0')),
+    ]))
+    
+    story.append(t)
+    doc.build(story)
+    return response

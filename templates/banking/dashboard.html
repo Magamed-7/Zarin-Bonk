@@ -221,24 +221,24 @@ data-value="1000"
           {% for tx in recent_transactions %}
             {% if tx.sender_account == account %}
               {# Исходящая #}
-              <div class="tx-item">
+              <a href="{% url 'transactions:transaction_detail' tx.id %}" class="tx-item" style="text-decoration: none; color: inherit; display: grid;">
                 <div class="tx-icon tx-icon--out">↑</div>
                 <div class="tx-info">
                   <div class="tx-desc">{{ tx.description|default:"Перевод" }}</div>
                   <div class="tx-date">{{ tx.created_at|date:"d.m.Y H:i" }}</div>
                 </div>
                 <div class="tx-amount tx-amount--out">− {{ tx.amount }}</div>
-              </div>
+              </a>
             {% else %}
               {# Входящая #}
-              <div class="tx-item">
+              <a href="{% url 'transactions:transaction_detail' tx.id %}" class="tx-item" style="text-decoration: none; color: inherit; display: grid;">
                 <div class="tx-icon tx-icon--in">↓</div>
                 <div class="tx-info">
                   <div class="tx-desc">{{ tx.description|default:"Получение" }}</div>
                   <div class="tx-date">{{ tx.created_at|date:"d.m.Y H:i" }}</div>
                 </div>
                 <div class="tx-amount tx-amount--in">+ {{ tx.amount }}</div>
-              </div>
+              </a>
             {% endif %}
           {% endfor %}
         </div>

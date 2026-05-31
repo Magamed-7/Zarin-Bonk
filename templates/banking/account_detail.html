@@ -82,6 +82,27 @@
         {% endif %}
       </div>
 
+      {# Выписка по счету #}
+      <div class="detail-card">
+        <h2 class="section-heading">Выписка по счету</h2>
+        <form action="{% url 'transactions:export_statement_pdf' %}" method="get" class="statement-form">
+          <input type="hidden" name="account_id" value="{{ account.id }}">
+          <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+            <div style="display: flex; gap: 0.5rem;">
+              <div style="flex: 1;">
+                <label style="font-size: 0.72rem; color: var(--muted); display: block; margin-bottom: 0.2rem;">С даты</label>
+                <input type="date" name="start_date" style="width:100%; background:rgba(255,255,255,0.05); border:1.5px solid rgba(255,255,255,0.1); border-radius:8px; padding:0.4rem; color:white; font-size:0.85rem;" required>
+              </div>
+              <div style="flex: 1;">
+                <label style="font-size: 0.72rem; color: var(--muted); display: block; margin-bottom: 0.2rem;">По дату</label>
+                <input type="date" name="end_date" style="width:100%; background:rgba(255,255,255,0.05); border:1.5px solid rgba(255,255,255,0.1); border-radius:8px; padding:0.4rem; color:white; font-size:0.85rem;" required>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-gold btn-sm" style="width: 100%; padding: 0.6rem;">Скачать выписку (PDF)</button>
+          </div>
+        </form>
+      </div>
+
     </div>
 
     {# ── Правая колонка ────────────────────────────────────── #}
@@ -105,7 +126,7 @@
         {% if transactions %}
           <div class="tx-list">
             {% for tx in transactions %}
-              <div class="tx-item">
+              <a href="{% url 'transactions:transaction_detail' tx.id %}" class="tx-item" style="text-decoration: none; color: inherit; display: grid;">
 
                 {# Иконка типа #}
                 <div class="tx-icon tx-icon--{{ tx.transaction_type }}">
@@ -132,7 +153,7 @@
                   {{ tx.amount|floatformat:2 }}
                 </div>
 
-              </div>
+              </a>
             {% endfor %}
           </div>
         {% else %}

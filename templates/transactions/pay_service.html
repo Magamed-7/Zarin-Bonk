@@ -49,7 +49,7 @@
         <div class="provider-select-wrap">
           <select name="provider" class="services-select" required>
             {% for prov in providers %}
-              <option value="{{ prov.id }}">{{ prov.name }}</option>
+              <option value="{{ prov.id }}" {% if initial_provider == prov.id or initial_provider == prov.name %}selected{% endif %}>{{ prov.name }}</option>
             {% endfor %}
           </select>
         </div>
@@ -58,13 +58,13 @@
       {# Реквизиты #}
       <div class="form-block">
         <label class="form-label">{{ category.requisite_label }}</label>
-        <input type="text" name="requisite" class="services-input" placeholder="{{ category.placeholder }}" required>
+        <input type="text" name="requisite" class="services-input" placeholder="{{ category.placeholder }}" value="{{ initial_requisite }}" required>
       </div>
 
       {# Сумма #}
       <div class="form-block">
         <label class="form-label">Сумма (TJS)</label>
-        <input type="number" name="amount" class="services-input" placeholder="0.00" min="1" step="0.01" required>
+        <input type="number" name="amount" class="services-input" placeholder="0.00" min="1" step="0.01" value="{{ initial_amount }}" required>
       </div>
 
       {# Чекбокс шаблона #}
