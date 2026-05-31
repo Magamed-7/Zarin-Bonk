@@ -56,141 +56,17 @@
     <h2 class="section-subtitle">Выберите категорию услуг</h2>
     <div class="categories-grid">
       {% for cat in categories %}
-        <div class="category-card glass card-3d" data-category="{{ cat.id }}" onclick="selectCategory('{{ cat.id }}')">
+        <a href="{% url 'transactions:category_services' cat.id %}" class="category-card glass card-3d" style="text-decoration: none; display: flex; flex-direction: column;">
           <span class="cat-card-icon">{{ cat.icon }}</span>
           <span class="cat-card-name">{{ cat.name }}</span>
-        </div>
+        </a>
       {% endfor %}
     </div>
   </div>
 
-  {# Основная форма оплаты #}
-  <div class="payment-form-section glass" id="paymentFormBlock" style="display: none;">
-    <h2 class="section-subtitle" id="formSectionTitle">Заполнение реквизитов</h2>
-    <form method="post" action="{% url 'transactions:pay_service' %}" class="payment-form" id="servicePaymentForm">
-      {% csrf_token %}
-      <input type="hidden" name="category" id="formCategory">
-
-      {# Счёт списания #}
-      <div class="form-block">
-        <label class="form-label">Счёт списания</label>
-        <div class="account-select-wrap">
-          <select name="account" class="services-select" required>
-            {% for acc in accounts %}
-              <option value="{{ acc.id }}">
-                {{ acc.get_account_type_display }} ({{ acc.balance|floatformat:2 }} {{ acc.currency }}) — {{ acc.account_number }}
-              </option>
-            {% empty %}
-              <option value="">Нет доступных счетов</option>
-            {% endfor %}
-          </select>
-        </div>
-      </div>
-
-      {# Провайдер #}
-      <div class="form-block">
-        <label class="form-label">Поставщик услуг</label>
-        <div class="provider-select-wrap">
-          <select name="provider" id="providerSelect" class="services-select" required>
-            {# Опции добавляются через JS #</select>
-        </div>
-      </div>
-
-      {# Реквизиты #}
-      <div class="form-block">
-        <label class="form-label" id="requisiteLabel">Номер телефона / Лицевой счет</label>
-        <input type="text" name="requisite" id="requisiteInput" class="services-input" placeholder="Введите номер или счет" required>
-      </div>
-
-      {# Сумма #}
-      <div class="form-block">
-        <label class="form-label">Сумма (TJS)</label>
-        <input type="number" name="amount" class="services-input" placeholder="0.00" min="1" step="0.01" required>
-      </div>
-
-      {# Чекбокс шаблона #}
-      <div class="form-block checkbox-block">
-        <label class="checkbox-container">
-          <input type="checkbox" name="save_template" id="saveTemplateCheckbox" onchange="toggleTemplateNameInput()">
-          <span class="checkmark"></span>
-          Сохранить этот платеж как шаблон
-        </label>
-      </div>
-
-      {# Название шаблона #}
-      <div class="form-block" id="templateNameBlock" style="display: none;">
-        <label class="form-label">Название шаблона (необязательно)</label>
-        <input type="text" name="template_name" class="services-input" placeholder="Например: Домашний Интернет">
-      </div>
-
-      {# Кнопка отправки #}
-      <button type="submit" class="btn btn-gold btn-pay-submit">
-        <span>Оплатить услугу</span>
-        <span class="btn-arrow">→</span>
-      </button>
-    </form>
-  </div>
-
 </div>
 
-{# JSON с провайдерами для JS #}
-<script id="providersData" type="application/json">
-  {{ providers|json_script:"providers-json" }}
-</script>
-
 <script>
-  const providers = JSON.parse(document.getElementById('providers-json').textContent);
-
-  function selectCategory(catId) {
-    // Подсветка активной карточки
-    document.querySelectorAll('.category-card').forEach(card => {
-      card.classList.remove('active');
-      if (card.dataset.category === catId) {
-        card.classList.add('active');
-      }
-    });
-
-    // Устанавливаем категорию в форму
-    document.getElementById('formCategory').value = catId;
-
-    // Обновляем список провайдеров
-    const providerSelect = document.getElementById('providerSelect');
-    providerSelect.innerHTML = '';
-    
-    const provs = providers[catId] || [];
-    provs.forEach(prov => {
-      const opt = document.createElement('option');
-      opt.value = prov.id;
-      opt.textContent = prov.name;
-      providerSelect.appendChild(opt);
-    });
-
-    // Настраиваем лейбл реквизита в зависимости от типа
-    const requisiteLabel = document.getElementById('requisiteLabel');
-    const requisiteInput = document.getElementById('requisiteInput');
-    if (catId === 'phone') {
-      requisiteLabel.textContent = 'Номер телефона';
-      requisiteInput.placeholder = '+992 9XXXXXXXX';
-    } else if (catId === 'internet') {
-      requisiteLabel.textContent = 'Логин / Номер договора';
-      requisiteInput.placeholder = 'Введите ваш логин';
-    } else {
-      requisiteLabel.textContent = 'Лицевой счет';
-      requisiteInput.placeholder = 'Введите номер счета ЖКХ';
-    }
-
-    // Показываем блок формы с анимацией
-    const formBlock = document.getElementById('paymentFormBlock');
-    formBlock.style.display = 'block';
-    formBlock.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-
-  function toggleTemplateNameInput() {
-    const isChecked = document.getElementById('saveTemplateCheckbox').checked;
-    const nameBlock = document.getElementById('templateNameBlock');
-    nameBlock.style.display = isChecked ? 'block' : 'none';
-  }
-
   // Эффект 3D наклона (Tilt) для карточек
   document.addEventListener('DOMContentLoaded', () => {
     const cards = document.querySelectorAll('.card-3d');

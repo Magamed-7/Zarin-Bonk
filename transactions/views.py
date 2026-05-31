@@ -11,6 +11,8 @@ PROVIDERS = {
         {'id': 'babilon_t', 'name': 'Babilon-T'},
         {'id': 'tojiktelecom', 'name': 'Tojiktelecom'},
         {'id': 'satn', 'name': 'Satn'},
+        {'id': 'megafon', 'name': 'MegaFon'},
+        {'id': 'zet_mobile', 'name': 'ZET-Mobile'},
     ],
     'phone': [
         {'id': 'megafon', 'name': 'MegaFon'},
@@ -25,7 +27,13 @@ PROVIDERS = {
     ]
 }
 
-CATEGORIES = [
+CATEGORIES = {
+    'internet': {'name': 'Интернет', 'icon': '🌐', 'requisite_label': 'Логин / Номер договора', 'placeholder': 'Введите ваш логин'},
+    'phone': {'name': 'Мобильная связь', 'icon': '📱', 'requisite_label': 'Номер телефона', 'placeholder': '+992 9XXXXXXXX'},
+    'utilities': {'name': 'ЖКХ', 'icon': '⚡', 'requisite_label': 'Лицевой счет', 'placeholder': 'Введите номер счета ЖКХ'},
+}
+
+CATEGORIES_LIST = [
     {'id': 'internet', 'name': 'Интернет', 'icon': '🌐'},
     {'id': 'phone', 'name': 'Мобильная связь', 'icon': '📱'},
     {'id': 'utilities', 'name': 'ЖКХ', 'icon': '⚡'},
@@ -39,8 +47,24 @@ def services_view(request):
     return render(request, 'transactions/services.html', {
         'accounts': user_accounts,
         'templates': templates,
-        'categories': CATEGORIES,
-        'providers': PROVIDERS,
+        'categories': CATEGORIES_LIST,
+    })
+
+@login_required
+def category_services_view(request, category_id):
+    if category_id not in CATEGORIES:
+        messages.error(request, 'Неверная категория услуг.')
+        return redirect('transactions:services')
+        
+    user_accounts = Account.objects.filter(user=request.user, is_active=True)
+    category_data = CATEGORIES[category_id]
+    providers_list = PROVIDERS[category_id]
+    
+    return render(request, 'transactions/pay_service.html', {
+        'accounts': user_accounts,
+        'category_id': category_id,
+        'category': category_data,
+        'providers': providers_list,
     })
 
 @login_required
@@ -76,8 +100,8 @@ def pay_service_view(request):
 
     # Find provider display name
     provider_name = provider_id
-    for cat, prov_list in PROVIDERS.items():
-        for prov in prov_list:
+    if category in PROVIDERS:
+        for prov in PROVIDERS[category]:
             if prov['id'] == provider_id:
                 provider_name = prov['name']
                 break

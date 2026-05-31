@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Оплата: {{ category.name }} — ZarinPay{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/services.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="services-page">
+
+  {# Заголовок #}
+  <div class="services-header animate-fade-in">
+    <a href="{% url 'transactions:services' %}" class="back-btn">← Назад к категориям</a>
+    <div class="services-header-text">
+      <h1 class="services-title">Оплата: {{ category.name }}</h1>
+      <p class="services-subtitle">Введите реквизиты платежа и сумму списания</p>
+    </div>
+    <div class="services-icon-wrap" aria-hidden="true">{{ category.icon }}</div>
+  </div>
+
+  {# Основная форма оплаты #}
+  <div class="payment-form-section glass">
+    <h2 class="section-subtitle">Заполнение реквизитов</h2>
+    <form method="post" action="{% url 'transactions:pay_service' %}" class="payment-form">
+      {% csrf_token %}
+      <input type="hidden" name="category" value="{{ category_id }}">
+
+      {# Счёт списания #}
+      <div class="form-block">
+        <label class="form-label">Счёт списания</label>
+        <div class="account-select-wrap">
+          <select name="account" class="services-select" required>
+            {% for acc in accounts %}
+              <option value="{{ acc.id }}">
+                {{ acc.get_account_type_display }} ({{ acc.balance|floatformat:2 }} {{ acc.currency }}) — {{ acc.account_number }}
+              </option>
+            {% empty %}
+              <option value="">Нет доступных счетов</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      {# Провайдер #}
+      <div class="form-block">
+        <label class="form-label">Поставщик услуг</label>
+        <div class="provider-select-wrap">
+          <select name="provider" class="services-select" required>
+            {% for prov in providers %}
+              <option value="{{ prov.id }}">{{ prov.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      {# Реквизиты #}
+      <div class="form-block">
+        <label class="form-label">{{ category.requisite_label }}</label>
+        <input type="text" name="requisite" class="services-input" placeholder="{{ category.placeholder }}" required>
+      </div>
+
+      {# Сумма #}
+      <div class="form-block">
+        <label class="form-label">Сумма (TJS)</label>
+        <input type="number" name="amount" class="services-input" placeholder="0.00" min="1" step="0.01" required>
+      </div>
+
+      {# Чекбокс шаблона #}
+      <div class="form-block checkbox-block">
+        <label class="checkbox-container">
+          <input type="checkbox" name="save_template" id="saveTemplateCheckbox" onchange="toggleTemplateNameInput()">
+          <span class="checkmark"></span>
+          Сохранить этот платеж как шаблон
+        </label>
+      </div>
+
+      {# Название шаблона #}
+      <div class="form-block" id="templateNameBlock" style="display: none;">
+        <label class="form-label">Название шаблона (необязательно)</label>
+        <input type="text" name="template_name" class="services-input" placeholder="Например: {{ category.name }} мамы">
+      </div>
+
+      {# Кнопка отправки #}
+      <button type="submit" class="btn btn-gold btn-pay-submit">
+        <span>Оплатить услугу</span>
+        <span class="btn-arrow">→</span>
+      </button>
+    </form>
+  </div>
+
+</div>
+
+<script>
+  function toggleTemplateNameInput() {
+    const isChecked = document.getElementById('saveTemplateCheckbox').checked;
+    const nameBlock = document.getElementById('templateNameBlock');
+    nameBlock.style.display = isChecked ? 'block' : 'none';
+  }
+</script>
+{% endblock %}
