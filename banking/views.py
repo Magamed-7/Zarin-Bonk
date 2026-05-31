@@ -12,10 +12,13 @@ from django.utils import timezone
 from transactions.models import Transaction
 from .models import Account, Card
 from .forms import TopUpForm
+from .services import get_rates
 from .constants import EXCHANGE_RATES
 from .forms import CurrencyConvertForm
 from django.http import JsonResponse
 from .forms import TransferForm
+import requests
+from notifications.models import Notification
 
 
 @login_required
@@ -258,21 +261,50 @@ def currency_convert_view(request):
                 'to_currency'
             ]
 
-            rate = EXCHANGE_RATES[
-                source
-            ][target]
+            url = (
+
+                'https://api.exchangerate.host/convert'
+
+                f'?from={source}'
+
+                f'&to={target}'
+
+                f'&amount={amount}'
+
+            )
+
+            response = requests.get(
+                url,
+                timeout=5
+            )
+
+            data = response.json()
 
             converted = round(
-                float(amount)*rate,
+
+                data.get(
+                    'result',
+                    0
+                ),
+
                 2
+
+            )
+
+            rate = data.get(
+                'info',
+                {}
+            ).get(
+                'rate'
             )
 
     context = {
 
         'form':form,
+
         'converted':converted,
+
         'rate':rate,
-        'rates':EXCHANGE_RATES,
 
     }
 
@@ -287,8 +319,12 @@ def currency_convert_view(request):
     )
 
 
+
+
 @login_required
 def currency_rates_view(request):
+
+    rates = get_rates()
 
     return render(
 
@@ -298,7 +334,7 @@ def currency_rates_view(request):
 
         {
 
-            'rates':EXCHANGE_RATES
+            'rates':rates
 
         }
 
@@ -307,106 +343,98 @@ def currency_rates_view(request):
 
 @login_required
 def receiver_lookup_view(request):
-
-    number = request.GET.get(
-        'number'
-    )
-
+    """
+    AJAX: ищем счёт по номеру и возвращаем имя владельца.
+    Используется JS-ом при вводе номера получателя.
+    """
+    number = request.GET.get('number', '').strip()
     account = Account.objects.filter(
         account_number=number
-    ).select_related(
-        'user'
-    ).first()
-
+    ).select_related('user').first()
+ 
     if not account:
-
-        return JsonResponse({
-
-            'found':False
-
-        })
-
+        return JsonResponse({'found': False})
+ 
     return JsonResponse({
-
-        'found':True,
-
-        'name':
-        account.user.get_full_name()
-
+        'found':    True,
+        'name':     account.user.get_full_name() or account.user.username,
+        'currency': account.currency,
     })
 
 
 @login_required
 def transfer_money_view(request):
-
-    form = TransferForm(
-
-        request.POST or None,
-
-        user=request.user
-
-    )
-
-    if request.method=='POST':
-
-        if form.is_valid():
-
-            sender = form.cleaned_data[
-                'sender_account'
-            ]
-
-            receiver = Account.objects.filter(
-                account_number=
-                form.cleaned_data[
-                    'receiver_number'
-                ]
-            ).first()
-
-            amount = form.cleaned_data[
-                'amount'
-            ]
-
-            if not receiver:
-
-                messages.error(
-                    request,
-                    'Получатель не найден'
-                )
-
-            elif sender.balance < amount:
-
-                messages.error(
-                    request,
-                    'Недостаточно средств'
-                )
-
-            else:
-
-                sender.balance -= amount
-                receiver.balance += amount
-
-                sender.save()
-                receiver.save()
-
-                messages.success(
-                    request,
-                    'Перевод выполнен'
-                )
-
-                return redirect(
-                    'banking:transfer'
-                )
-
-    return render(
-
-        request,
-
-        'banking/transfer.html',
-
-        {
-
-            'form':form
-
-        }
-
-    )
+    # Счета пользователя для кастомного селектора
+    user_accounts = Account.objects.filter(user=request.user, is_active=True)
+    form = TransferForm(request.POST or None, user=request.user)
+ 
+    if request.method == 'POST' and form.is_valid():
+        sender          = form.cleaned_data['sender_account']
+        receiver_number = form.cleaned_data['receiver_number']
+        amount          = form.cleaned_data['amount']
+        description     = form.cleaned_data.get('description', '')
+ 
+        receiver = Account.objects.filter(account_number=receiver_number).first()
+ 
+        if not receiver:
+            messages.error(request, 'Счёт получателя не найден.')
+ 
+        elif sender == receiver:
+            messages.error(request, 'Нельзя переводить на тот же счёт.')
+ 
+        elif sender.balance < amount:
+            messages.error(
+                request,
+                f'Недостаточно средств. Доступно: {sender.balance} {sender.currency}.'
+            )
+ 
+        else:
+            # Двигаем деньги
+            sender.balance   -= amount
+            receiver.balance += amount
+            sender.save()
+            receiver.save()
+ 
+            # Сохраняем запись о транзакции
+            Transaction.objects.create(
+                sender_account=sender,
+                receiver_account=receiver,
+                amount=amount,
+                transaction_type=Transaction.TransactionType.TRANSFER,
+                status=Transaction.Status.COMPLETED,
+                description=description or f'Перевод на счёт {receiver_number}',
+            )
+ 
+            # Уведомляем отправителя
+            Notification.objects.create(
+                user=sender.user,
+                title='Перевод выполнен',
+                message=(
+                    f'Перевод {amount} {sender.currency} '
+                    f'на счёт {receiver_number} выполнен успешно.'
+                ),
+                notification_type=Notification.NotificationType.TRANSACTION,
+            )
+ 
+            # Уведомляем получателя
+            Notification.objects.create(
+                user=receiver.user,
+                title='Входящий перевод',
+                message=(
+                    f'Получен перевод {amount} {sender.currency} '
+                    f'от {sender.user.get_full_name() or sender.user.username}.'
+                ),
+                notification_type=Notification.NotificationType.TRANSACTION,
+            )
+ 
+            messages.success(
+                request,
+                f'Перевод {amount} {sender.currency} выполнен!'
+            )
+            return redirect('banking:transfer')
+ 
+    return render(request, 'banking/transfer.html', {
+        'form':          form,
+        'user_accounts': user_accounts,
+    })
+ 

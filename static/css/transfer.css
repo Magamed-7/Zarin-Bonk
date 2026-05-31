@@ -1,0 +1,515 @@
+/* ══════════════════════════════════════════════════════════════
+   transfer.css — Страница перевода денег
+   ══════════════════════════════════════════════════════════════ */
+
+.transfer-page {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+/* ── Заголовок ─────────────────────────────────────────────── */
+.transfer-header {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.back-btn {
+  font-size: 0.875rem;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: color 0.2s, border-color 0.2s;
+  white-space: nowrap;
+}
+
+.back-btn:hover {
+  color: var(--gold);
+  border-color: rgba(255, 215, 0, 0.3);
+}
+
+.transfer-header-text {
+  flex: 1;
+}
+
+.transfer-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0 0 0.2rem;
+  line-height: 1.1;
+}
+
+.transfer-subtitle {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+.transfer-icon-wrap {
+  font-size: 2.2rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+/* ── Форма ─────────────────────────────────────────────────── */
+.transfer-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+/* ── Блок формы ────────────────────────────────────────────── */
+.transfer-block {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 1.4rem 1.5rem;
+  backdrop-filter: blur(12px);
+  animation: fadeUp 0.4s ease both;
+  transition: border-color 0.25s;
+}
+
+.transfer-block:nth-child(1) { animation-delay: 0.05s; }
+.transfer-block:nth-child(2) { animation-delay: 0.10s; }
+.transfer-block:nth-child(3) { animation-delay: 0.15s; }
+.transfer-block:nth-child(4) { animation-delay: 0.20s; }
+
+.transfer-block:focus-within {
+  border-color: rgba(255, 215, 0, 0.22);
+}
+
+/* Лейбл блока */
+.transfer-block-label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-bottom: 1rem;
+}
+
+.block-num {
+  color: var(--gold);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.optional-badge {
+  margin-left: auto;
+  font-size: 0.68rem;
+  font-weight: 500;
+  text-transform: lowercase;
+  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: 0;
+}
+
+/* ── Кастомные радио-карточки счетов ───────────────────────── */
+.account-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.account-radio-card {
+  cursor: pointer;
+  border-radius: 14px;
+  border: 1.5px solid rgba(255, 255, 255, 0.07);
+  transition: border-color 0.2s, background 0.2s, transform 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.account-radio-card:hover {
+  border-color: rgba(255, 215, 0, 0.2);
+  transform: translateX(3px);
+}
+
+/* Цветная полоска слева по типу */
+.account-radio-card--checking { border-left: 3px solid rgba(255, 215, 0,   0.5); }
+.account-radio-card--saving   { border-left: 3px solid rgba(72,  199, 116, 0.5); }
+.account-radio-card--currency { border-left: 3px solid rgba(90,  140, 255, 0.5); }
+
+/* Скрываем нативный radio */
+.account-radio-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.account-radio-inner {
+  padding: 0.85rem 1rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  gap: 0.2rem 0.5rem;
+  align-items: center;
+}
+
+.account-radio-top {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  grid-column: 1;
+}
+
+.account-radio-icon { font-size: 1rem; }
+
+.account-radio-type {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* Галочка — скрыта когда не выбрано */
+.account-radio-check {
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--gold);
+  opacity: 0;
+  transition: opacity 0.2s;
+  grid-column: 2;
+  grid-row: 1 / 3;
+  align-self: center;
+}
+
+.account-radio-balance {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.account-radio-currency {
+  font-size: 0.8rem;
+  color: var(--gold);
+  margin-left: 0.3rem;
+}
+
+.account-radio-number {
+  font-family: monospace;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: 0.04em;
+  grid-column: 1;
+}
+
+/* Состояние выбранной карточки */
+.account-radio-input:checked ~ .account-radio-inner {
+  background: rgba(255, 215, 0, 0.05);
+}
+
+.account-radio-input:checked ~ .account-radio-inner .account-radio-check {
+  opacity: 1;
+}
+
+.account-radio-card:has(.account-radio-input:checked) {
+  border-color: rgba(255, 215, 0, 0.35);
+  background: rgba(255, 215, 0, 0.04);
+}
+
+/* ── Инпут ─────────────────────────────────────────────────── */
+.transfer-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.transfer-input-icon {
+  position: absolute;
+  left: 14px;
+  font-size: 1rem;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.transfer-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0.85rem 1rem 0.85rem 2.8rem;
+  color: var(--text);
+  font-size: 0.95rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.transfer-input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.transfer-input:focus {
+  border-color: rgba(255, 215, 0, 0.45);
+  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.07);
+}
+
+.transfer-input.is-invalid {
+  border-color: rgba(255, 80, 80, 0.5);
+  box-shadow: 0 0 0 3px rgba(255, 80, 80, 0.07);
+}
+
+/* Спиннер поиска (показывается через JS) */
+.transfer-input-spinner {
+  position: absolute;
+  right: 14px;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 215, 0, 0.2);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  display: none;
+  animation: spin 0.7s linear infinite;
+}
+
+.transfer-input-spinner.visible {
+  display: block;
+}
+
+/* ── Блок получателя ───────────────────────────────────────── */
+.receiver-box {
+  margin-top: 0.7rem;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  max-height: 0;
+  opacity: 0;
+}
+
+.receiver-box[data-state="found"],
+.receiver-box[data-state="notfound"] {
+  max-height: 60px;
+  opacity: 1;
+}
+
+.receiver-found,
+.receiver-notfound {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.receiver-found {
+  background: rgba(72, 199, 116, 0.1);
+  border: 1px solid rgba(72, 199, 116, 0.2);
+  color: #48c774;
+  display: none;
+}
+
+.receiver-notfound {
+  background: rgba(255, 80, 80, 0.08);
+  border: 1px solid rgba(255, 80, 80, 0.2);
+  color: #ff6b6b;
+  display: none;
+}
+
+.receiver-box[data-state="found"]    .receiver-found    { display: flex; }
+.receiver-box[data-state="notfound"] .receiver-notfound { display: flex; }
+
+.receiver-check { font-size: 1rem; }
+.receiver-x     { font-size: 1rem; }
+
+.receiver-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.receiver-name {
+  font-weight: 700;
+  color: #48c774;
+}
+
+.receiver-currency {
+  font-size: 0.72rem;
+  color: rgba(72, 199, 116, 0.7);
+}
+
+/* ── Сумма ─────────────────────────────────────────────────── */
+.amount-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.amount-input {
+  /* Убираем стрелки у number input */
+  -moz-appearance: textfield;
+}
+
+.amount-input::-webkit-inner-spin-button,
+.amount-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
+
+/* Бейдж валюты внутри поля */
+.amount-currency-badge {
+  position: absolute;
+  right: 14px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--gold);
+  pointer-events: none;
+  letter-spacing: 0.06em;
+}
+
+/* Подсказки баланса */
+.balance-hint {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  min-height: 1.2rem;
+}
+
+.balance-hint-available {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.balance-hint-after {
+  font-size: 0.78rem;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.balance-hint-after.is-ok      { color: #48c774; }
+.balance-hint-after.is-error   { color: #ff6b6b; }
+.balance-hint-after.is-warning { color: var(--gold); }
+
+/* ── Ошибки полей ──────────────────────────────────────────── */
+.transfer-field-error {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: #ff6b6b;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* ── Кнопка Submit ─────────────────────────────────────────── */
+.transfer-submit-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 1rem 1.5rem;
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #ffe76a, var(--gold), #e6ac00);
+  color: #0b1020;
+  font-size: 1.05rem;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+  animation: fadeUp 0.4s 0.22s ease both;
+  letter-spacing: 0.02em;
+}
+
+.transfer-submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 36px rgba(255, 215, 0, 0.3);
+}
+
+.transfer-submit-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.transfer-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.submit-btn-arrow {
+  font-size: 1.2rem;
+  transition: transform 0.2s;
+}
+
+.transfer-submit-btn:hover .submit-btn-arrow {
+  transform: translateX(4px);
+}
+
+/* Спиннер кнопки */
+.submit-btn-spinner {
+  position: absolute;
+  right: 1.2rem;
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(0, 0, 0, 0.2);
+  border-top-color: rgba(0, 0, 0, 0.7);
+  border-radius: 50%;
+  display: none;
+  animation: spin 0.7s linear infinite;
+}
+
+.transfer-submit-btn.is-loading .submit-btn-text,
+.transfer-submit-btn.is-loading .submit-btn-arrow {
+  opacity: 0.4;
+}
+
+.transfer-submit-btn.is-loading .submit-btn-spinner {
+  display: block;
+}
+
+/* ── Пустое состояние ──────────────────────────────────────── */
+.transfer-empty {
+  font-size: 0.9rem;
+  color: var(--muted);
+  padding: 0.5rem 0;
+}
+
+.transfer-empty a {
+  color: var(--gold);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* ── Анимации ──────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50%       { transform: translateY(-6px) rotate(3deg); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Адаптив ───────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .transfer-header { flex-wrap: wrap; }
+  .transfer-icon-wrap { display: none; }
+  .balance-hint { flex-direction: column; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .transfer-block,
+  .transfer-submit-btn,
+  .account-radio-card,
+  .transfer-icon-wrap { animation: none !important; transition: none !important; }
+}

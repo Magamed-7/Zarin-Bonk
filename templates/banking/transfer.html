@@ -1,55 +1,197 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}Перевод — ZarinPay{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/transfer.css' %}">
+{% endblock %}
+
 {% block content %}
+<div class="transfer-page">
 
-<div class="glass transfer-card">
+  {# Заголовок #}
+  <div class="transfer-header">
+    <a href="{% url 'banking:dashboard' %}" class="back-btn">← Назад</a>
+    <div class="transfer-header-text">
+      <h1 class="transfer-title">Перевод денег</h1>
+      <p class="transfer-subtitle">Мгновенный перевод между счетами</p>
+    </div>
+    <div class="transfer-icon-wrap" aria-hidden="true">💸</div>
+  </div>
 
-<h1>
+  {# Форма #}
+  <form method="post" id="transferForm" class="transfer-form" novalidate>
+    {% csrf_token %}
 
-Перевод денег
+    {# ── Блок 1: Счёт отправителя ───────────────────────── #}
+    <div class="transfer-block">
+      <div class="transfer-block-label">
+        <span class="block-num">01</span>
+        Счёт отправителя
+      </div>
 
-</h1>
+      {% if user_accounts %}
+        <div class="account-radio-group" id="senderGroup">
+          {% for acc in user_accounts %}
+            <label class="account-radio-card account-radio-card--{{ acc.account_type }}"
+                   data-balance="{{ acc.balance }}"
+                   data-currency="{{ acc.currency }}">
 
-<form method="post">
+              {# Скрытый radio — Django получит его из POST #}
+              <input
+                type="radio"
+                name="sender_account"
+                value="{{ acc.id }}"
+                class="account-radio-input"
+                {% if forloop.first %}checked{% endif %}
+              >
 
-{% csrf_token %}
+              <div class="account-radio-inner">
+                <div class="account-radio-top">
+                  <span class="account-radio-icon">
+                    {% if acc.account_type == 'checking' %}🏦
+                    {% elif acc.account_type == 'saving' %}💰
+                    {% else %}💱{% endif %}
+                  </span>
+                  <span class="account-radio-type">{{ acc.get_account_type_display }}</span>
+                  <span class="account-radio-check" aria-hidden="true">✓</span>
+                </div>
+                <div class="account-radio-balance">
+                  {{ acc.balance|floatformat:2 }}
+                  <span class="account-radio-currency">{{ acc.currency }}</span>
+                </div>
+                <div class="account-radio-number">{{ acc.account_number }}</div>
+              </div>
+            </label>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="transfer-empty">
+          У вас нет активных счетов.
+          <a href="{% url 'banking:create_account' %}">Открыть счёт</a>
+        </div>
+      {% endif %}
 
-{{ form.sender_account }}
+      {% if form.sender_account.errors %}
+        <div class="transfer-field-error">{{ form.sender_account.errors.0 }}</div>
+      {% endif %}
+    </div>
 
-{{ form.receiver_number }}
+    {# ── Блок 2: Получатель ─────────────────────────────── #}
+    <div class="transfer-block">
+      <div class="transfer-block-label">
+        <span class="block-num">02</span>
+        Получатель
+      </div>
 
-<div id="receiverBox">
+      <div class="transfer-input-wrap">
+        <span class="transfer-input-icon">🔢</span>
+        <input
+          type="text"
+          name="receiver_number"
+          id="id_receiver_number"
+          class="transfer-input {% if form.receiver_number.errors %}is-invalid{% endif %}"
+          placeholder="Введите номер счёта получателя"
+          autocomplete="off"
+          value="{{ form.receiver_number.value|default:'' }}"
+        >
+        <span class="transfer-input-spinner" id="lookupSpinner" aria-hidden="true"></span>
+      </div>
 
-Получатель:
+      {% if form.receiver_number.errors %}
+        <div class="transfer-field-error">{{ form.receiver_number.errors.0 }}</div>
+      {% endif %}
 
-—
+      {# Результат поиска получателя #}
+      <div class="receiver-box" id="receiverBox" data-state="empty">
+        <div class="receiver-found" id="receiverFound">
+          <span class="receiver-check">✓</span>
+          <div class="receiver-info">
+            <span class="receiver-name" id="receiverName"></span>
+            <span class="receiver-currency" id="receiverCurrency"></span>
+          </div>
+        </div>
+        <div class="receiver-notfound" id="receiverNotFound">
+          <span class="receiver-x">✕</span>
+          <span>Счёт не найден</span>
+        </div>
+      </div>
+    </div>
 
+    {# ── Блок 3: Сумма ──────────────────────────────────── #}
+    <div class="transfer-block">
+      <div class="transfer-block-label">
+        <span class="block-num">03</span>
+        Сумма
+      </div>
+
+      <div class="amount-wrap">
+        <div class="transfer-input-wrap">
+          <span class="transfer-input-icon">💰</span>
+          <input
+            type="number"
+            name="amount"
+            id="id_amount"
+            class="transfer-input amount-input {% if form.amount.errors %}is-invalid{% endif %}"
+            placeholder="0.00"
+            step="0.01"
+            min="1"
+            value="{{ form.amount.value|default:'' }}"
+          >
+          <span class="amount-currency-badge" id="amountCurrency">TJS</span>
+        </div>
+
+        {# Подсказка баланса и остатка #}
+        <div class="balance-hint" id="balanceHint">
+          <span class="balance-hint-available" id="balanceAvailable"></span>
+          <span class="balance-hint-after" id="balanceAfter"></span>
+        </div>
+      </div>
+
+      {% if form.amount.errors %}
+        <div class="transfer-field-error">{{ form.amount.errors.0 }}</div>
+      {% endif %}
+    </div>
+
+    {# ── Блок 4: Описание ───────────────────────────────── #}
+    <div class="transfer-block">
+      <div class="transfer-block-label">
+        <span class="block-num">04</span>
+        Описание
+        <span class="optional-badge">необязательно</span>
+      </div>
+
+      <div class="transfer-input-wrap">
+        <span class="transfer-input-icon">✏️</span>
+        <input
+          type="text"
+          name="description"
+          id="id_description"
+          class="transfer-input"
+          placeholder="Назначение платежа"
+          maxlength="200"
+          value="{{ form.description.value|default:'' }}"
+        >
+      </div>
+    </div>
+
+    {# ── Кнопка отправки ────────────────────────────────── #}
+    <button type="submit" class="transfer-submit-btn" id="transferBtn">
+      <span class="submit-btn-text">Перевести</span>
+      <span class="submit-btn-arrow">→</span>
+      <span class="submit-btn-spinner" aria-hidden="true"></span>
+    </button>
+
+  </form>
 </div>
 
-{{ form.amount }}
-
-<div id="balanceCheck">
-
-</div>
-
-<button>
-
-Перевести
-
-</button>
-
-</form>
-
-</div>
-
+{# Данные для JS #}
 <script>
-
-window.lookupUrl=
-"{% url 'banking:lookup_account' %}"
-
+  window.LOOKUP_URL = "{% url 'banking:lookup_account' %}";
 </script>
+{% endblock %}
 
+{% block extra_js %}
 <script src="{% static 'js/transfer.js' %}"></script>
-
 {% endblock %}
