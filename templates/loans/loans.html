@@ -1,0 +1,634 @@
+{% extends 'base.html' %}
+
+{% block title %}Мои кредиты - ZarinPay{% endblock %}
+
+{% block content %}
+<div class="loans-page">
+    <div class="container">
+        <h1 class="page-title">Мои кредиты</h1>
+        
+        <!-- Форма оформления нового кредита -->
+        <div class="loan-form-section glass-card">
+            <h2 class="section-title">Оформить новый кредит</h2>
+            
+            <form method="POST" class="loan-form">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label>Выберите кредитную программу:</label>
+                    <div class="programs-grid">
+                        {% for program in programs %}
+                        <div class="program-card" data-program="{{ program.id }}">
+                            <div class="program-icon">{{ program.icon }}</div>
+                            <h3>{{ program.name }}</h3>
+                            <p class="rate">Ставка: {{ program.rate }}%</p>
+                            <p class="limits">От {{ program.min_amount }} до {{ program.max_amount }} TJS</p>
+                            <p class="term">Срок: {{ program.min_term }} - {{ program.max_term }} мес.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="program" id="selected-program" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="amount">Сумма кредита (TJS):</label>
+                        <input type="number" name="amount" id="amount" min="1000" max="500000" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="term">Срок (месяцев):</label>
+                        <input type="number" name="term" id="term" min="3" max="240" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="purpose">Цель кредита:</label>
+                    <textarea name="purpose" id="purpose" rows="2" placeholder="Опишите цель кредита..."></textarea>
+                </div>
+                
+                <button type="submit" class="btn-primary">Оформить кредит</button>
+            </form>
+        </div>
+        
+        <!-- Список активных кредитов -->
+        <div class="loans-list-section">
+            <h2 class="section-title">Активные кредиты</h2>
+            
+            {% if loans %}
+                {% for loan_data in loans %}
+                    {% if loan_data.obj.status == 'active' %}
+                    <div class="loan-card glass-card">
+                        <div class="loan-header">
+                            <div class="loan-info">
+                                <h3>Кредит #{{ loan_data.obj.id }}</h3>
+                                <p class="loan-amount">{{ loan_data.obj.amount }} TJS</p>
+                                <p class="loan-term">Срок: {{ loan_data.obj.term_months }} мес.</p>
+                                <p class="loan-rate">Ставка: {{ loan_data.obj.interest_rate }}%</p>
+                            </div>
+                            <div class="loan-status active">Активен</div>
+                        </div>
+                        
+                        <!-- Прогресс-бар погашения -->
+                        <div class="progress-section">
+                            <div class="progress-info">
+                                <span>Погашено: {{ loan_data.progress }}%</span>
+                                <span>{{ loan_data.total_paid_amount }} / {{ loan_data.total_loan_amount }} TJS</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: {{ loan_data.progress }}%"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Следующий платёж -->
+                        {% if loan_data.next_payment %}
+                        <div class="next-payment">
+                            <h4>Следующий платёж</h4>
+                            <div class="payment-details">
+                                <span class="payment-amount">{{ loan_data.next_payment.amount }} TJS</span>
+                                <span class="payment-date">{{ loan_data.next_payment.due_date }}</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- График платежей -->
+                        <div class="payments-schedule">
+                            <h4>График платежей</h4>
+                            <div class="payments-list">
+                                {% for payment in loan_data.payments %}
+                                <div class="payment-item {% if payment.is_paid %}paid{% endif %}">
+                                    <span class="payment-date">{{ payment.due_date }}</span>
+                                    <span class="payment-amount">{{ payment.amount }} TJS</span>
+                                    <span class="payment-status">
+                                        {% if payment.is_paid %}
+                                            ✅ Оплачен
+                                        {% else %}
+                                            ⏳ Ожидает
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <!-- Кнопка досрочного погашения -->
+                        <div class="early-repayment">
+                            <a href="{% url 'loans:repay_loan' loan_data.obj.id %}" 
+                               class="btn-secondary"
+                               onclick="return confirm('Вы уверены, что хотите погасить кредит досрочно?')">
+                                Досрочное погашение
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <div class="no-loans">
+                    <p>У вас нет активных кредитов</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Закрытые кредиты -->
+        <div class="closed-loans-section">
+            <h2 class="section-title">Закрытые кредиты</h2>
+            
+            {% if loans %}
+                {% for loan_data in loans %}
+                    {% if loan_data.obj.status == 'closed' %}
+                    <div class="loan-card glass-card closed">
+                        <div class="loan-header">
+                            <div class="loan-info">
+                                <h3>Кредит #{{ loan_data.obj.id }}</h3>
+                                <p class="loan-amount">{{ loan_data.obj.amount }} TJS</p>
+                                <p class="loan-term">Срок: {{ loan_data.obj.term_months }} мес.</p>
+                            </div>
+                            <div class="loan-status closed">Закрыт</div>
+                        </div>
+                        
+                        <div class="progress-section">
+                            <div class="progress-info">
+                                <span>Погашено: 100%</span>
+                                <span>{{ loan_data.total_loan_amount }} / {{ loan_data.total_loan_amount }} TJS</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 100%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <div class="no-loans">
+                    <p>Нет закрытых кредитов</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.loans-page {
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0a0a1a 100%);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.page-title {
+    color: #ffd700;
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 40px;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+    animation: fadeInDown 0.6s ease;
+}
+
+.section-title {
+    color: #ffd700;
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: fadeInUp 0.6s ease;
+}
+
+.glass-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(255, 215, 0, 0.2);
+}
+
+.loan-form-section {
+    margin-bottom: 40px;
+}
+
+.loan-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    color: #ffd700;
+    font-weight: 500;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.programs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.program-card {
+    background: rgba(255, 215, 0, 0.1);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    border-radius: 15px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.program-card:hover {
+    transform: scale(1.05);
+    border-color: #ffd700;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+.program-card.selected {
+    border-color: #ffd700;
+    background: rgba(255, 215, 0, 0.2);
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.4);
+}
+
+.program-icon {
+    font-size: 3rem;
+    margin-bottom: 10px;
+}
+
+.program-card h3 {
+    color: #ffd700;
+    margin: 10px 0;
+    font-size: 1.1rem;
+}
+
+.program-card p {
+    color: #ccc;
+    font-size: 0.9rem;
+    margin: 5px 0;
+}
+
+.form-group input,
+.form-group textarea {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 10px;
+    padding: 12px;
+    color: #fff;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #ffd700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%);
+    color: #0a0a1a;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+}
+
+.loan-card {
+    animation: fadeInUp 0.6s ease;
+}
+
+.loan-card.closed {
+    opacity: 0.6;
+}
+
+.loan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.loan-info h3 {
+    color: #ffd700;
+    margin: 0 0 10px 0;
+    font-size: 1.5rem;
+}
+
+.loan-info p {
+    color: #ccc;
+    margin: 5px 0;
+}
+
+.loan-status {
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.loan-status.active {
+    background: rgba(0, 255, 0, 0.2);
+    color: #00ff00;
+    border: 1px solid #00ff00;
+}
+
+.loan-status.closed {
+    background: rgba(255, 255, 255, 0.1);
+    color: #888;
+    border: 1px solid #888;
+}
+
+.progress-section {
+    margin: 20px 0;
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    color: #ccc;
+    margin-bottom: 10px;
+}
+
+.progress-bar {
+    height: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ffd700 0%, #ffaa00 100%);
+    border-radius: 10px;
+    transition: width 1s ease;
+    animation: progressAnimation 1.5s ease;
+}
+
+.next-payment {
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.next-payment h4 {
+    color: #ffd700;
+    margin: 0 0 15px 0;
+}
+
+.payment-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.payment-amount {
+    color: #ffd700;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.payment-date {
+    color: #ccc;
+}
+
+.payments-schedule {
+    margin: 20px 0;
+}
+
+.payments-schedule h4 {
+    color: #ffd700;
+    margin-bottom: 15px;
+}
+
+.payments-list {
+    max-height: 300px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.payment-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+    transition: background 0.3s ease;
+}
+
+.payment-item:hover {
+    background: rgba(255, 215, 0, 0.1);
+}
+
+.payment-item.paid {
+    opacity: 0.5;
+}
+
+.payment-item:last-child {
+    border-bottom: none;
+}
+
+.payment-status {
+    font-size: 0.9rem;
+}
+
+.early-repayment {
+    margin-top: 20px;
+    text-align: right;
+}
+
+.btn-secondary {
+    background: rgba(255, 215, 0, 0.1);
+    color: #ffd700;
+    border: 2px solid #ffd700;
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-secondary:hover {
+    background: #ffd700;
+    color: #0a0a1a;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+}
+
+.no-loans {
+    text-align: center;
+    color: #888;
+    padding: 40px;
+    font-size: 1.2rem;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes progressAnimation {
+    from {
+        width: 0%;
+    }
+}
+
+/* 3D эффект для карточек */
+.loan-card {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+}
+
+.loan-card:hover {
+    transform: rotateX(5deg) rotateY(5deg);
+}
+
+/* Скроллбар */
+.payments-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.payments-list::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+}
+
+.payments-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 215, 0, 0.3);
+    border-radius: 10px;
+}
+
+.payments-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 215, 0, 0.5);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Выбор кредитной программы
+    const programCards = document.querySelectorAll('.program-card');
+    const selectedProgramInput = document.getElementById('selected-program');
+    
+    programCards.forEach(card => {
+        card.addEventListener('click', function() {
+            // Убираем выделение со всех карточек
+            programCards.forEach(c => c.classList.remove('selected'));
+            // Добавляем выделение на текущую
+            this.classList.add('selected');
+            // Сохраняем выбранную программу
+            selectedProgramInput.value = this.dataset.program;
+            
+            // Обновляем мин/макс значения для суммы и срока
+            const programId = this.dataset.program;
+            const programs = {
+                'consumer': { minAmount: 1000, maxAmount: 50000, minTerm: 3, maxTerm: 36 },
+                'auto': { minAmount: 10000, maxAmount: 150000, minTerm: 12, maxTerm: 60 },
+                'mortgage': { minAmount: 50000, maxAmount: 500000, minTerm: 24, maxTerm: 240 }
+            };
+            
+            const program = programs[programId];
+            if (program) {
+                document.getElementById('amount').min = program.minAmount;
+                document.getElementById('amount').max = program.maxAmount;
+                document.getElementById('term').min = program.minTerm;
+                document.getElementById('term').max = program.maxTerm;
+            }
+        });
+    });
+    
+    // Анимация прогресс-баров при загрузке
+    const progressBars = document.querySelectorAll('.progress-fill');
+    progressBars.forEach(bar => {
+        const width = bar.style.width;
+        bar.style.width = '0%';
+        setTimeout(() => {
+            bar.style.width = width;
+        }, 300);
+    });
+    
+    // 3D эффект для карточек кредитов
+    const loanCards = document.querySelectorAll('.loan-card');
+    loanCards.forEach(card => {
+        card.addEventListener('mousemove', function(e) {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const rotateX = (y - centerY) / 20;
+            const rotateY = (centerX - x) / 20;
+            
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+        });
+    });
+    
+    // Плавная прокрутка к разделам
+    document.querySelectorAll('.section-title').forEach(title => {
+        title.style.cursor = 'pointer';
+        title.addEventListener('click', function() {
+            this.nextElementSibling.scrollIntoView({ behavior: 'smooth' });
+        });
+    });
+});
+</script>
+{% endblock %}
