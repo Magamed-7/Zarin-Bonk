@@ -101,6 +101,12 @@
           <a class="footer-link" href="#">Лицензии</a>
           <a class="footer-link" href="#">Политика</a>
           <a class="footer-link" href="#">Безопасность</a>
+          {% if user.is_authenticated and user.role == 'manager' %}
+          <a class="footer-link" href="{% url 'manager:loan_requests' %}" style="color: #ffd700;">Кабинет менеджера</a>
+          {% endif %}
+          {% if user.is_authenticated and user.role == 'admin' %}
+          <a class="footer-link" href="{% url 'manager:loan_requests' %}" style="color: #ffd700;">Кабинет менеджера</a>
+          {% endif %}
         </div>
         <div class="footer-col">
           <div class="footer-head">Контакты</div>

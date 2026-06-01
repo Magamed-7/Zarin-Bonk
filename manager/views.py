@@ -26,6 +26,7 @@ class LoanRequestDetailView(generic.DetailView):
     model = Loan
     template_name = 'manager/loan_request_detail.html'
     context_object_name = 'loan'
+    pk_url_kwarg = 'loan_id'
     
     def post(self, request, *args, **kwargs):
         loan = self.get_object()
