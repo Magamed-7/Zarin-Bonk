@@ -71,54 +71,25 @@ def loans_view(request):
             messages.error(request, f"Срок для программы {program['name']} должен быть в пределах от {program['min_term']} до {program['max_term']} месяцев.")
             return redirect('loans:loans_page')
 
-        # Create Loan (status is pending by default)
-        # Note: If approved, we will generate payments. For demo purposes, we will auto-approve and generate payments 
-        # so the user can actually test Part 47 (active loans, progress bar, payments list, early repayment) immediately!
+        # Create Loan with pending status (waiting for manager approval)
         loan = Loan.objects.create(
             user=request.user,
             amount=amount,
             term_months=term,
             interest_rate=Decimal(str(program['rate'])),
-            status=Loan.Status.ACTIVE,  # Set to active to immediately demonstrate Part 47 features!
+            status=Loan.Status.PENDING,
             manager_comment=f"Программа: {program['name']}. Цель кредита: {purpose}"
         )
-
-        # Generate monthly payments schedule
-        monthly_payment = loan.calculate_monthly_payment()
-        start_date = timezone.now().date()
-        for i in range(1, term + 1):
-            due_date = start_date + relativedelta(months=i)
-            LoanPayment.objects.create(
-                loan=loan,
-                amount=monthly_payment,
-                due_date=due_date,
-                is_paid=False
-            )
 
         # Notify the user
         Notification.objects.create(
             user=request.user,
-            title='Кредит одобрен и выдан',
-            message=f"Кредит '{program['name']}' на сумму {amount} TJS одобрен и зачислен на ваш счет. График платежей сформирован.",
+            title='Заявка на кредит отправлена',
+            message=f"Ваша заявка на кредит '{program['name']}' на сумму {amount} TJS отправлена на рассмотрение менеджеру.",
             notification_type=Notification.NotificationType.LOAN,
         )
 
-        # Credit the first active account of the user
-        account = Account.objects.filter(user=request.user, is_active=True).first()
-        if account:
-            account.balance += amount
-            account.save()
-            # Log transaction
-            Transaction.objects.create(
-                sender_account=None,
-                receiver_account=account,
-                amount=amount,
-                transaction_type=Transaction.TransactionType.DEPOSIT,
-                status=Transaction.Status.COMPLETED,
-                description=f"Зачисление кредитных средств ({program['name']})"
-            )
-
-        messages.success(request, f"Кредит '{program['name']}' успешно оформлен, {amount} TJS зачислены на ваш счет!")
+        messages.success(request, f"Заявка на кредит '{program['name']}' на сумму {amount} TJS отправлена на рассмотрение!")
         return redirect('loans:loans_page')
 
     # GET request

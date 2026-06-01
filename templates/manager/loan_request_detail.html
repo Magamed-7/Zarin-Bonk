@@ -1,0 +1,270 @@
+{% extends 'base.html' %}
+
+{% block title %}Детали заявки #{{ loan.id }} - ZarinPay{% endblock %}
+
+{% block content %}
+<div class="manager-page">
+    <div class="container">
+        <h1 class="page-title">Заявка на кредит #{{ loan.id }}</h1>
+        
+        <div class="loan-card glass-card">
+            <div class="loan-header">
+                <div class="loan-info">
+                    <h3>Кредит #{{ loan.id }}</h3>
+                    <p class="client-name">Клиент: {{ loan.user.username }}</p>
+                    <p class="client-email">Email: {{ loan.user.email }}</p>
+                    <p class="client-phone">Телефон: {{ loan.user.phone|default:"Не указан" }}</p>
+                </div>
+                <div class="loan-status {{ loan.status }}">
+                    {{ loan.get_status_display }}
+                </div>
+            </div>
+            
+            <div class="loan-details">
+                <p><strong>Сумма кредита:</strong> {{ loan.amount }} TJS</p>
+                <p><strong>Срок кредита:</strong> {{ loan.term_months }} месяцев</p>
+                <p><strong>Процентная ставка:</strong> {{ loan.interest_rate }}%</p>
+                <p><strong>Ежемесячный платёж:</strong> {{ loan.monthly_payment }} TJS</p>
+                <p><strong>Дата заявки:</strong> {{ loan.created_at|date:"d.m.Y H:i" }}</p>
+                {% if loan.manager_comment %}
+                <p><strong>Комментарий менеджера:</strong> {{ loan.manager_comment }}</p>
+                {% endif %}
+            </div>
+            
+            {% if loan.status == 'pending' %}
+            <div class="loan-actions">
+                <form method="POST" class="action-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="comment">Комментарий:</label>
+                        <textarea name="comment" id="comment" rows="3" placeholder="Введите комментарий..."></textarea>
+                    </div>
+                    <div class="buttons">
+                        <button type="submit" name="action" value="approve" class="btn-success">
+                            ✅ Одобрить
+                        </button>
+                        <button type="submit" name="action" value="reject" class="btn-danger">
+                            ❌ Отклонить
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {% endif %}
+            
+            <div class="back-link">
+                <a href="{% url 'manager:loan_requests' %}" class="btn-secondary">
+                    ← Назад к списку
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.manager-page {
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0a0a1a 100%);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.page-title {
+    color: #ffd700;
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 40px;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(255, 215, 0, 0.2);
+}
+
+.loan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.loan-info h3 {
+    color: #ffd700;
+    margin: 0 0 10px 0;
+    font-size: 1.5rem;
+}
+
+.loan-info p {
+    color: #ccc;
+    margin: 5px 0;
+}
+
+.loan-status {
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.loan-status.pending {
+    background: rgba(255, 165, 0, 0.2);
+    color: #ffa500;
+    border: 1px solid #ffa500;
+}
+
+.loan-status.approved {
+    background: rgba(0, 255, 0, 0.2);
+    color: #00ff00;
+    border: 1px solid #00ff00;
+}
+
+.loan-status.active {
+    background: rgba(0, 255, 0, 0.2);
+    color: #00ff00;
+    border: 1px solid #00ff00;
+}
+
+.loan-status.rejected {
+    background: rgba(255, 0, 0, 0.2);
+    color: #ff0000;
+    border: 1px solid #ff0000;
+}
+
+.loan-details {
+    margin: 20px 0;
+}
+
+.loan-details p {
+    color: #ccc;
+    margin: 10px 0;
+    font-size: 1.1rem;
+}
+
+.loan-details strong {
+    color: #ffd700;
+}
+
+.loan-actions {
+    margin: 30px 0;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 215, 0, 0.1);
+}
+
+.action-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    color: #ffd700;
+    font-weight: 500;
+}
+
+.form-group textarea {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 10px;
+    padding: 12px;
+    color: #fff;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    resize: vertical;
+}
+
+.form-group textarea:focus {
+    outline: none;
+    border-color: #ffd700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+.buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #00ff00 0%, #00cc00 100%);
+    color: #0a0a1a;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-success:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0, 255, 0, 0.4);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+    color: #fff;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(255, 0, 0, 0.4);
+}
+
+.btn-secondary {
+    background: rgba(255, 215, 0, 0.1);
+    color: #ffd700;
+    border: 2px solid #ffd700;
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-secondary:hover {
+    background: #ffd700;
+    color: #0a0a1a;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+}
+
+.back-link {
+    margin-top: 20px;
+}
+</style>
+{% endblock %}
