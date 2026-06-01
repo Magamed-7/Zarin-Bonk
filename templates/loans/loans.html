@@ -95,12 +95,17 @@
                             <h4>График платежей</h4>
                             <div class="payments-list">
                                 {% for payment in loan_data.payments %}
-                                <div class="payment-item {% if payment.is_paid %}paid{% endif %}">
+                                <div class="payment-item {% if payment.is_paid %}paid{% elif payment.is_overdue %}overdue{% endif %}">
                                     <span class="payment-date">{{ payment.due_date }}</span>
                                     <span class="payment-amount">{{ payment.amount }} TJS</span>
                                     <span class="payment-status">
                                         {% if payment.is_paid %}
                                             ✅ Оплачен
+                                        {% elif payment.is_overdue %}
+                                            🔴 Просрочен
+                                            {% if payment.penalty_amount > 0 %}
+                                                (Штраф: {{ payment.penalty_amount }} TJS)
+                                            {% endif %}
                                         {% else %}
                                             ⏳ Ожидает
                                         {% endif %}
@@ -456,6 +461,11 @@
 
 .payment-item.paid {
     opacity: 0.5;
+}
+
+.payment-item.overdue {
+    background: rgba(255, 0, 0, 0.1);
+    border-left: 3px solid #ff0000;
 }
 
 .payment-item:last-child {

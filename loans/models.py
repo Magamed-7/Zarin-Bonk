@@ -79,6 +79,13 @@ class LoanPayment(models.Model):
     due_date = models.DateField()
     paid_date = models.DateField(blank=True, null=True)
     is_paid = models.BooleanField(default=False)
+    is_overdue = models.BooleanField(default=False)
+    penalty_amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        help_text='Штраф за просрочку',
+    )
 
     class Meta:
         verbose_name = 'платёж по кредиту'
@@ -86,5 +93,5 @@ class LoanPayment(models.Model):
         ordering = ['due_date']
 
     def __str__(self):
-        status = 'оплачен' if self.is_paid else 'не оплачен'
+        status = 'оплачен' if self.is_paid else 'просрочен' if self.is_overdue else 'не оплачен'
         return f'Платёж {self.amount} — {self.due_date} ({status})'
