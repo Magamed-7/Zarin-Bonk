@@ -57,6 +57,42 @@ class Transaction(models.Model):
     def __str__(self):
         return f'{self.get_transaction_type_display()} — {self.amount} ({self.status})'
 
+    def save(self, *args, **kwargs):
+        if not self.category and self.description:
+            self.category = self.auto_categorize()
+        super().save(*args, **kwargs)
+
+    def auto_categorize(self):
+        description_lower = self.description.lower()
+        
+        keywords = {
+            'Покупки': ['магазин', 'shop', 'store', 'супермаркет', 'маркет', 'покупка', 'товар'],
+            'Еда': ['ресторан', 'кафе', 'cafe', 'restaurant', 'еда', 'food', 'пицца', 'sushi', 'бургер'],
+            'Транспорт': ['такси', 'taxi', 'uber', 'yandex', 'транспорт', 'transport', 'метро', 'автобус'],
+            'Интернет': ['интернет', 'internet', 'babilon', 'tojiktelecom', 'satn'],
+            'Связь': ['телефон', 'phone', 'мегафон', 'megafon', 'tcell', 'babilon', 'zet'],
+            'ЖКХ': ['жкх', 'электро', 'вода', 'газ', 'коммуналь', 'utilities'],
+        }
+        
+        for category, words in keywords.items():
+            for word in words:
+                if word in description_lower:
+                    return category
+        
+        return 'Прочее'
+
+    def get_category_icon(self):
+        icons = {
+            'Покупки': '🛒',
+            'Еда': '🍔',
+            'Транспорт': '🚕',
+            'Интернет': '🌐',
+            'Связь': '📱',
+            'ЖКХ': '⚡',
+            'Прочее': '📄',
+        }
+        return icons.get(self.category, '📄')
+
 
 class PaymentTemplate(models.Model):
     user = models.ForeignKey(

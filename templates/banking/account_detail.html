@@ -128,18 +128,18 @@
             {% for tx in transactions %}
               <a href="{% url 'transactions:transaction_detail' tx.id %}" class="tx-item" style="text-decoration: none; color: inherit; display: grid;">
 
-                {# Иконка типа #}
+                {# Иконка категории #}
                 <div class="tx-icon tx-icon--{{ tx.transaction_type }}">
-                  {% if tx.transaction_type == 'transfer' %}↔
-                  {% elif tx.transaction_type == 'payment' %}🧾
-                  {% elif tx.transaction_type == 'deposit' %}↓
-                  {% else %}↑{% endif %}
+                  {{ tx.get_category_icon }}
                 </div>
 
                 {# Описание #}
                 <div class="tx-info">
                   <div class="tx-type">{{ tx.get_transaction_type_display }}</div>
                   <div class="tx-date">{{ tx.created_at|date:"d.m.Y H:i" }}</div>
+                  {% if tx.category %}
+                  <div class="tx-category">{{ tx.category }}</div>
+                  {% endif %}
                 </div>
 
                 {# Статус #}

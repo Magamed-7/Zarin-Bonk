@@ -62,8 +62,8 @@ def dashboard_view(request):
         'account':             account,
         'card':                card,
         'recent_transactions': recent_transactions,
-        'week_labels':         week_labels,
-        'week_data':           week_data,
+        'week_labels':         json.dumps(week_labels),
+        'week_data':           json.dumps(week_data),
     })
 
 
@@ -473,4 +473,3 @@ def transfer_money_view(request):
         'form':          form,
         'user_accounts': user_accounts,
     })
- 

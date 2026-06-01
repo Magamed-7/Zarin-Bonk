@@ -2,8 +2,11 @@ from decimal import Decimal
 import os
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
+from django.views import generic
 from django.http import HttpResponse
+from django.utils.decorators import method_decorator
 from banking.models import Account
 from notifications.models import Notification
 from .models import Transaction, PaymentTemplate
@@ -34,19 +37,40 @@ PROVIDERS = {
         {'id': 'barki_tojik', 'name': 'Барки Точик (Электроэнергия)'},
         {'id': 'vodokanal', 'name': 'Душанбеводоканал (Вода)'},
         {'id': 'communal', 'name': 'Коммунальные услуги'},
-    ]
+    ],
+    'shopping': [
+        {'id': 'internet_shop', 'name': 'Интернет-магазин'},
+        {'id': 'supermarket', 'name': 'Супермаркет'},
+        {'id': 'electronics', 'name': 'Электроника'},
+    ],
+    'food': [
+        {'id': 'restaurant', 'name': 'Ресторан'},
+        {'id': 'cafe', 'name': 'Кафе'},
+        {'id': 'delivery', 'name': 'Доставка еды'},
+    ],
+    'transport': [
+        {'id': 'taxi', 'name': 'Такси'},
+        {'id': 'metro', 'name': 'Метро'},
+        {'id': 'bus', 'name': 'Автобус'},
+    ],
 }
 
 CATEGORIES = {
     'internet': {'name': 'Интернет', 'icon': '🌐', 'requisite_label': 'Логин / Номер договора', 'placeholder': 'Введите ваш логин'},
     'phone': {'name': 'Мобильная связь', 'icon': '📱', 'requisite_label': 'Номер телефона', 'placeholder': '+992 9XXXXXXXX'},
     'utilities': {'name': 'ЖКХ', 'icon': '⚡', 'requisite_label': 'Лицевой счет', 'placeholder': 'Введите номер счета ЖКХ'},
+    'shopping': {'name': 'Покупки', 'icon': '🛒', 'requisite_label': 'Номер заказа / Магазин', 'placeholder': 'Введите номер заказа'},
+    'food': {'name': 'Еда', 'icon': '🍔', 'requisite_label': 'Ресторан / Кафе', 'placeholder': 'Введите название'},
+    'transport': {'name': 'Транспорт', 'icon': '🚕', 'requisite_label': 'Номер поездки / Маршрут', 'placeholder': 'Введите детали'},
 }
 
 CATEGORIES_LIST = [
     {'id': 'internet', 'name': 'Интернет', 'icon': '🌐'},
     {'id': 'phone', 'name': 'Мобильная связь', 'icon': '📱'},
     {'id': 'utilities', 'name': 'ЖКХ', 'icon': '⚡'},
+    {'id': 'shopping', 'name': 'Покупки', 'icon': '🛒'},
+    {'id': 'food', 'name': 'Еда', 'icon': '🍔'},
+    {'id': 'transport', 'name': 'Транспорт', 'icon': '🚕'},
 ]
 
 # Helper function to register Cyrillic font
@@ -62,16 +86,15 @@ def get_pdf_font_name():
             pass
     return font_name
 
-@login_required
-def services_view(request):
-    user_accounts = Account.objects.filter(user=request.user, is_active=True)
-    templates = PaymentTemplate.objects.filter(user=request.user)
+class ServicesView(LoginRequiredMixin, generic.TemplateView):
+    template_name = 'transactions/services.html'
     
-    return render(request, 'transactions/services.html', {
-        'accounts': user_accounts,
-        'templates': templates,
-        'categories': CATEGORIES_LIST,
-    })
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['accounts'] = Account.objects.filter(user=self.request.user, is_active=True)
+        context['templates'] = PaymentTemplate.objects.filter(user=self.request.user)
+        context['categories'] = CATEGORIES_LIST
+        return context
 
 @login_required
 def category_services_view(request, category_id):

@@ -262,6 +262,12 @@
   color: var(--text-secondary, #8892b0);
 }
 
+.tx-category {
+  font-size: 0.7rem;
+  color: var(--gold, #ffd700);
+  margin-top: 0.2rem;
+}
+
 .tx-amount { font-size: 0.9rem; font-weight: 600; font-variant-numeric: tabular-nums; }
 .tx-amount--out { color: #ff6b6b; }
 .tx-amount--in  { color: #48c774; }
