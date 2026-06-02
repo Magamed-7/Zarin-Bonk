@@ -17,6 +17,7 @@ urlpatterns = [
     path('notifications/', include('notifications.urls')),
     path('support/', include('support.urls')),
     path('manager/', include('manager.urls')),
+    path('ai-assistant/', include('ai_assistant.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if not settings.DEBUG:

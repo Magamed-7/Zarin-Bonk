@@ -1,0 +1,5 @@
+# Библиотеки для AI ассистента
+anthropic
+google-generativeai
+groq
+openai
