@@ -91,8 +91,8 @@ class ServicesView(LoginRequiredMixin, generic.TemplateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['accounts'] = Account.objects.filter(user=self.request.user, is_active=True)
-        context['templates'] = PaymentTemplate.objects.filter(user=self.request.user)
+        context['accounts'] = Account.objects.filter(user=self.request.user, is_active=True, is_deleted=False)
+        context['templates'] = PaymentTemplate.objects.filter(user=self.request.user, is_deleted=False)
         context['categories'] = CATEGORIES_LIST
         return context
 
@@ -102,7 +102,7 @@ def category_services_view(request, category_id):
         messages.error(request, 'Неверная категория услуг.')
         return redirect('transactions:services')
         
-    user_accounts = Account.objects.filter(user=request.user, is_active=True)
+    user_accounts = Account.objects.filter(user=request.user, is_active=True, is_deleted=False)
     category_data = CATEGORIES[category_id]
     providers_list = PROVIDERS[category_id]
     
@@ -200,8 +200,8 @@ def pay_service_view(request):
 
 @login_required
 def quick_pay_view(request, template_id):
-    template = get_object_or_404(PaymentTemplate, id=template_id, user=request.user)
-    account = Account.objects.filter(user=request.user, is_active=True).first()
+    template = get_object_or_404(PaymentTemplate, id=template_id, user=request.user, is_deleted=False)
+    account = Account.objects.filter(user=request.user, is_active=True, is_deleted=False).first()
 
     if not account:
         messages.error(request, 'У вас нет активных счетов для оплаты.')
@@ -239,7 +239,7 @@ def quick_pay_view(request, template_id):
 
 @login_required
 def delete_template_view(request, template_id):
-    template = get_object_or_404(PaymentTemplate, id=template_id, user=request.user)
+    template = get_object_or_404(PaymentTemplate, id=template_id, user=request.user, is_deleted=False)
     name = template.name
     template.delete()
     messages.success(request, f'Шаблон "{name}" удален.')
@@ -249,7 +249,8 @@ def delete_template_view(request, template_id):
 def transaction_detail_view(request, transaction_id):
     tx = get_object_or_404(
         Transaction.objects.select_related('sender_account', 'receiver_account'),
-        id=transaction_id
+        id=transaction_id,
+        is_deleted=False
     )
     # Security check: User must be sender or receiver
     user_accounts = request.user.accounts.values_list('id', flat=True)
@@ -296,7 +297,7 @@ def repeat_transaction_view(request, transaction_id):
 
 @login_required
 def transaction_pdf_view(request, transaction_id):
-    tx = get_object_or_404(Transaction, id=transaction_id)
+    tx = get_object_or_404(Transaction, id=transaction_id, is_deleted=False)
     
     # Check permissions
     user_accounts = request.user.accounts.values_list('id', flat=True)
@@ -387,8 +388,8 @@ def export_statement_pdf_view(request):
         messages.error(request, 'Некорректный формат дат.')
         return redirect('banking:account_detail', account_id=account.id)
         
-    sent = Transaction.objects.filter(sender_account=account, created_at__date__gte=start_date, created_at__date__lte=end_date)
-    received = Transaction.objects.filter(receiver_account=account, created_at__date__gte=start_date, created_at__date__lte=end_date)
+    sent = Transaction.objects.filter(sender_account=account, created_at__date__gte=start_date, created_at__date__lte=end_date, is_deleted=False)
+    received = Transaction.objects.filter(receiver_account=account, created_at__date__gte=start_date, created_at__date__lte=end_date, is_deleted=False)
     transactions = (sent | received).order_by('created_at')
     
     response = HttpResponse(content_type='application/pdf')

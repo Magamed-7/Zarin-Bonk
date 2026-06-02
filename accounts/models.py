@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
+
 class User(AbstractUser):
     class Role(models.TextChoices):
         CLIENT = 'client', 'Клиент'
@@ -17,6 +19,8 @@ class User(AbstractUser):
     date_of_birth = models.DateField(blank=True, null=True)
     address = models.TextField(blank=True)
     is_verified = models.BooleanField(default=False)
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         verbose_name = 'пользователь'
@@ -24,6 +28,12 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.get_username()
+    
+    def delete(self, *args, **kwargs):
+        self.is_deleted = True
+        self.deleted_at = timezone.now()
+        self.is_active = False
+        self.save()
     
 
 

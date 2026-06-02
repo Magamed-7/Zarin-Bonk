@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Удалить бюджет — ZarinPay{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/budget.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="budget-form-page">
+  <h1>🗑️ Удалить бюджет</h1>
+
+  <div class="budget-form-card">
+    <div class="budget-delete-confirm">
+      <p><strong>Вы уверены, что хотите удалить бюджет для категории "{{ object.category.name }}"?</strong></p>
+      
+      <div class="budget-delete-info">
+        <p><span class="budget-delete-label">Категория:</span> {{ object.category.icon }} {{ object.category.name }}</p>
+        <p><span class="budget-delete-label">Период:</span> {{ object.month|stringformat:"02d" }}/{{ object.year }}</p>
+        <p><span class="budget-delete-label">Лимит:</span> {{ object.limit_amount }} TJS</p>
+        <p><span class="budget-delete-label">Потрачено:</span> {{ object.current_amount }} TJS</p>
+        <p><span class="budget-delete-label">Осталось:</span> {{ object.remaining }} TJS</p>
+      </div>
+
+      <form method="post" class="budget-delete-form">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">🗑️ Удалить бюджет</button>
+        <a href="{% url 'budget:budget_list' %}" class="btn btn-secondary">Отмена</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

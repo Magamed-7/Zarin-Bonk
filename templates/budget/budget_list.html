@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Бюджет — ZarinPay{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/budget.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="budget-page">
+  <h1>📊 Бюджет</h1>
+
+  {# Messages #}
+  {% if messages %}
+    <div class="budget-messages">
+      {% for message in messages %}
+        <div class="budget-message budget-message--{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {# Уведомление о превышении лимита #}
+  {% if over_limit_budgets %}
+    <div class="budget-alert budget-alert--danger">
+      <h3>⚠️ Превышение лимита!</h3>
+      <p>Следующие категории превысили установленный лимит:</p>
+      <ul>
+        {% for budget in over_limit_budgets %}
+          <li>{{ budget.category.icon }} {{ budget.category.name }}: потрачено {{ budget.current_amount }} из {{ budget.limit_amount }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  {# Диаграмма расходов #}
+  <div class="budget-chart-section">
+    <h2>Расходы по категориям</h2>
+    <div class="budget-chart-container">
+      <canvas id="budgetChart"></canvas>
+    </div>
+  </div>
+
+  {# Карточки категорий с прогресс-барами #}
+  <div class="budget-cards-section">
+    <div class="budget-section-header">
+      <h2>Лимиты по категориям</h2>
+      <a href="{% url 'budget:budget_create' %}" class="btn btn-primary">➕ Добавить бюджет</a>
+    </div>
+
+    {% if budgets %}
+      <div class="budget-cards-grid">
+        {% for budget in budgets %}
+          <div class="budget-card {% if budget.is_exceeded %}budget-card--over-limit{% endif %}">
+            <div class="budget-card-header">
+              <div class="budget-card-icon">{{ budget.category.icon }}</div>
+              <div class="budget-card-title">
+                <h3>{{ budget.category.name }}</h3>
+                <p class="budget-card-subtitle">{{ budget.month|stringformat:"02d" }}/{{ budget.year }} — Лимит: {{ budget.limit_amount }} TJS</p>
+              </div>
+              <div class="budget-card-actions">
+                <a href="{% url 'budget:budget_update' budget.slug %}" class="btn btn-sm btn-secondary">✏️</a>
+                <a href="{% url 'budget:budget_delete' budget.slug %}" class="btn btn-sm btn-danger">🗑️</a>
+              </div>
+            </div>
+
+            <div class="budget-card-body">
+              <div class="budget-progress">
+                <div class="budget-progress-bar">
+                  <div class="budget-progress-fill" style="width: {{ budget.usage_percent }}%; background: {% if budget.is_exceeded %}#ff6b6b{% elif budget.usage_percent > 80 %}#ffc107{% else %}#48c774{% endif %};"></div>
+                </div>
+                <div class="budget-progress-text">
+                  <span>Потрачено: {{ budget.current_amount }} TJS</span>
+                  <span>{{ budget.usage_percent|floatformat:0 }}%</span>
+                </div>
+              </div>
+
+              <div class="budget-card-stats">
+                <div class="budget-stat">
+                  <span class="budget-stat-label">Осталось:</span>
+                  <span class="budget-stat-value {% if budget.remaining < 0 %}budget-stat-value--negative{% endif %}">
+                    {{ budget.remaining }} TJS
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="budget-empty">
+        <p>Бюджеты не установлены. <a href="{% url 'budget:budget_create' %}">Создайте первый бюджет</a></p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('budgetChart');
+    
+    if (ctx) {
+      const chartLabels = {{ chart_labels|safe }};
+      const chartData = {{ chart_data|safe }};
+      const chartColors = {{ chart_colors|safe }};
+
+      if (chartLabels.length > 0) {
+        new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: chartLabels,
+            datasets: [{
+              data: chartData,
+              backgroundColor: chartColors,
+              borderWidth: 2,
+              borderColor: '#1a1a2e'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: {
+                  color: '#e8eaf6',
+                  padding: 20,
+                  font: {
+                    size: 14
+                  }
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const label = context.label || '';
+                    const value = context.parsed || 0;
+                    return `${label}: ${value.toFixed(2)} TJS`;
+                  }
+                }
+              }
+            }
+          }
+        });
+      } else {
+        ctx.parentElement.innerHTML = '<p class="budget-chart-empty">Нет данных для отображения</p>';
+      }
+    }
+  });
+</script>
+{% endblock %}

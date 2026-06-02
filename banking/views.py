@@ -5,7 +5,9 @@ from dateutil.relativedelta import relativedelta
  
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Sum
+from django.views import generic
 from decimal import Decimal
 from django.shortcuts import redirect, render, get_object_or_404
 from django.utils import timezone
@@ -24,18 +26,18 @@ from notifications.models import Notification
 
 @login_required
 def dashboard_view(request):
-    account = Account.objects.filter(user=request.user, is_active=True).first()
+    account = Account.objects.filter(user=request.user, is_active=True, is_deleted=False).first()
 
     card = None
     if account:
-        card = Card.objects.filter(account=account).first()
+        card = Card.objects.filter(account=account, is_deleted=False).first()
 
     recent_transactions = []
     if account:
         recent_transactions = Transaction.objects.filter(
-            sender_account=account
+            sender_account=account, is_deleted=False
         ) | Transaction.objects.filter(
-            receiver_account=account
+            receiver_account=account, is_deleted=False
         )
         recent_transactions = recent_transactions.order_by('-created_at')[:5]
 
@@ -52,6 +54,7 @@ def dashboard_view(request):
                 sender_account=account,
                 status='completed',
                 created_at__date=day,
+                is_deleted=False,
             ).aggregate(total=Sum('amount'))['total'] or 0
         else:
             spent = 0
@@ -68,64 +71,62 @@ def dashboard_view(request):
 
 
 
-@login_required
-def accounts_view(request):
-    accounts = Account.objects.filter(user=request.user).order_by('-created_at')
+class AccountsListView(LoginRequiredMixin, generic.ListView):
+    model = Account
+    template_name = 'banking/accounts.html'
+    context_object_name = 'accounts'
+    
+    def get_queryset(self):
+        return Account.objects.filter(user=self.request.user, is_deleted=False).order_by('-created_at')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        accounts = self.get_queryset()
+        total_balance = accounts.filter(
+            currency=Account.Currency.TJS
+        ).aggregate(total=Sum('balance'))['total'] or 0
+        context['total_balance'] = total_balance
+        return context
+
+
  
-    total_balance = accounts.filter(
-        currency=Account.Currency.TJS
-    ).aggregate(total=Sum('balance'))['total'] or 0
- 
-    return render(request, 'banking/accounts.html', {
-        'accounts':      accounts,
-        'total_balance': total_balance,
-    })
- 
- 
-@login_required
-def create_account_view(request):
-    if request.method == 'POST':
-        account_type = request.POST.get('account_type', '').strip()
-        currency     = request.POST.get('currency', '').strip()
- 
-        valid_types     = [t[0] for t in Account.AccountType.choices]
-        valid_currencies = [c[0] for c in Account.Currency.choices]
- 
-        if account_type not in valid_types:
-            messages.error(request, 'Выберите корректный тип счёта.')
-        elif currency not in valid_currencies:
-            messages.error(request, 'Выберите корректную валюту.')
-        else:
-            account = Account.objects.create(
-                user=request.user,
-                account_type=account_type,
-                currency=currency,
-            )
- 
-            Card.objects.create(
-                account=account,
-                expiry_date=date.today() + relativedelta(years=3),
-                card_type=Card.CardType.VIRTUAL,
-            )
- 
-            messages.success(request, f'Счёт {account.account_number} успешно создан.')
-            return redirect('banking:accounts')
- 
-    return render(request, 'banking/create_account.html', {
-        'account_types': Account.AccountType.choices,
-        'currencies':    Account.Currency.choices,
-    })
+
+class CreateAccountView(LoginRequiredMixin, generic.CreateView):
+    model = Account
+    template_name = 'banking/create_account.html'
+    fields = ['account_type', 'currency']
+    
+    def form_valid(self, form):
+        account = form.save(commit=False)
+        account.user = self.request.user
+        account.save()
+        
+        Card.objects.create(
+            account=account,
+            expiry_date=date.today() + relativedelta(years=3),
+            card_type=Card.CardType.VIRTUAL,
+        )
+        
+        messages.success(self.request, f'Счёт {account.account_number} успешно создан.')
+        return redirect('banking:accounts')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['account_types'] = Account.AccountType.choices
+        context['currencies'] = Account.Currency.choices
+        return context
+
 
 
 
 @login_required
 def account_detail_view(request, account_id):
-    account = get_object_or_404(Account, id=account_id, user=request.user)
+    account = get_object_or_404(Account, id=account_id, user=request.user, is_deleted=False)
  
-    cards = Card.objects.filter(account=account)
+    cards = Card.objects.filter(account=account, is_deleted=False)
  
-    sent     = Transaction.objects.filter(sender_account=account)
-    received = Transaction.objects.filter(receiver_account=account)
+    sent     = Transaction.objects.filter(sender_account=account, is_deleted=False)
+    received = Transaction.objects.filter(receiver_account=account, is_deleted=False)
     transactions = (sent | received).order_by('-created_at')[:10]
  
     today      = timezone.now().date()
@@ -135,11 +136,13 @@ def account_detail_view(request, account_id):
         sender_account=account,
         status=Transaction.Status.COMPLETED,
         created_at__date__gte=start_date,
+        is_deleted=False,
     )
     received_30 = Transaction.objects.filter(
         receiver_account=account,
         status=Transaction.Status.COMPLETED,
         created_at__date__gte=start_date,
+        is_deleted=False,
     )
  
     total_received = received_30.aggregate(t=Sum('amount'))['t'] or 0
@@ -323,6 +326,29 @@ def currency_convert_view(request):
 
 
 @login_required
+def delete_card_view(request, card_id):
+    card = get_object_or_404(Card, id=card_id, account__user=request.user, is_deleted=False)
+    card.delete()
+    messages.success(request, f'Карта {card.masked_number} удалена.')
+    return redirect('banking:account_detail', account_id=card.account.id)
+
+
+@login_required
+def delete_account_view(request, account_id):
+    account = get_object_or_404(Account, id=account_id, user=request.user, is_deleted=False)
+    
+    if account.balance < 0:
+        messages.error(request, 'Нельзя удалить счёт с отрицательным балансом.')
+        return redirect('banking:account_detail', account_id=account.id)
+    
+    
+    
+    account.delete()
+    messages.success(request, f'Счёт {account.account_number} удалён. Все средства на счёте обнулены.')
+    return redirect('banking:accounts')
+
+
+@login_required
 def currency_rates_view(request):
 
     rates = get_rates()
@@ -346,7 +372,8 @@ def currency_rates_view(request):
 def receiver_lookup_view(request):
     number = request.GET.get('number', '').strip()
     account = Account.objects.filter(
-        account_number=number
+        account_number=number,
+        is_deleted=False
     ).select_related('user').first()
  
     if not account:
@@ -379,7 +406,7 @@ def convert_currency(amount, from_currency, to_currency):
  
 @login_required
 def transfer_money_view(request):
-    user_accounts = Account.objects.filter(user=request.user, is_active=True)
+    user_accounts = Account.objects.filter(user=request.user, is_active=True, is_deleted=False)
     initial_data = {}
     if request.method == 'GET':
         initial_data = {
@@ -396,7 +423,7 @@ def transfer_money_view(request):
         amount          = form.cleaned_data['amount']
         description     = form.cleaned_data.get('description', '')
  
-        receiver = Account.objects.filter(account_number=receiver_number).first()
+        receiver = Account.objects.filter(account_number=receiver_number, is_deleted=False).first()
  
         if not receiver:
             messages.error(request, 'Счёт получателя не найден.')

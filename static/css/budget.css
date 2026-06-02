@@ -1,0 +1,459 @@
+/* ── Budget Page ────────────────────────────────────────────────── */
+.budget-page {
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.budget-page h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-primary, #e8eaf6);
+  margin: 0 0 2rem;
+}
+
+/* Messages */
+.budget-messages {
+  margin-bottom: 1.5rem;
+}
+
+.budget-message {
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.budget-message--success {
+  background: rgba(72, 199, 116, 0.08);
+  border: 1px solid rgba(72, 199, 116, 0.25);
+  color: #48c774;
+}
+
+.budget-message--error {
+  background: rgba(255, 80, 80, 0.08);
+  border: 1px solid rgba(255, 80, 80, 0.25);
+  color: #ff6b6b;
+}
+
+.budget-message--warning {
+  background: rgba(255, 193, 7, 0.08);
+  border: 1px solid rgba(255, 193, 7, 0.25);
+  color: #ffc107;
+}
+
+/* Alert */
+.budget-alert {
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.budget-alert--danger {
+  background: rgba(255, 107, 107, 0.1);
+  border-color: rgba(255, 107, 107, 0.3);
+}
+
+.budget-alert h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ff6b6b;
+  margin: 0 0 0.75rem;
+}
+
+.budget-alert p {
+  margin: 0.5rem 0;
+  color: var(--text-primary, #e8eaf6);
+}
+
+.budget-alert ul {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+  color: var(--text-secondary, #8892b0);
+}
+
+/* Chart Section */
+.budget-chart-section {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 215, 0, 0.12);
+  border-radius: 20px;
+  padding: 2rem;
+  backdrop-filter: blur(12px);
+  margin-bottom: 2rem;
+}
+
+.budget-chart-section h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary, #e8eaf6);
+  margin: 0 0 1.5rem;
+}
+
+.budget-chart-container {
+  position: relative;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.budget-chart-empty {
+  text-align: center;
+  color: var(--text-secondary, #8892b0);
+  font-size: 0.875rem;
+  padding: 2rem;
+}
+
+/* Budget Cards Section */
+.budget-cards-section {
+  margin-bottom: 2rem;
+}
+
+.budget-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.budget-section-header h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary, #e8eaf6);
+  margin: 0;
+}
+
+.budget-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.budget-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 215, 0, 0.12);
+  border-radius: 16px;
+  padding: 1.5rem;
+  backdrop-filter: blur(12px);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.budget-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(255, 215, 0, 0.15);
+}
+
+.budget-card--over-limit {
+  border-color: rgba(255, 107, 107, 0.4);
+  background: rgba(255, 107, 107, 0.05);
+}
+
+.budget-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.budget-card-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.budget-card-title {
+  flex: 1;
+}
+
+.budget-card-title h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary, #e8eaf6);
+  margin: 0 0 0.25rem;
+}
+
+.budget-card-subtitle {
+  font-size: 0.875rem;
+  color: var(--text-secondary, #8892b0);
+  margin: 0;
+}
+
+.budget-card-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.budget-card-body {
+  margin-top: 1rem;
+}
+
+/* Progress Bar */
+.budget-progress {
+  margin-bottom: 1rem;
+}
+
+.budget-progress-bar {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.budget-progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.budget-progress-text {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  color: var(--text-secondary, #8892b0);
+}
+
+/* Stats */
+.budget-card-stats {
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.budget-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.budget-stat-label {
+  color: var(--text-secondary, #8892b0);
+}
+
+.budget-stat-value {
+  font-weight: 600;
+  color: var(--text-primary, #e8eaf6);
+}
+
+.budget-stat-value--negative {
+  color: #ff6b6b;
+}
+
+/* Empty State */
+.budget-empty {
+  text-align: center;
+  padding: 3rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 215, 0, 0.2);
+  border-radius: 16px;
+}
+
+.budget-empty p {
+  color: var(--text-secondary, #8892b0);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.budget-empty a {
+  color: var(--gold, #ffd700);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.budget-empty a:hover {
+  text-decoration: underline;
+}
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--gold, #ffd700), #e6ac00);
+  color: #0b1020;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary, #e8eaf6);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+  color: white;
+}
+
+.btn-danger:hover {
+  background: linear-gradient(135deg, #ff5252, #e04848);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+.btn-sm {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+/* ── Budget Form Page ─────────────────────────────────────────────── */
+.budget-form-page {
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.budget-form-page h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-primary, #e8eaf6);
+  margin: 0 0 2rem;
+}
+
+.budget-form-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 215, 0, 0.12);
+  border-radius: 20px;
+  padding: 2rem;
+  backdrop-filter: blur(12px);
+}
+
+.budget-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary, #8892b0);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.form-input,
+.form-select {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  color: var(--text-primary, #e8eaf6);
+  font-size: 0.95rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+}
+
+.form-input::placeholder {
+  color: rgba(136, 146, 176, 0.5);
+}
+
+.form-input:focus,
+.form-select:focus {
+  border-color: rgba(255, 215, 0, 0.5);
+  background: rgba(255, 215, 0, 0.04);
+  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.08);
+}
+
+.form-select {
+  cursor: pointer;
+}
+
+.form-error {
+  color: #ff6b6b;
+  font-size: 0.875rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.form-actions .btn {
+  flex: 1;
+  text-align: center;
+}
+
+/* Budget Delete Confirm */
+.budget-delete-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.budget-delete-confirm p {
+  color: var(--text-primary, #e8eaf6);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.budget-delete-info {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.budget-delete-info p {
+  display: flex;
+  justify-content: space-between;
+  margin: 0.5rem 0;
+  color: var(--text-secondary, #8892b0);
+}
+
+.budget-delete-label {
+  font-weight: 600;
+}
+
+.budget-delete-form {
+  display: flex;
+  gap: 1rem;
+}
+
+.budget-delete-form .btn {
+  flex: 1;
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .budget-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .budget-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .form-actions,
+  .budget-delete-form {
+    flex-direction: column;
+  }
+}

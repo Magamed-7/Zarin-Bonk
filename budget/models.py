@@ -1,4 +1,6 @@
 from decimal import Decimal
+from django.utils import timezone
+import secrets
 
 from django.conf import settings
 from django.db import models
@@ -55,6 +57,10 @@ class Budget(models.Model):
     year = models.PositiveSmallIntegerField(
         help_text='Год, например 2025',
     )
+    slug = models.SlugField(max_length=50, unique=True, editable=False, default='')
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(default=timezone.now, blank=True, null=True)
 
     class Meta:
         verbose_name = 'бюджет'
@@ -64,6 +70,22 @@ class Budget(models.Model):
 
     def __str__(self):
         return f'{self.user} — {self.category} ({self.month:02d}/{self.year})'
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = self.generate_slug()
+        super().save(*args, **kwargs)
+
+    def generate_slug(self):
+        while True:
+            slug = secrets.token_urlsafe(16)
+            if not Budget.objects.filter(slug=slug).exists():
+                return slug
+
+    def delete(self, *args, **kwargs):
+        self.is_deleted = True
+        self.deleted_at = timezone.now()
+        self.save()
 
     @property
     def remaining(self):

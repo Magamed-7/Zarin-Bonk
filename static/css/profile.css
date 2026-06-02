@@ -191,11 +191,42 @@ textarea.field-input {
   font-family: inherit;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
 }
 
 .profile-save-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(255, 215, 0, 0.35);
+}
+
+/* Profile actions */
+.profile-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.profile-save-btn--secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary, #e8eaf6);
+}
+
+.profile-save-btn--secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.15);
+}
+
+.profile-save-btn--danger {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+  color: white;
+}
+
+.profile-save-btn--danger:hover {
+  background: linear-gradient(135deg, #ff5252, #e04848);
+  box-shadow: 0 8px 24px rgba(255, 107, 107, 0.35);
 }
 
 /* ── Login history ──────────────────────────────────────────── */

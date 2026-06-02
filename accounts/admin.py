@@ -6,8 +6,8 @@ from .models import User, LoginHistory
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    list_display = ('username', 'email', 'role', 'phone', 'is_verified', 'is_staff')
-    list_filter = ('role', 'is_verified', 'is_staff', 'is_superuser')
+    list_display = ('username', 'email', 'role', 'phone', 'is_verified', 'is_deleted', 'deleted_at', 'is_staff')
+    list_filter = ('role', 'is_verified', 'is_deleted', 'is_staff', 'is_superuser')
     search_fields = ('username', 'email', 'phone')
 
     fieldsets = BaseUserAdmin.fieldsets + (
@@ -21,6 +21,8 @@ class UserAdmin(BaseUserAdmin):
                     'date_of_birth',
                     'address',
                     'is_verified',
+                    'is_deleted',
+                    'deleted_at',
                 ),
             },
         ),

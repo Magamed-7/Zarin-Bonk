@@ -1,4 +1,5 @@
 from decimal import Decimal
+from django.utils import timezone
 
 from django.db import models
 from django.conf import settings
@@ -48,6 +49,8 @@ class Transaction(models.Model):
         choices=Status.choices,
         default=Status.PENDING,
     )
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         verbose_name = 'транзакция'
@@ -93,6 +96,11 @@ class Transaction(models.Model):
         }
         return icons.get(self.category, '📄')
 
+    def delete(self, *args, **kwargs):
+        self.is_deleted = True
+        self.deleted_at = timezone.now()
+        self.save()
+
 
 class PaymentTemplate(models.Model):
     user = models.ForeignKey(
@@ -106,6 +114,8 @@ class PaymentTemplate(models.Model):
     requisite = models.CharField(max_length=50, verbose_name="Реквизит")
     amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Сумма")
     created_at = models.DateTimeField(auto_now_add=True)
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         verbose_name = 'шаблон платежа'
@@ -115,3 +125,7 @@ class PaymentTemplate(models.Model):
     def __str__(self):
         return f"{self.name} ({self.service_provider})"
 
+    def delete(self, *args, **kwargs):
+        self.is_deleted = True
+        self.deleted_at = timezone.now()
+        self.save()

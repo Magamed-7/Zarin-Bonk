@@ -466,6 +466,19 @@ def profile_view(request):
 
 
 @login_required
+def delete_account_view(request):
+    user = request.user
+    
+    if request.method == 'POST':
+        user.delete()
+        logout(request)
+        messages.success(request, 'Ваш аккаунт успешно удалён.')
+        return redirect('landing')
+    
+    return render(request, 'accounts/delete_account.html', {'user': user})
+
+
+@login_required
 def change_password_view(request):
     user = request.user
  

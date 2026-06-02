@@ -1,6 +1,7 @@
 import secrets
 
 from decimal import Decimal
+from django.utils import timezone
 
 from django.conf import settings
 from django.db import models
@@ -40,6 +41,8 @@ class Account(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         verbose_name = 'счёт'
@@ -61,6 +64,12 @@ class Account(models.Model):
         if not self.account_number:
             self.account_number = self.generate_account_number()
         super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        self.is_deleted = True
+        self.deleted_at = timezone.now()
+        self.is_active = False
+        self.save()
 
 
 
@@ -84,6 +93,8 @@ class Card(models.Model):
         default=CardType.VIRTUAL,
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         verbose_name = 'карта'
@@ -116,3 +127,8 @@ class Card(models.Model):
         if not self.cvv:
             self.cvv = self.generate_cvv()
         super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        self.is_deleted = True
+        self.deleted_at = timezone.now()
+        self.save()

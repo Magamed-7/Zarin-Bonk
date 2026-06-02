@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Удаление аккаунта — ZarinPay{% endblock %}
+
+{% block content %}
+<div class="container container--center">
+  <div class="auth-card">
+    <h1 class="auth-title">⚠️ Удаление аккаунта</h1>
+    
+    <div class="alert alert--warning">
+      <p><strong>ВНИМАНИЕ!</strong> Это действие необратимо.</p>
+      <p>При удалении аккаунта:</p>
+      <ul>
+        <li>Ваши счета и карты останутся в системе</li>
+        <li>Вы не сможете восстановить доступ к аккаунту</li>
+        <li>Вы сможете зарегистрироваться заново с той же электронной почтой</li>
+        <li>Все данные будут сохранены в системе для администратора</li>
+      </ul>
+    </div>
+
+    <div class="delete-account-info">
+      <p><strong>Аккаунт:</strong> {{ user.username }}</p>
+      <p><strong>Email:</strong> {{ user.email }}</p>
+    </div>
+
+    <form method="post" class="delete-account-form">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger btn-full" onclick="return confirm('⚠️ ВНИМАНИЕ: Вы уверены, что хотите удалить свой аккаунт? Это действие необратимо!')">
+        🗑️ Удалить аккаунт навсегда
+      </button>
+    </form>
+
+    <a href="{% url 'accounts:profile' %}" class="btn btn-secondary btn-full">Отмена</a>
+  </div>
+</div>
+
+<style>
+  .container--center {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .auth-card {
+    max-width: 500px;
+    width: 100%;
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .auth-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: #1a1a1a;
+  }
+
+  .alert--warning {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .alert--warning p {
+    margin: 0.5rem 0;
+    color: #856404;
+  }
+
+  .alert--warning ul {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+    color: #856404;
+  }
+
+  .delete-account-info {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .delete-account-info p {
+    margin: 0.5rem 0;
+    color: #495057;
+  }
+
+  .delete-account-form {
+    margin-bottom: 1rem;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .btn-full {
+    width: 100%;
+  }
+
+  .btn-danger {
+    background: #dc3545;
+    color: white;
+  }
+
+  .btn-danger:hover {
+    background: #c82333;
+  }
+
+  .btn-secondary {
+    background: #6c757d;
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background: #5a6268;
+  }
+</style>
+{% endblock %}

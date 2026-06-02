@@ -21,11 +21,13 @@ class AccountAdmin(admin.ModelAdmin):
         'balance',
         'currency',
         'is_active',
+        'is_deleted',
+        'deleted_at',
         'created_at',
     )
-    list_filter = ('account_type', 'currency', 'is_active')
+    list_filter = ('account_type', 'currency', 'is_active', 'is_deleted')
     search_fields = ('account_number', 'user__username', 'user__email')
-    readonly_fields = ('account_number', 'created_at')
+    readonly_fields = ('account_number', 'created_at', 'deleted_at')
 
 
 
@@ -38,11 +40,13 @@ class CardAdmin(admin.ModelAdmin):
         'card_type',
         'expiry_date',
         'is_frozen',
+        'is_deleted',
+        'deleted_at',
         'created_at',
     )
-    list_filter = ('card_type', 'is_frozen')
+    list_filter = ('card_type', 'is_frozen', 'is_deleted')
     search_fields = ('card_number', 'account__account_number')
-    readonly_fields = ('card_number', 'cvv', 'created_at')
+    readonly_fields = ('card_number', 'cvv', 'created_at', 'deleted_at')
 
     @admin.display(description='Номер карты')
     def masked_number(self, obj):

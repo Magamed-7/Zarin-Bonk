@@ -22,6 +22,10 @@
     <span class="detail-status {% if account.is_active %}detail-status--active{% else %}detail-status--inactive{% endif %}">
       {% if account.is_active %}Активен{% else %}Закрыт{% endif %}
     </span>
+    <form method="post" action="{% url 'banking:delete_account' account.id %}" style="display: inline;">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('⚠️ ВНИМАНИЕ: Вы уверены, что хотите удалить счёт? Все средства на счёте будут обнулены. Это действие нельзя отменить.')">🗑️ Удалить счёт</button>
+    </form>
   </div>
 
   <div class="detail-grid">
@@ -74,6 +78,12 @@
               <div class="card-item-bottom">
                 <span class="card-item-label">Срок действия</span>
                 <span class="card-item-expiry">{{ card.expiry_date|date:"m/Y" }}</span>
+              </div>
+              <div class="card-item-actions">
+                <form method="post" action="{% url 'banking:delete_card' card.id %}" style="display: inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Вы уверены, что хотите удалить карту?')">🗑️ Удалить карту</button>
+                </form>
               </div>
             </div>
           {% endfor %}
