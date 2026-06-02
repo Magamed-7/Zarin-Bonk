@@ -42,6 +42,8 @@
 
         <div class="nav-links">
           <a class="nav-link" href="/">Главная</a>
+          <a class="nav-link" href="{% url 'about' %}">О нас</a>
+          <a class="nav-link" href="{% url 'contacts' %}">Контакты</a>
           <a class="nav-link" href="{% url 'banking:accounts' %}">Счета</a>
           <a class="nav-link" href="{% url 'banking:transfer' %}">Транзакции</a>
           <a class="nav-link" href="{% url 'transactions:services' %}">Оплата услуг</a>
@@ -111,9 +113,6 @@
             </div>
           </div>
           {% endif %}
-          <button id="ui-tilt-toggle" class="btn btn-ghost" type="button">
-            3D
-          </button>
           {% if not user.is_authenticated %}
           <a class="btn btn-gold" href="{% url 'accounts:login' %}">Dashboard </a>
           {% else %}
@@ -163,6 +162,8 @@
         </div>
         <div class="footer-col">
           <div class="footer-head">Инфо</div>
+          <a class="footer-link" href="{% url 'about' %}">ℹ️ О банке</a>
+          <a class="footer-link" href="{% url 'contacts' %}">📞 Контакты</a>
           <a class="footer-link" href="{% url 'budget:budget_list' %}">📊 Бюджет</a>
           <a class="footer-link" href="{% url 'goals:goal_list' %}">🎯 Цели</a>
           <a class="footer-link" href="#">Лицензии</a>

@@ -5,43 +5,65 @@
 
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/landing.css' %}" />
+  <style>
+    .hero-3d-wrapper {
+      position: relative;
+      overflow: hidden;
+    }
+    #landing3D {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 1;
+    }
+  </style>
 {% endblock %}
 
 {% block content %}
-  <section class="hero parallax-layer" data-speed="0.18">
-    <div class="hero-card glass card-3d reveal">
-      <div class="hero-kicker">ZarinPay</div>
-      <h1 class="hero-title">
-        Умный банкинг в стиле
-        <span class="hero-accent">Dark Gold</span>
-      </h1>
-      <p class="hero-subtitle">
-        Управляйте финансами красиво: 3D интерфейс, быстрые переводы и контроль
-        бюджета в одном месте.
-      </p>
-      <div class="hero-actions">
-        <a class="btn btn-gold" href="#">Открыть счёт</a>
-        <a class="btn btn-ghost" href="#">Войти</a>
+  <section class="hero parallax-layer hero-3d-wrapper" data-speed="0.18">
+    <canvas id="landing3D"></canvas>
+    <div class="hero-content" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem; align-items: center;">
+      <div class="hero-card glass card-3d reveal">
+        <div class="hero-kicker">ZarinPay</div>
+        <h1 class="hero-title">
+          Умный банкинг в стиле
+          <span class="hero-accent">Dark Gold</span>
+        </h1>
+        <p class="hero-subtitle">
+          Управляйте финансами красиво: 3D интерфейс, быстрые переводы и контроль
+          бюджета в одном месте.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-gold" href="#">Открыть счёт</a>
+          <a class="btn btn-ghost" href="#">Войти</a>
+        </div>
       </div>
-    </div>
 
-    <div class="hero-card glass card-3d reveal delay-1">
-      <div class="hero-kicker">3D Analytics</div>
-      <div class="chart-wrap">
-        <canvas id="miniChart" height="150"></canvas>
-      </div>
-      <div class="hero-metrics">
-        <div class="metric">
-          <div class="metric-label">Активные клиенты</div>
-          <div class="metric-value">12,4K</div>
+      <div class="hero-card glass card-3d reveal delay-1">
+        <div class="hero-kicker">3D Analytics</div>
+        <div class="chart-wrap">
+          <canvas id="miniChart" height="150"></canvas>
         </div>
-        <div class="metric">
-          <div class="metric-label">Транзакций сегодня</div>
-          <div class="metric-value metric-good">+8.1%</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">Доступность</div>
-          <div class="metric-value">99.98%</div>
+        <div class="hero-metrics">
+          <div class="metric">
+            <div class="metric-label">Активные клиенты</div>
+            <div class="metric-value">12,4K</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Транзакций сегодня</div>
+            <div class="metric-value metric-good">+8.1%</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Доступность</div>
+            <div class="metric-value">99.98%</div>
+          </div>
         </div>
       </div>
     </div>
@@ -134,4 +156,84 @@
 
 {% block extra_js %}
   <script src="{% static 'js/landing.js' %}"></script>
+  <script src="https://unpkg.com/three@0.165.0/build/three.min.js"></script>
+  <script>
+    const canvas = document.getElementById('landing3D');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+
+    const particlesCount = 2000;
+    const positions = new Float32Array(particlesCount * 3);
+    const colors = new Float32Array(particlesCount * 3);
+    for (let i = 0; i < particlesCount; i++) {
+      const i3 = i * 3;
+      positions[i3] = (Math.random() - 0.5) * 30;
+      positions[i3 + 1] = (Math.random() - 0.5) * 30;
+      positions[i3 + 2] = (Math.random() - 0.5) * 30;
+      const goldness = Math.random() * 0.5 + 0.5;
+      colors[i3] = 1 * goldness;
+      colors[i3 + 1] = 0.84 * goldness;
+      colors[i3 + 2] = 0 * goldness;
+    }
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    const material = new THREE.PointsMaterial({
+      size: 0.12,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.9
+    });
+    const particles = new THREE.Points(geometry, material);
+    scene.add(particles);
+
+    const torusGeo = new THREE.TorusKnotGeometry(2.5, 0.7, 128, 32);
+    const torusMat = new THREE.MeshBasicMaterial({
+      color: 0xffd700,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.3
+    });
+    const torus = new THREE.Mesh(torusGeo, torusMat);
+    scene.add(torus);
+
+    const boxGeo = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+    const boxMat = new THREE.MeshBasicMaterial({
+      color: 0xffaa00,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.35
+    });
+    const box = new THREE.Mesh(boxGeo, boxMat);
+    scene.add(box);
+
+    camera.position.z = 8;
+
+    function resize() {
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      renderer.setSize(w, h);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', resize);
+
+    let time = 0;
+    function animate() {
+      requestAnimationFrame(animate);
+      time += 0.005;
+      particles.rotation.y = time * 0.3;
+      particles.rotation.x = time * 0.2;
+      torus.rotation.x = time * 0.5;
+      torus.rotation.y = time * 0.4;
+      box.rotation.x = time * -0.4;
+      box.rotation.y = time * 0.6;
+      box.position.y = Math.sin(time * 1.5) * 1.2;
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
 {% endblock %}

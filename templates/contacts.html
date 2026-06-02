@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Контакты ZarinPay — свяжитесь с нами{% endblock %}
+
+{% block extra_css %}
+<style>
+.contacts-hero {
+    padding: 6rem 2rem 3rem;
+    text-align: center;
+}
+.contacts-hero h1 {
+    color: #ffd700;
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    text-shadow: 0 0 30px rgba(255,215,0,0.3);
+}
+.contacts-hero p {
+    color: #aaa;
+    max-width: 600px;
+    margin: 0 auto;
+}
+.section {
+    padding: 4rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.section-title {
+    text-align: center;
+    color: #ffd700;
+    font-size: 2rem;
+    margin-bottom: 3rem;
+}
+.contact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(300px,1fr));
+    gap: 2rem;
+    margin-bottom: 4rem;
+}
+.contact-card {
+    padding: 2.5rem 2rem;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.05);
+    border:1px solid rgba(255,215,0,0.2);
+    backdrop-filter: blur(10px);
+    text-align: center;
+}
+.contact-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+.faq-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+.accordion-item {
+    background: rgba(255,255,255,0.03);
+    border:1px solid rgba(255,215,0,0.15);
+    border-radius:15px;
+    margin-bottom:1rem;
+    overflow:hidden;
+}
+.accordion-button {
+    width: 100%;
+    text-align: left;
+    padding:1.5rem 2rem;
+    border: none;
+    background: none;
+    color: #fff;
+    font-size:1.1rem;
+    font-weight:600;
+    cursor: pointer;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+.accordion-button:hover {
+    color:#ffd700;
+}
+.accordion-icon {
+    font-size: 1.5rem;
+    transition: transform 0.3s ease;
+}
+.accordion-item.open .accordion-icon {
+    transform: rotate(45deg);
+}
+.accordion-content {
+    padding:0 2rem 1.5rem;
+    display:none;
+    color:#aaa;
+    line-height:1.7;
+}
+.accordion-item.open .accordion-content {
+    display:block;
+}
+.reveal {
+    opacity:0;
+    transform: translateY(30px);
+    transition: all 0.6s ease;
+}
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="contacts-hero reveal">
+    <h1>Контакты</h1>
+    <p>Свяжитесь с нами любым удобным для вас способом.</p>
+</section>
+
+<section class="section reveal" id="contacts">
+    <h2 class="section-title">Как связаться</h2>
+    <div class="contact-grid">
+        <div class="contact-card">
+            <div class="contact-icon">📧</div>
+            <h3>Email</h3>
+            <p class="muted">support@zarinpay.local</p>
+        </div>
+        <div class="contact-card reveal delay-1">
+            <div class="contact-icon">📞</div>
+            <h3>Телефон</h3>
+            <p class="muted">+992 44 123 45 67</p>
+        </div>
+        <div class="contact-card reveal delay-2">
+            <div class="contact-icon">📍</div>
+            <h3>Адрес</h3>
+            <p class="muted">Душанбе, проспект Рудаки 1</p>
+        </div>
+        <div class="contact-card reveal delay-3">
+            <div class="contact-icon">🕐</div>
+            <h3>Часы работы</h3>
+            <p class="muted">24/7 — поддержка всегда онлайн</p>
+        </div>
+    </div>
+</section>
+
+<section class="section reveal" id="faq">
+    <h2 class="section-title">FAQ — часто задаваемые вопросы</h2>
+    <div class="faq-container">
+        <div class="accordion-item reveal">
+            <button class="accordion-button">
+                <span>Как открыть счёт в ZarinPay?</span>
+                <span class="accordion-icon">+</span>
+            </button>
+            <div class="accordion-content">
+                Просто зарегистрируйтесь, подтвердите email и перейдите в раздел «Счета». Счёт создаётся автоматически.
+            </div>
+        </div>
+        <div class="accordion-item reveal delay-1">
+            <button class="accordion-button">
+                <span>Как я могу взять кредит?</span>
+                <span class="accordion-icon">+</span>
+            </button>
+            <div class="accordion-content">
+                В разделе «Кредиты» выберите нужную программу, заполните заявку и дождитесь одобрения нашего менеджера.
+            </div>
+        </div>
+        <div class="accordion-item reveal delay-2">
+            <button class="accordion-button">
+                <span>Какие комиссии за переводы?</span>
+                <span class="accordion-icon">+</span>
+            </button>
+            <div class="accordion-content">
+                Внутри банка переводы бесплатные, для внешних переводов комиссия зависит от суммы и валюты, проверьте раздел «Тарифы».
+            </div>
+        </div>
+        <div class="accordion-item reveal delay-3">
+            <button class="accordion-button">
+                <span>Безопасно ли хранить деньги в ZarinPay?</span>
+                <span class="accordion-icon">+</span>
+            </button>
+            <div class="accordion-content">
+                Да, все данные шифруются, счета застрахованы, а активность мониторится 24/7 для предотвращения подозрительных транзакций.
+            </div>
+        </div>
+        <div class="accordion-item reveal delay-2">
+            <button class="accordion-button">
+                <span>Как работает AI-ассистент?</span>
+                <span class="accordion-icon">+</span>
+            </button>
+            <div class="accordion-content">
+                AI-ассистент анализирует ваши транзакции, даёт советы по экономии, помогает с бюджетом и отвечает на ваши вопросы.
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const reveals = document.querySelectorAll('.reveal');
+const obs = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+        if(entry.isIntersecting) entry.target.classList.add('visible');
+    })
+}, {threshold:0.1});
+reveals.forEach(el => obs.observe(el));
+
+const accordions = document.querySelectorAll('.accordion-item');
+accordions.forEach(item => {
+    const btn = item.querySelector('.accordion-button');
+    btn.addEventListener('click', () => {
+        const isOpen = item.classList.contains('open');
+        accordions.forEach(i => i.classList.remove('open'));
+        if (!isOpen) item.classList.add('open');
+    });
+});
+</script>
+{% endblock %}
