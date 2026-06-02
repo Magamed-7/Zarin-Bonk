@@ -7,7 +7,118 @@ from dateutil.relativedelta import relativedelta
 from banking.models import Account
 from transactions.models import Transaction
 from notifications.models import Notification
+from ai_assistant.ai_service import AIService
 from .models import Loan, LoanPayment
+
+def run_credit_scoring(loan, user):
+    """
+    Run AI-powered credit scoring for the loan application
+    """
+    try:
+        # Gather financial history data
+        from django.db.models import Q, Sum
+        
+        user_accounts = Account.objects.filter(user=user, is_deleted=False)
+        transactions = Transaction.objects.filter(
+            Q(sender_account__in=user_accounts) | Q(receiver_account__in=user_accounts),
+            is_deleted=False
+        ).order_by('-created_at')[:100]
+        
+        user_loans = Loan.objects.filter(user=user)
+        
+        # Prepare context for AI
+        context_parts = [
+            f"Клиент: {user.first_name} {user.last_name}",
+            f"Запрашиваемая сумма кредита: {loan.amount} TJS",
+            f"Срок кредита: {loan.term_months} месяцев",
+        ]
+        
+        total_balance = sum(acc.balance for acc in user_accounts)
+        context_parts.append(f"Общий баланс на счетах: {total_balance} TJS")
+        
+        total_income = sum(
+            tx.amount for tx in transactions
+            if tx.receiver_account and tx.receiver_account in user_accounts
+        )
+        total_expense = sum(
+            tx.amount for tx in transactions
+            if tx.sender_account and tx.sender_account in user_accounts
+        )
+        context_parts.append(f"Общий доход за последние транзакции: {total_income} TJS")
+        context_parts.append(f"Общие расходы за последние транзакции: {total_expense} TJS")
+        
+        # Loan history
+        active_loans = user_loans.filter(status__in=['active', 'pending'])
+        closed_loans = user_loans.filter(status='closed')
+        rejected_loans = user_loans.filter(status='rejected')
+        
+        context_parts.append(f"Активные кредиты: {active_loans.count()}")
+        context_parts.append(f"Закрытые кредиты: {closed_loans.count()}")
+        context_parts.append(f"Отклоненные заявки: {rejected_loans.count()}")
+        
+        overdue_payments = LoanPayment.objects.filter(
+            loan__user=user,
+            is_paid=False,
+            is_overdue=True
+        ).count()
+        context_parts.append(f"Просроченные платежи: {overdue_payments}")
+        
+        full_context = "\n".join(context_parts)
+        
+        system_prompt = """Ты кредитный аналитик банка ZarinPay. Оцени кредитоспособность клиента.
+        
+Ответь в следующем формате строго:
+СКОРИНГ: [число от 0 до 100]
+ОБЪЯСНЕНИЕ: [подробное объяснение, почему такой рейтинг]
+
+Пример:
+СКОРИНГ: 75
+ОБЪЯСНЕНИЕ: У клиента стабильный доход, нет просроченных платежей, хорошая кредитная история. Рекомендуется одобрить заявку."""
+        
+        # Call AI service
+        ai_service = AIService()
+        ai_response = ai_service.get_ai_response(
+            "Оцени кредитоспособность клиента.",
+            full_context + "\n\n" + system_prompt
+        )
+        
+        # Parse AI response
+        score = None
+        explanation = ""
+        
+        for line in ai_response.split('\n'):
+            line = line.strip()
+            if line.startswith('СКОРИНГ:'):
+                try:
+                    score = int(line.replace('СКОРИНГ:', '').strip())
+                    # Clamp score between 0 and 100
+                    score = max(0, min(100, score))
+                except ValueError:
+                    pass
+            elif line.startswith('ОБЪЯСНЕНИЕ:'):
+                explanation = line.replace('ОБЪЯСНЕНИЕ:', '').strip()
+            elif explanation:
+                explanation += " " + line
+        
+        # Fallback if parsing failed
+        if score is None:
+            score = 50
+            explanation = "Не удалось получить точный анализ от ИИ. Средний рейтинг по умолчанию."
+        
+        # Save to loan
+        loan.credit_score = score
+        loan.credit_score_explanation = explanation
+        loan.save()
+        
+    except Exception as e:
+        # Fallback in case of any error
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Credit scoring error: {e}")
+        loan.credit_score = 50
+        loan.credit_score_explanation = "Ошибка при анализе кредитоспособности. Средний рейтинг по умолчанию."
+        loan.save()
+
 
 LOAN_PROGRAMS = {
     'consumer': {
@@ -80,6 +191,9 @@ def loans_view(request):
             status=Loan.Status.PENDING,
             manager_comment=f"Программа: {program['name']}. Цель кредита: {purpose}"
         )
+        
+        # Run credit scoring
+        run_credit_scoring(loan, request.user)
 
         # Notify the user
         Notification.objects.create(

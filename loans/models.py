@@ -40,6 +40,15 @@ class Loan(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     manager_comment = models.TextField(blank=True)
+    credit_score = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        help_text='Кредитный рейтинг клиента (0-100)',
+    )
+    credit_score_explanation = models.TextField(
+        blank=True,
+        help_text='Объяснение кредитного рейтинга от ИИ',
+    )
 
     class Meta:
         verbose_name = 'кредит'

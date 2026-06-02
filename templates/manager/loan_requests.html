@@ -42,6 +42,9 @@
                         <p><strong>Ставка:</strong> {{ loan.interest_rate }}%</p>
                         <p><strong>Ежемесячный платёж:</strong> {{ loan.monthly_payment }} TJS</p>
                         <p><strong>Дата заявки:</strong> {{ loan.created_at|date:"d.m.Y H:i" }}</p>
+                        {% if loan.credit_score is not None %}
+                        <p><strong>📊 Кредитный рейтинг:</strong> <span class="credit-score-badge">{{ loan.credit_score }}/100</span></p>
+                        {% endif %}
                         {% if loan.manager_comment %}
                         <p><strong>Комментарий менеджера:</strong> {{ loan.manager_comment }}</p>
                         {% endif %}
@@ -199,6 +202,17 @@
 
 .loan-details strong {
     color: #ffd700;
+}
+
+.credit-score-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    background: rgba(255, 215, 0, 0.2);
+    border: 1px solid rgba(255, 215, 0, 0.5);
+    color: #ffd700;
+    font-weight: bold;
+    font-size: 0.95rem;
 }
 
 .loan-actions {

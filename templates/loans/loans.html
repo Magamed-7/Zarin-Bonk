@@ -50,14 +50,13 @@
             </form>
         </div>
         
-        <!-- Список активных кредитов -->
+        <!-- Список активных и ожидающих кредитов -->
         <div class="loans-list-section">
-            <h2 class="section-title">Активные кредиты</h2>
+            <h2 class="section-title">Мои заявки и кредиты</h2>
             
             {% if loans %}
                 {% for loan_data in loans %}
-                    {% if loan_data.obj.status == 'active' %}
-                    <div class="loan-card glass-card">
+                    <div class="loan-card glass-card {% if loan_data.obj.status == 'closed' %}closed{% endif %}">
                         <div class="loan-header">
                             <div class="loan-info">
                                 <h3>Кредит #{{ loan_data.obj.id }}</h3>
@@ -65,8 +64,26 @@
                                 <p class="loan-term">Срок: {{ loan_data.obj.term_months }} мес.</p>
                                 <p class="loan-rate">Ставка: {{ loan_data.obj.interest_rate }}%</p>
                             </div>
-                            <div class="loan-status active">Активен</div>
+                            <div class="loan-status {{ loan_data.obj.status }}">
+                                {{ loan_data.obj.get_status_display }}
+                            </div>
                         </div>
+                        
+                        <!-- Credit Score Display -->
+                        {% if loan_data.obj.credit_score is not None %}
+                        <div class="credit-score-section">
+                            <h4>📊 Кредитный рейтинг</h4>
+                            <div class="score-display">
+                                <div class="score-circle" data-score="{{ loan_data.obj.credit_score }}">
+                                    <span class="score-number">{{ loan_data.obj.credit_score }}</span>
+                                    <span class="score-label">из 100</span>
+                                </div>
+                                <div class="score-explanation">
+                                    {{ loan_data.obj.credit_score_explanation }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
                         
                         <!-- Прогресс-бар погашения -->
                         <div class="progress-section">
@@ -115,7 +132,8 @@
                             </div>
                         </div>
                         
-                        <!-- Кнопка досрочного погашения -->
+                        <!-- Кнопка досрочного погашения (только для активных кредитов) -->
+                        {% if loan_data.obj.status == 'active' %}
                         <div class="early-repayment">
                             <a href="{% url 'loans:repay_loan' loan_data.obj.id %}" 
                                class="btn-secondary"
@@ -123,48 +141,12 @@
                                 Досрочное погашение
                             </a>
                         </div>
+                        {% endif %}
                     </div>
-                    {% endif %}
                 {% endfor %}
             {% else %}
                 <div class="no-loans">
-                    <p>У вас нет активных кредитов</p>
-                </div>
-            {% endif %}
-        </div>
-        
-        <!-- Закрытые кредиты -->
-        <div class="closed-loans-section">
-            <h2 class="section-title">Закрытые кредиты</h2>
-            
-            {% if loans %}
-                {% for loan_data in loans %}
-                    {% if loan_data.obj.status == 'closed' %}
-                    <div class="loan-card glass-card closed">
-                        <div class="loan-header">
-                            <div class="loan-info">
-                                <h3>Кредит #{{ loan_data.obj.id }}</h3>
-                                <p class="loan-amount">{{ loan_data.obj.amount }} TJS</p>
-                                <p class="loan-term">Срок: {{ loan_data.obj.term_months }} мес.</p>
-                            </div>
-                            <div class="loan-status closed">Закрыт</div>
-                        </div>
-                        
-                        <div class="progress-section">
-                            <div class="progress-info">
-                                <span>Погашено: 100%</span>
-                                <span>{{ loan_data.total_loan_amount }} / {{ loan_data.total_loan_amount }} TJS</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 100%"></div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
-                {% endfor %}
-            {% else %}
-                <div class="no-loans">
-                    <p>Нет закрытых кредитов</p>
+                    <p>У вас нет заявок или кредитов</p>
                 </div>
             {% endif %}
         </div>
@@ -371,6 +353,60 @@
     background: rgba(255, 255, 255, 0.1);
     color: #888;
     border: 1px solid #888;
+}
+
+.credit-score-section {
+    margin: 20px 0;
+    padding: 20px;
+    background: rgba(255, 215, 0, 0.05);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: 15px;
+}
+
+.credit-score-section h4 {
+    color: #ffd700;
+    margin: 0 0 15px 0;
+}
+
+.score-display {
+    display: flex;
+    gap: 25px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.score-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.05));
+    border: 4px solid #ffd700;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+    flex-shrink: 0;
+}
+
+.score-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #ffd700;
+    line-height: 1;
+}
+
+.score-label {
+    font-size: 0.8rem;
+    color: #ccc;
+    margin-top: 5px;
+}
+
+.score-explanation {
+    flex: 1;
+    color: #ccc;
+    line-height: 1.6;
+    font-size: 0.95rem;
 }
 
 .progress-section {

@@ -31,6 +31,22 @@
                 {% endif %}
             </div>
             
+            <!-- Credit Score Display for Manager -->
+            {% if loan.credit_score is not None %}
+            <div class="credit-score-section">
+                <h3>📊 Кредитный рейтинг клиента</h3>
+                <div class="score-display">
+                    <div class="score-circle" data-score="{{ loan.credit_score }}">
+                        <span class="score-number">{{ loan.credit_score }}</span>
+                        <span class="score-label">из 100</span>
+                    </div>
+                    <div class="score-explanation">
+                        {{ loan.credit_score_explanation }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
             {% if loan.status == 'pending' %}
             <div class="loan-actions">
                 <form method="POST" class="action-form">
@@ -158,6 +174,60 @@
 
 .loan-details strong {
     color: #ffd700;
+}
+
+.credit-score-section {
+    margin: 25px 0;
+    padding: 25px;
+    background: rgba(255, 215, 0, 0.08);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 15px;
+}
+
+.credit-score-section h3 {
+    color: #ffd700;
+    margin: 0 0 20px 0;
+}
+
+.score-display {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.score-circle {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.05));
+    border: 5px solid #ffd700;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.25);
+    flex-shrink: 0;
+}
+
+.score-number {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #ffd700;
+    line-height: 1;
+}
+
+.score-label {
+    font-size: 0.85rem;
+    color: #ccc;
+    margin-top: 5px;
+}
+
+.score-explanation {
+    flex: 1;
+    color: #ccc;
+    line-height: 1.7;
+    font-size: 1rem;
 }
 
 .loan-actions {
