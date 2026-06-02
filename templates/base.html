@@ -52,6 +52,11 @@
         </div>
 
         <div class="nav-actions">
+            {% if user.is_authenticated and user.role == 'admin' %}
+            <a href="{% url 'administration:dashboard' %}" class="btn btn-ghost" style="padding: 0.6rem 1rem; border: 1px solid rgba(255, 215, 0, 0.5); border-radius: 10px;">
+                👑 Панель администратора
+            </a>
+            {% endif %}
             {% if user.is_authenticated and user.role == 'manager' %}
             <a href="{% url 'manager:dashboard' %}" class="btn btn-ghost" style="padding: 0.6rem 1rem; border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 10px;">
                 📊 Панель менеджера
@@ -168,6 +173,7 @@
           {% endif %}
           {% if user.is_authenticated and user.role == 'admin' %}
           <a class="footer-link" href="{% url 'manager:loan_requests' %}" style="color: #ffd700;">Кабинет менеджера</a>
+          <a class="footer-link" href="{% url 'administration:dashboard' %}" style="color: #ffd700;">👑 Панель администратора</a>
           {% endif %}
         </div>
         <div class="footer-col">

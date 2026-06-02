@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     'banking',
     'transactions',
     'loans',
-    'deposits',
     'budget',
     'goals',
     'notifications',

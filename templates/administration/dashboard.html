@@ -1,0 +1,265 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Административная панель — ZarinPay{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>👑 Административная панель</h1>
+            <p class="dashboard-subtitle">Общая статистика и аналитика</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card glass-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-content">
+                    <h3 class="stat-value">{{ total_users }}</h3>
+                    <p class="stat-label">Пользователи</p>
+                </div>
+            </div>
+
+            <div class="stat-card glass-card">
+                <div class="stat-icon">💳</div>
+                <div class="stat-content">
+                    <h3 class="stat-value">{{ total_transactions }}</h3>
+                    <p class="stat-label">Транзакции</p>
+                </div>
+            </div>
+
+            <div class="stat-card glass-card">
+                <div class="stat-icon">🏦</div>
+                <div class="stat-content">
+                    <h3 class="stat-value">{{ total_loans }}</h3>
+                    <p class="stat-label">Кредиты</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-section">
+            <div class="chart-card glass-card">
+                <h2 class="chart-title">📈 Рост пользователей (12 месяцев)</h2>
+                <canvas id="usersChart"></canvas>
+            </div>
+
+            <div class="chart-card glass-card">
+                <h2 class="chart-title">📊 Рост транзакций (12 месяцев)</h2>
+                <canvas id="transactionsChart"></canvas>
+            </div>
+
+            <div class="chart-card glass-card">
+                <h2 class="chart-title">🏦 Рост кредитов (12 месяцев)</h2>
+                <canvas id="loansChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+    // Prepare chart data
+    const months = JSON.parse('{{ months|safe }}');
+    const userCounts = JSON.parse('{{ user_counts|safe }}');
+    const transactionCounts = JSON.parse('{{ transaction_counts|safe }}');
+    const loanCounts = JSON.parse('{{ loan_counts|safe }}');
+
+    // Chart options
+    const chartOptions = {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: 'rgba(255, 215, 0, 0.1)'
+                },
+                ticks: {
+                    color: '#ccc'
+                }
+            },
+            x: {
+                grid: {
+                    color: 'rgba(255, 215, 0, 0.1)'
+                },
+                ticks: {
+                    color: '#ccc'
+                }
+            }
+        }
+    };
+
+    // Users Chart
+    new Chart(document.getElementById('usersChart'), {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Пользователи',
+                data: userCounts,
+                borderColor: '#ffd700',
+                backgroundColor: 'rgba(255, 215, 0, 0.2)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: chartOptions
+    });
+
+    // Transactions Chart
+    new Chart(document.getElementById('transactionsChart'), {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Транзакции',
+                data: transactionCounts,
+                borderColor: '#ff9500',
+                backgroundColor: 'rgba(255, 149, 0, 0.2)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: chartOptions
+    });
+
+    // Loans Chart
+    new Chart(document.getElementById('loansChart'), {
+        type: 'bar',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Кредиты',
+                data: loanCounts,
+                backgroundColor: 'rgba(0, 188, 212, 0.7)',
+                borderColor: '#00bcd4',
+                borderWidth: 2
+            }]
+        },
+        options: chartOptions
+    });
+</script>
+
+<style>
+.admin-dashboard {
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0a0a1a 100%);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.dashboard-header h1 {
+    color: #ffd700;
+    font-size: 2.8rem;
+    margin: 20px 0 10px;
+}
+
+.dashboard-subtitle {
+    color: #ccc;
+    font-size: 1.15rem;
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 25px;
+    margin-bottom: 50px;
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-icon {
+    font-size: 3.5rem;
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-value {
+    color: #ffd700;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 0 5px;
+}
+
+.stat-label {
+    color: #ccc;
+    font-size: 1.05rem;
+    margin: 0;
+}
+
+/* Charts Section */
+.charts-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(550px, 1fr));
+    gap: 25px;
+}
+
+.chart-card {
+    transition: transform 0.3s ease;
+}
+
+.chart-card:hover {
+    transform: translateY(-3px);
+}
+
+.chart-title {
+    color: #ffd700;
+    font-size: 1.4rem;
+    margin: 0 0 20px;
+}
+
+@media (max-width: 1200px) {
+    .charts-section {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-header h1 {
+        font-size: 2rem;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+    }
+}
+</style>
+{% endblock %}
