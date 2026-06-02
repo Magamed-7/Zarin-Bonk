@@ -8,7 +8,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const apiUrl = chatForm.dataset.apiUrl;
 
     // Прокрутка вниз при загрузке
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    scrollToBottom();
+
+    // Авто-ресайз textarea
+    messageInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+    });
 
     chatForm.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -16,14 +22,22 @@ document.addEventListener('DOMContentLoaded', function() {
         const messageText = messageInput.value.trim();
         if (!messageText) return;
         
+        // Удаляем empty-chat если есть
+        const emptyChat = chatMessages.querySelector('.empty-chat');
+        if (emptyChat) emptyChat.remove();
+        
         // Блокируем кнопку
         sendBtn.disabled = true;
         btnText.style.display = 'none';
-        btnLoading.style.display = 'inline';
+        btnLoading.style.display = 'flex';
         
         // Добавляем сообщение пользователя в чат сразу
         addMessage(messageText, 'user');
         messageInput.value = '';
+        messageInput.style.height = 'auto';
+        
+        // Показываем индикатор печатания
+        const typingIndicator = addTypingIndicator();
         
         // Отправляем запрос
         fetch(apiUrl, {
@@ -38,6 +52,9 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
+            // Удаляем индикатор печатания
+            removeTypingIndicator(typingIndicator);
+            
             if (data.success) {
                 addMessage(data.message, 'ai');
             } else {
@@ -46,6 +63,8 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Error:', error);
+            // Удаляем индикатор печатания
+            removeTypingIndicator(typingIndicator);
             addMessage('Произошла ошибка при отправке сообщения.', 'ai');
         })
         .finally(() => {
@@ -78,6 +97,36 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         
         chatMessages.appendChild(messageDiv);
+        scrollToBottom();
+    }
+    
+    function addTypingIndicator() {
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'typing-indicator';
+        typingDiv.id = 'typing-indicator';
+        typingDiv.innerHTML = `
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+        `;
+        chatMessages.appendChild(typingDiv);
+        scrollToBottom();
+        return typingDiv;
+    }
+    
+    function removeTypingIndicator(indicator) {
+        if (indicator && indicator.parentNode) {
+            indicator.style.opacity = '0';
+            indicator.style.transition = 'opacity 0.3s ease';
+            setTimeout(() => {
+                if (indicator.parentNode) {
+                    indicator.parentNode.removeChild(indicator);
+                }
+            }, 300);
+        }
+    }
+    
+    function scrollToBottom() {
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
     
