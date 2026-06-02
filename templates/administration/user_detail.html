@@ -6,12 +6,12 @@
 <div class="admin-page">
     <div class="container">
         <nav class="admin-nav">
-            <a href="{% url 'administration:dashboard' %}" class="admin-nav-link">
-                Дашборд
-            </a>
-            <a href="{% url 'administration:user_list' %}" class="admin-nav-link">
-                Пользователи
-            </a>
+            <a href="{% url 'administration:dashboard' %}" class="admin-nav-link">Дашборд</a>
+            <a href="{% url 'administration:user_list' %}" class="admin-nav-link">Пользователи</a>
+            <a href="{% url 'administration:transactions' %}" class="admin-nav-link">Транзакции</a>
+            <a href="{% url 'administration:settings' %}" class="admin-nav-link">Настройки банка</a>
+            <a href="{% url 'administration:exchange_rates' %}" class="admin-nav-link active">Курсы валют</a>
+            <a href="{% url 'administration:loan_programs' %}" class="admin-nav-link">Кредитные программы</a>
         </nav>
         
         <div class="profile-header glass-card">

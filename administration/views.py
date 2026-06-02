@@ -10,9 +10,10 @@ import json
 
 from accounts.models import User
 from accounts.decorators import admin_required
-from banking.models import Account
+from banking.models import Account, BankSettings, ExchangeRate
 from transactions.models import Transaction
-from loans.models import Loan
+from loans.models import Loan, LoanProgram
+from .forms import BankSettingsForm, ExchangeRateForm, LoanProgramForm
 
 
 @method_decorator(login_required, name='dispatch')
@@ -162,4 +163,170 @@ class ToggleBlockView(generic.View):
             messages.success(request, f'Пользователь {user.username} заблокирован')
         
         return redirect('administration:user_detail', user_id=user.id)
+
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(admin_required, name='dispatch')
+class TransactionListView(generic.ListView):
+    model = Transaction
+    template_name = 'administration/transactions.html'
+    context_object_name = 'transactions'
+    ordering = ['-created_at']
+    paginate_by = 20
+
+    def get_queryset(self):
+        queryset = Transaction.objects.filter(is_deleted=False).select_related(
+            'sender_account', 'receiver_account',
+            'sender_account__user', 'receiver_account__user'
+        )
+        # Фильтры
+        type_filter = self.request.GET.get('type', '')
+        search_query = self.request.GET.get('search', '')
+        
+        if type_filter:
+            queryset = queryset.filter(transaction_type=type_filter)
+        
+        if search_query:
+            queryset = queryset.filter(
+                Q(sender_account__user__username__icontains=search_query) |
+                Q(receiver_account__user__username__icontains=search_query) |
+                Q(description__icontains=search_query)
+            )
+        
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Общая статистика
+        total_turnover = Transaction.objects.filter(
+            is_deleted=False, transaction_type='transfer'
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        total_deposits = Transaction.objects.filter(
+            is_deleted=False, transaction_type='deposit'
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        total_withdrawals = Transaction.objects.filter(
+            is_deleted=False, transaction_type='withdrawal'
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        context['total_turnover'] = total_turnover
+        context['total_deposits'] = total_deposits
+        context['total_withdrawals'] = total_withdrawals
+        context['type_filter'] = self.request.GET.get('type', '')
+        context['search_query'] = self.request.GET.get('search', '')
+        return context
+
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(admin_required, name='dispatch')
+class BankSettingsView(generic.UpdateView):
+    model = BankSettings
+    template_name = 'administration/settings.html'
+    form_class = BankSettingsForm
+    context_object_name = 'settings'
+
+    def get_object(self, queryset=None):
+        return BankSettings.get_settings()
+
+    def get_success_url(self):
+        return self.request.path
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Настройки банка успешно обновлены!')
+        return super().form_valid(form)
+
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(admin_required, name='dispatch')
+class ExchangeRateListView(generic.ListView):
+    model = ExchangeRate
+    template_name = 'administration/exchange_rates.html'
+    context_object_name = 'rates'
+
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(admin_required, name='dispatch')
+class ExchangeRateCreateView(generic.CreateView):
+    model = ExchangeRate
+    template_name = 'administration/exchange_rate_form.html'
+    form_class = ExchangeRateForm
+    success_url = '/administration/exchange-rates/'
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Курс валют успешно добавлен!')
+        return super().form_valid(form)
+
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(admin_required, name='dispatch')
+class ExchangeRateUpdateView(generic.UpdateView):
+    model = ExchangeRate
+    template_name = 'administration/exchange_rate_form.html'
+    form_class = ExchangeRateForm
+    pk_url_kwarg = 'rate_id'
+    success_url = '/administration/exchange-rates/'
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Курс валют успешно обновлен!')
+        return super().form_valid(form)
+
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(admin_required, name='dispatch')
+class ExchangeRateDeleteView(generic.DeleteView):
+    model = ExchangeRate
+    pk_url_kwarg = 'rate_id'
+    success_url = '/administration/exchange-rates/'
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, 'Курс валют успешно удалён!')
+        return super().delete(request, *args, **kwargs)
+
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(admin_required, name='dispatch')
+class LoanProgramListView(generic.ListView):
+    model = LoanProgram
+    template_name = 'administration/loan_programs.html'
+    context_object_name = 'programs'
+
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(admin_required, name='dispatch')
+class LoanProgramCreateView(generic.CreateView):
+    model = LoanProgram
+    template_name = 'administration/loan_program_form.html'
+    form_class = LoanProgramForm
+    success_url = '/administration/loan-programs/'
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Кредитная программа успешно добавлена!')
+        return super().form_valid(form)
+
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(admin_required, name='dispatch')
+class LoanProgramUpdateView(generic.UpdateView):
+    model = LoanProgram
+    template_name = 'administration/loan_program_form.html'
+    form_class = LoanProgramForm
+    pk_url_kwarg = 'program_id'
+    success_url = '/administration/loan-programs/'
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Кредитная программа успешно обновлена!')
+        return super().form_valid(form)
+
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(admin_required, name='dispatch')
+class LoanProgramDeleteView(generic.DeleteView):
+    model = LoanProgram
+    pk_url_kwarg = 'program_id'
+    success_url = '/administration/loan-programs/'
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, 'Кредитная программа успешно удалена!')
+        return super().delete(request, *args, **kwargs)
 

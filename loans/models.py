@@ -4,6 +4,48 @@ from django.conf import settings
 from django.db import models
 
 
+class LoanProgram(models.Model):
+    name = models.CharField(max_length=100, verbose_name='Название программы')
+    description = models.TextField(blank=True, verbose_name='Описание')
+    min_amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=Decimal('1000.00'),
+        verbose_name='Минимальная сумма'
+    )
+    max_amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=Decimal('1000000.00'),
+        verbose_name='Максимальная сумма'
+    )
+    min_term = models.PositiveIntegerField(
+        default=3,
+        verbose_name='Минимальный срок (месяцев)'
+    )
+    max_term = models.PositiveIntegerField(
+        default=60,
+        verbose_name='Максимальный срок (месяцев)'
+    )
+    interest_rate = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=Decimal('15.00'),
+        verbose_name='Процентная ставка (%)'
+    )
+    is_active = models.BooleanField(default=True, verbose_name='Активна')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'кредитная программа'
+        verbose_name_plural = 'кредитные программы'
+        ordering = ['-is_active', 'name']
+
+    def __str__(self):
+        return self.name
+
+
 class Loan(models.Model):
     class Status(models.TextChoices):
         PENDING = 'pending', 'На рассмотрении'
@@ -16,6 +58,14 @@ class Loan(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='loans',
+    )
+    program = models.ForeignKey(
+        LoanProgram,
+        on_delete=models.PROTECT,
+        related_name='loans',
+        null=True,
+        blank=True,
+        help_text='Кредитная программа'
     )
     amount = models.DecimalField(
         max_digits=12,

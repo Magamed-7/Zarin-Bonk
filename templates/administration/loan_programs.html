@@ -1,0 +1,292 @@
+{% extends 'base.html' %}
+
+{% block title %}Кредитные программы — ZarinPay{% endblock %}
+
+{% block content %}
+<div class="admin-page">
+    <div class="container">
+        <nav class="admin-nav">
+            <a href="{% url 'administration:dashboard' %}" class="admin-nav-link">Дашборд</a>
+            <a href="{% url 'administration:user_list' %}" class="admin-nav-link">Пользователи</a>
+            <a href="{% url 'administration:transactions' %}" class="admin-nav-link">Транзакции</a>
+            <a href="{% url 'administration:settings' %}" class="admin-nav-link">Настройки банка</a>
+            <a href="{% url 'administration:exchange_rates' %}" class="admin-nav-link">Курсы валют</a>
+            <a href="{% url 'administration:loan_programs' %}" class="admin-nav-link active">Кредитные программы</a>
+        </nav>
+
+        <div class="page-header">
+            <h1 class="page-title">Кредитные программы</h1>
+            <a href="{% url 'administration:loan_program_add' %}" class="btn-primary">➕ Добавить программу</a>
+        </div>
+
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message glass-card">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="programs-grid">
+            {% for program in programs %}
+            <div class="program-card glass-card {% if not program.is_active %}inactive{% endif %}">
+                <div class="program-header">
+                    <h3>{{ program.name }}</h3>
+                    {% if program.is_active %}
+                    <span class="badge active">Активна</span>
+                    {% else %}
+                    <span class="badge" style="background: rgba(255,107,107,0.2); border:1px solid #ff6b6b;">Неактивна</span>
+                    {% endif %}
+                </div>
+                {% if program.description %}
+                <p class="program-description">{{ program.description }}</p>
+                {% endif %}
+                <div class="program-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Мин. сумма</span>
+                        <span class="detail-value">{{ program.min_amount|floatformat:2 }} TJS</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Макс. сумма</span>
+                        <span class="detail-value">{{ program.max_amount|floatformat:2 }} TJS</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Мин. срок</span>
+                        <span class="detail-value">{{ program.min_term }} мес.</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Макс. срок</span>
+                        <span class="detail-value">{{ program.max_term }} мес.</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Ставка</span>
+                        <span class="detail-value highlight">{{ program.interest_rate }}%</span>
+                    </div>
+                </div>
+                <div class="program-actions">
+                    <a href="{% url 'administration:loan_program_edit' program.pk %}" class="btn-secondary">✏️ Редактировать</a>
+                    <form method="post" action="{% url 'administration:loan_program_delete' program.pk %}" style="display:inline;" onsubmit="return confirm('Удалить программу?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-danger">🗑️ Удалить</button>
+                    </form>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty glass-card">
+                <p>Нет кредитных программ</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+.admin-page {
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0a0a1a 100%);
+    min-height: 100vh;
+}
+
+.admin-nav {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    flex-wrap: wrap;
+}
+
+.admin-nav-link {
+    padding: 10px 20px;
+    color: #888;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.admin-nav-link:hover {
+    color: #ffd700;
+    background: rgba(255, 215, 0, 0.1);
+}
+
+.admin-nav-link.active {
+    color: #0a0a1a;
+    background: linear-gradient(135deg, #ffd700, #ffaa00);
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.page-title {
+    color: #ffd700;
+    font-size: 2.5rem;
+    margin: 0;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.glass-card:hover {
+    transform: translateY(-5px);
+}
+
+.program-card.inactive {
+    opacity: 0.6;
+}
+
+.programs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 20px;
+}
+
+.program-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.program-header h3 {
+    color: #ffd700;
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+.badge {
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    background: rgba(72,199,116,0.2);
+    color: #48c774;
+    border: 1px solid #48c774;
+}
+
+.program-description {
+    color: #aaa;
+    margin-bottom: 20px;
+}
+
+.program-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-label {
+    color: #888;
+    font-size: 0.85rem;
+}
+
+.detail-value {
+    color: #fff;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.detail-value.highlight {
+    color: #ffd700;
+}
+
+.program-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%);
+    color: #0a0a1a;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    flex:1;
+    text-align:center;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 215, 0, 0.1);
+    color: #ffd700;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex:1;
+}
+
+.btn-danger:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+}
+
+.empty {
+    text-align: center;
+    color: #888;
+    padding: 60px;
+    grid-column: 1/-1;
+}
+</style>
+{% endblock %}
