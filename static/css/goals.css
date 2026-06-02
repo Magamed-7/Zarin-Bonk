@@ -96,6 +96,22 @@
   margin: 0;
 }
 
+.goals-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold), #e6ac00);
+  color: #0b1020;
+}
+
+.btn-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+}
+
 /* Goals Grid */
 .goals-grid {
   display: grid;

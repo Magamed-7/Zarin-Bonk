@@ -1,0 +1,296 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ИИ Финансовый планер — ZarinPay{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/goals.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="ai-planner-page">
+    <div class="container">
+        <div class="planner-header">
+            <a href="{% url 'goals:goal_list' %}" class="btn btn-secondary">← Назад к целям</a>
+            <h1>🤖 ИИ Финансовый планер</h1>
+            <p class="planner-subtitle">Создадим пошаговый план для достижения вашей цели</p>
+        </div>
+
+        {% if not ai_plan %}
+        <div class="planner-form-section glass-card">
+            <form method="POST" class="planner-form">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="{{ form.goal_title.id_for_label }}">{{ form.goal_title.label }}</label>
+                    {{ form.goal_title }}
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.target_amount.id_for_label }}">{{ form.target_amount.label }}</label>
+                        {{ form.target_amount }}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.deadline_months.id_for_label }}">{{ form.deadline_months.label }}</label>
+                        {{ form.deadline_months }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+                    {{ form.description }}
+                </div>
+
+                <button type="submit" class="btn btn-primary">✨ Сгенерировать план</button>
+            </form>
+        </div>
+        {% else %}
+        <div class="planner-result-section">
+            <div class="plan-summary glass-card">
+                <h2>📊 Сводка по цели</h2>
+                <div class="summary-stats">
+                    <div class="summary-stat">
+                        <span class="stat-label">Цель:</span>
+                        <span class="stat-value">{{ plan_data.title }}</span>
+                    </div>
+                    <div class="summary-stat">
+                        <span class="stat-label">Целевая сумма:</span>
+                        <span class="stat-value">{{ plan_data.target_amount }} TJS</span>
+                    </div>
+                    <div class="summary-stat">
+                        <span class="stat-label">Срок:</span>
+                        <span class="stat-value">{{ plan_data.deadline_months }} месяцев</span>
+                    </div>
+                    <div class="summary-stat">
+                        <span class="stat-label">Дедлайн:</span>
+                        <span class="stat-value">{{ plan_data.deadline_date|date:"d.m.Y" }}</span>
+                    </div>
+                    <div class="summary-stat highlight">
+                        <span class="stat-label">Ежемесячные накопления:</span>
+                        <span class="stat-value">{{ plan_data.monthly_payment }} TJS</span>
+                    </div>
+                </div>
+
+                <form method="POST" action="{% url 'goals:create_from_plan' %}" class="create-goal-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="title" value="{{ plan_data.title }}">
+                    <input type="hidden" name="target_amount" value="{{ plan_data.target_amount }}">
+                    <input type="hidden" name="deadline_date" value="{{ plan_data.deadline_date|date:'Y-m-d' }}">
+                    <button type="submit" class="btn btn-gold">🎯 Создать цель по этому плану</button>
+                </form>
+            </div>
+
+            <div class="plan-content glass-card">
+                <h2>📝 План от ИИ</h2>
+                <div class="plan-text">
+                    {{ ai_plan|linebreaks }}
+                </div>
+            </div>
+
+            <div class="planner-actions">
+                <a href="{% url 'goals:ai_planner' %}" class="btn btn-secondary">🔄 Создать новый план</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.ai-planner-page {
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0a0a1a 100%);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.planner-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.planner-header h1 {
+    color: #ffd700;
+    font-size: 2.5rem;
+    margin: 20px 0 10px;
+}
+
+.planner-subtitle {
+    color: #ccc;
+    font-size: 1.1rem;
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.planner-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    color: #ffd700;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-input {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: #fff;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #ffd700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+.form-input::placeholder {
+    color: rgba(204, 204, 204, 0.5);
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 28px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%);
+    color: #0a0a1a;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(255, 215, 0, 0.4);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ccc;
+    border: 2px solid rgba(255, 215, 0, 0.3);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 215, 0, 0.1);
+    border-color: #ffd700;
+    color: #ffd700;
+}
+
+.btn-gold {
+    background: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%);
+    color: #0a0a1a;
+    font-size: 1.1rem;
+    padding: 14px 32px;
+}
+
+.btn-gold:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(255, 215, 0, 0.4);
+}
+
+.plan-summary h2, .plan-content h2 {
+    color: #ffd700;
+    margin-bottom: 25px;
+    font-size: 1.6rem;
+}
+
+.summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.summary-stat {
+    background: rgba(255, 215, 0, 0.05);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.summary-stat.highlight {
+    background: rgba(255, 215, 0, 0.15);
+    border-color: rgba(255, 215, 0, 0.5);
+}
+
+.stat-label {
+    color: #ccc;
+    font-size: 0.85rem;
+}
+
+.stat-value {
+    color: #fff;
+    font-size: 1.15rem;
+    font-weight: 600;
+}
+
+.create-goal-form {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.plan-text {
+    color: #fff;
+    line-height: 1.8;
+    font-size: 1rem;
+}
+
+.planner-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .planner-header h1 {
+        font-size: 1.8rem;
+    }
+}
+</style>
+{% endblock %}

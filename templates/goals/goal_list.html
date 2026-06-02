@@ -35,7 +35,10 @@
 
   <div class="goals-section-header">
     <h2>Мои цели</h2>
-    <a href="{% url 'goals:goal_create' %}" class="btn btn-primary">➕ Создать цель</a>
+    <div class="goals-actions">
+      <a href="{% url 'goals:ai_planner' %}" class="btn btn-gold">🤖 ИИ-планер</a>
+      <a href="{% url 'goals:goal_create' %}" class="btn btn-primary">➕ Создать цель</a>
+    </div>
   </div>
 
   {% if goals %}
