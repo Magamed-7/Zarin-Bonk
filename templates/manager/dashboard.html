@@ -76,8 +76,15 @@
                         <span class="tx-date">{{ tx.created_at|date:"d.m.Y H:i" }}</span>
                     </div>
                     <span class="tx-amount {% if tx.transaction_type == 'deposit' %}income{% else %}expense{% endif %}">
-                        {{ tx.amount }} {{ tx.sender_account.currency|default:tx.receiver_account.currency|default:"TJS" }}
-                    </span>
+                    {{ tx.amount }} 
+                    {% if tx.sender_account %}
+                        {{ tx.sender_account.currency }}
+                    {% elif tx.receiver_account %}
+                        {{ tx.receiver_account.currency }}
+                    {% else %}
+                        TJS
+                    {% endif %}
+                </span>
                 </div>
                 {% endfor %}
             </div>
