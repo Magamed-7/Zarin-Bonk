@@ -33,11 +33,23 @@
     </div>
   {% endif %}
 
-  {# Диаграмма расходов #}
+  {# Диаграммы доходов/расходов #}
   <div class="budget-chart-section">
-    <h2>Расходы по категориям</h2>
+    <div class="budget-tabs">
+      <button class="budget-tab budget-tab--active" data-tab="expense">💰 Расходы</button>
+      <button class="budget-tab" data-tab="income">💵 Доходы</button>
+    </div>
     <div class="budget-chart-container">
-      <canvas id="budgetChart"></canvas>
+      <div class="budget-total" id="expenseTotal">
+        <span class="budget-total-label">Общий расход за месяц:</span>
+        <span class="budget-total-value budget-total-value--expense">{{ total_expense|floatformat:2 }} TJS</span>
+      </div>
+      <div class="budget-total budget-total--hidden" id="incomeTotal">
+        <span class="budget-total-label">Общий доход за месяц:</span>
+        <span class="budget-total-value budget-total-value--income">{{ total_income|floatformat:2 }} TJS</span>
+      </div>
+      <canvas id="expenseChart"></canvas>
+      <canvas id="incomeChart" class="budget-chart--hidden"></canvas>
     </div>
   </div>
 
@@ -98,21 +110,23 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    const ctx = document.getElementById('budgetChart');
+    let expenseChart, incomeChart;
     
-    if (ctx) {
-      const chartLabels = {{ chart_labels|safe }};
-      const chartData = {{ chart_data|safe }};
-      const chartColors = {{ chart_colors|safe }};
-
-      if (chartLabels.length > 0) {
-        new Chart(ctx, {
+    // Инициализация диаграммы расходов
+    const expenseCtx = document.getElementById('expenseChart');
+    if (expenseCtx) {
+      const expenseLabels = {{ expense_labels|safe }};
+      const expenseData = {{ expense_data|safe }};
+      const expenseColors = {{ expense_colors|safe }};
+      
+      if (expenseLabels.length > 0) {
+        expenseChart = new Chart(expenseCtx, {
           type: 'doughnut',
           data: {
-            labels: chartLabels,
+            labels: expenseLabels,
             datasets: [{
-              data: chartData,
-              backgroundColor: chartColors,
+              data: expenseData,
+              backgroundColor: expenseColors,
               borderWidth: 2,
               borderColor: '#1a1a2e'
             }]
@@ -144,9 +158,96 @@
           }
         });
       } else {
-        ctx.parentElement.innerHTML = '<p class="budget-chart-empty">Нет данных для отображения</p>';
+        expenseCtx.parentElement.innerHTML = '<p class="budget-chart-empty">Нет данных для отображения</p>';
       }
     }
+    
+    // Инициализация диаграммы доходов
+    const incomeCtx = document.getElementById('incomeChart');
+    if (incomeCtx) {
+      const incomeLabels = {{ income_labels|safe }};
+      const incomeData = {{ income_data|safe }};
+      const incomeColors = {{ income_colors|safe }};
+      
+      if (incomeLabels.length > 0) {
+        incomeChart = new Chart(incomeCtx, {
+          type: 'doughnut',
+          data: {
+            labels: incomeLabels,
+            datasets: [{
+              data: incomeData,
+              backgroundColor: incomeColors,
+              borderWidth: 2,
+              borderColor: '#1a1a2e'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: {
+                  color: '#e8eaf6',
+                  padding: 20,
+                  font: {
+                    size: 14
+                  }
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const label = context.label || '';
+                    const value = context.parsed || 0;
+                    return `${label}: ${value.toFixed(2)} TJS`;
+                  }
+                }
+              }
+            }
+          }
+        });
+      } else {
+        incomeCtx.parentElement.innerHTML = '<p class="budget-chart-empty">Нет данных для отображения</p>';
+      }
+    }
+    
+    // Переключение вкладок
+    const tabs = document.querySelectorAll('.budget-tab');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', function() {
+        // Удаляем активный класс со всех вкладок
+        tabs.forEach(t => t.classList.remove('budget-tab--active'));
+        
+        // Добавляем активный класс текущей вкладке
+        this.classList.add('budget-tab--active');
+        
+        const tabType = this.getAttribute('data-tab');
+        
+        // Переключаем диаграммы и суммы
+        const expenseChartEl = document.getElementById('expenseChart');
+        const incomeChartEl = document.getElementById('incomeChart');
+        const expenseTotal = document.getElementById('expenseTotal');
+        const incomeTotal = document.getElementById('incomeTotal');
+        
+        // Сначала скрываем всё
+        expenseChartEl.classList.add('budget-chart--hidden');
+        incomeChartEl.classList.add('budget-chart--hidden');
+        expenseTotal.classList.add('budget-total--hidden');
+        incomeTotal.classList.add('budget-total--hidden');
+        
+        // Потом показываем нужное
+        if (tabType === 'expense') {
+          expenseChartEl.classList.remove('budget-chart--hidden');
+          expenseTotal.classList.remove('budget-total--hidden');
+          if (expenseChart) expenseChart.resize();
+        } else {
+          incomeChartEl.classList.remove('budget-chart--hidden');
+          incomeTotal.classList.remove('budget-total--hidden');
+          if (incomeChart) incomeChart.resize();
+        }
+      });
+    });
   });
 </script>
 {% endblock %}

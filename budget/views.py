@@ -38,7 +38,8 @@ class BudgetListView(LoginRequiredMixin, generic.ListView):
             'transport': 'Транспорт',
         }
         
-        transactions = Transaction.objects.filter(
+        # --- Данные для расходов ---
+        expense_transactions = Transaction.objects.filter(
             sender_account__in=user_accounts,
             status=Transaction.Status.COMPLETED,
             is_deleted=False,
@@ -46,36 +47,69 @@ class BudgetListView(LoginRequiredMixin, generic.ListView):
             created_at__year=current_year
         )
         
-        category_totals = {}
+        expense_totals = {}
+        total_expense = 0
         
-        for tx in transactions:
+        for tx in expense_transactions:
             tx_category = tx.category or 'Прочее'
-            
             budget_category_name = category_map.get(tx_category, tx_category)
             
-            if budget_category_name not in category_totals:
-                category_totals[budget_category_name] = 0
-            category_totals[budget_category_name] += float(tx.amount)
+            if budget_category_name not in expense_totals:
+                expense_totals[budget_category_name] = 0
+            expense_totals[budget_category_name] += float(tx.amount)
+            total_expense += float(tx.amount)
         
-        chart_labels = []
-        chart_data = []
-        chart_colors = []
+        expense_labels = []
+        expense_data = []
+        expense_colors = []
         
         budget_categories = {bc.name: bc for bc in BudgetCategory.objects.all()}
         
-        for cat_name, total in category_totals.items():
+        for cat_name, total in expense_totals.items():
             if total > 0:
-                chart_labels.append(cat_name)
-                chart_data.append(total)
-                
-                if cat_name in budget_categories:
-                    chart_colors.append(budget_categories[cat_name].color)
-                else:
-                    chart_colors.append('#888888') 
+                expense_labels.append(cat_name)
+                expense_data.append(total)
+                expense_colors.append(budget_categories[cat_name].color if cat_name in budget_categories else '#888888')
         
-        context['chart_labels'] = chart_labels
-        context['chart_data'] = chart_data
-        context['chart_colors'] = chart_colors
+        income_transactions = Transaction.objects.filter(
+            receiver_account__in=user_accounts,
+            status=Transaction.Status.COMPLETED,
+            is_deleted=False,
+            created_at__month=current_month,
+            created_at__year=current_year
+        )
+        
+        income_totals = {}
+        total_income = 0
+        
+        for tx in income_transactions:
+            tx_type = tx.get_transaction_type_display() or 'Доход'
+            
+            if tx_type not in income_totals:
+                income_totals[tx_type] = 0
+            income_totals[tx_type] += float(tx.amount)
+            total_income += float(tx.amount)
+        
+        income_labels = []
+        income_data = []
+        income_colors = []
+        income_color_palette = ['#48c774', '#3298dc', '#209cee', '#10a881', '#059669']
+        
+        for i, (cat_name, total) in enumerate(income_totals.items()):
+            if total > 0:
+                income_labels.append(cat_name)
+                income_data.append(total)
+                income_colors.append(income_color_palette[i % len(income_color_palette)])
+        
+        context['expense_labels'] = expense_labels
+        context['expense_data'] = expense_data
+        context['expense_colors'] = expense_colors
+        context['total_expense'] = total_expense
+        
+        context['income_labels'] = income_labels
+        context['income_data'] = income_data
+        context['income_colors'] = income_colors
+        context['total_income'] = total_income
       
         over_limit_budgets = [b for b in budgets if b.is_exceeded]
         context['over_limit_budgets'] = over_limit_budgets

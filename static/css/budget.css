@@ -441,6 +441,79 @@
   text-align: center;
 }
 
+/* Tabs */
+.budget-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0.5rem;
+  border-radius: 12px;
+}
+
+.budget-tab {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-secondary, #8892b0);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.budget-tab:hover {
+  color: var(--text-primary, #e8eaf6);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.budget-tab--active {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.08));
+  color: var(--gold, #ffd700);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+/* Total */
+.budget-total {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+}
+
+.budget-total--hidden {
+  display: none;
+}
+
+.budget-total-label {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--text-secondary, #8892b0);
+  margin-bottom: 0.5rem;
+}
+
+.budget-total-value {
+  display: block;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.budget-total-value--expense {
+  color: #ff6b6b;
+}
+
+.budget-total-value--income {
+  color: #48c774;
+}
+
+/* Hidden Chart */
+.budget-chart--hidden {
+  display: none;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .budget-cards-grid {
