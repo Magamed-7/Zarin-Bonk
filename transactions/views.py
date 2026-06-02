@@ -7,8 +7,10 @@ from django.contrib import messages
 from django.views import generic
 from django.http import HttpResponse
 from django.utils.decorators import method_decorator
+from django.utils import timezone
 from banking.models import Account
 from notifications.models import Notification
+from budget.models import Budget, BudgetCategory
 from .models import Transaction, PaymentTemplate
 import datetime
 
@@ -19,6 +21,45 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+
+
+
+TRANSACTION_CATEGORY_TO_BUDGET_CATEGORY = {
+    'internet': 'Интернет',
+    'phone': 'Связь',
+    'utilities': 'ЖКХ',
+    'shopping': 'Покупки',
+    'food': 'Еда',
+    'transport': 'Транспорт',
+}
+
+
+def update_budget(user, transaction_category_id, amount):
+    if transaction_category_id not in TRANSACTION_CATEGORY_TO_BUDGET_CATEGORY:
+        return
+    
+    budget_category_name = TRANSACTION_CATEGORY_TO_BUDGET_CATEGORY[transaction_category_id]
+    
+    try:
+        budget_category = BudgetCategory.objects.get(name=budget_category_name)
+    except BudgetCategory.DoesNotExist:
+        return
+    
+    now = timezone.now()
+    current_month = now.month
+    current_year = now.year
+    
+    budget = Budget.objects.filter(
+        user=user,
+        category=budget_category,
+        month=current_month,
+        year=current_year,
+        is_deleted=False
+    ).first()
+    
+    if budget:
+        budget.current_amount += amount
+        budget.save(update_fields=['current_amount'])
 
 
 PROVIDERS = {
@@ -151,7 +192,6 @@ def pay_service_view(request):
         messages.error(request, f'Недостаточно средств. На балансе: {account.balance} {account.currency}.')
         return redirect('transactions:services')
 
-    # Find provider display name
     provider_name = provider_id
     if category in PROVIDERS:
         for prov in PROVIDERS[category]:
@@ -159,7 +199,6 @@ def pay_service_view(request):
                 provider_name = prov['name']
                 break
 
-    # Perform payment
     account.balance -= amount
     account.save()
 
@@ -174,6 +213,8 @@ def pay_service_view(request):
         description=f"Оплата услуги: {provider_name} (Реквизит: {requisite})"
     )
 
+    update_budget(request.user, category, amount)
+
     # Send Notification
     Notification.objects.create(
         user=request.user,
@@ -182,7 +223,6 @@ def pay_service_view(request):
         notification_type=Notification.NotificationType.TRANSACTION,
     )
 
-    # Save as template if requested
     if save_template:
         name = template_name if template_name else f"Шаблон {provider_name}"
         PaymentTemplate.objects.create(
@@ -226,7 +266,9 @@ def quick_pay_view(request, template_id):
         description=f"Быстрая оплата: {template.service_provider} (Реквизит: {template.requisite})"
     )
 
-    # Send Notification
+    
+    update_budget(request.user, template.category, template.amount)
+
     Notification.objects.create(
         user=request.user,
         title='Быстрая оплата выполнена',
