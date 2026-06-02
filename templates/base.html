@@ -14,9 +14,10 @@
       rel="stylesheet"
     />
 
-    <link rel="stylesheet" href="{% static 'css/main.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/animations.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'css/animations.css' %}">
     <link rel="stylesheet" href="{% static 'css/verify_email.css' %}">
+    <link rel="stylesheet" href="{% static 'css/notifications.css' %}">
     {% block extra_css %}{% endblock %}
   </head>
   <body>
@@ -49,12 +50,64 @@
         </div>
 
         <div class="nav-actions">
+          {% if user.is_authenticated %}
+          <div class="notification-dropdown">
+            <button id="notification-btn" class="notification-bell" type="button">
+              🔔
+              {% if unread_count > 0 %}
+              <span class="notification-count">{{ unread_count }}</span>
+              {% endif %}
+            </button>
+            <div id="notification-panel" class="notification-panel">
+              <div class="notification-panel-header">
+                <h3>Уведомления</h3>
+                {% if unread_count > 0 %}
+                <form method="post" action="{% url 'notifications:mark_all_as_read' %}" class="mark-all-panel-form">
+                  {% csrf_token %}
+                  <button type="submit" class="mark-all-panel-btn">
+                    Пометить все
+                  </button>
+                </form>
+                {% endif %}
+              </div>
+              <div class="notification-panel-list">
+                {% for notification in recent_notifications %}
+                <div class="notification-panel-item {% if not notification.is_read %}notification-panel-item--unread{% endif %}" data-id="{{ notification.pk }}">
+                  <div class="notification-panel-icon">
+                    {% if notification.notification_type == 'transaction' %}💰{% elif notification.notification_type == 'security' %}🛡️{% elif notification.notification_type == 'loan' %}💳{% else %}ℹ️{% endif %}
+                  </div>
+                  <div class="notification-panel-content">
+                    <h4 class="notification-panel-title">{{ notification.title }}</h4>
+                    <span class="notification-panel-time">{{ notification.created_at|date:"d.m.Y H:i" }}</span>
+                  </div>
+                  {% if not notification.is_read %}
+                  <form method="post" action="{% url 'notifications:mark_as_read' notification.pk %}" class="mark-read-panel-form">
+                    {% csrf_token %}
+                    <button type="submit" class="mark-read-panel-btn" aria-label="Пометить как прочитанное">✔️</button>
+                  </form>
+                  {% endif %}
+                </div>
+                {% empty %}
+                <div class="notification-panel-empty">
+                  <p>Нет новых уведомлений</p>
+                </div>
+                {% endfor %}
+              </div>
+              <div class="notification-panel-footer">
+                <a href="{% url 'notifications:notification_list' %}" class="notification-panel-link">Все уведомления →</a>
+              </div>
+            </div>
+          </div>
+          {% endif %}
           <button id="ui-tilt-toggle" class="btn btn-ghost" type="button">
             3D
           </button>
+          {% if not user.is_authenticated %}
           <a class="btn btn-gold" href="{% url 'accounts:login' %}">Dashboard </a>
-          <a class="btn btn-gold" href="{% url 'accounts:logout' %}"> Log out</a>
+          {% else %}
           <a class="btn btn-gold" href="{% url 'accounts:profile' %}"> Profile </a>
+          <a class="btn btn-gold" href="{% url 'accounts:logout' %}"> Log out</a>
+          {% endif %}
         </div>
       </nav>
     </header>
@@ -127,6 +180,7 @@
     <script src="https://unpkg.com/three@0.165.0/build/three.min.js"></script>
     <script src="{% static 'js/particles.js' %}"></script>
     <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/notifications.js' %}"></script>
     {% block extra_js %}{% endblock %}
   </body>
 </html>

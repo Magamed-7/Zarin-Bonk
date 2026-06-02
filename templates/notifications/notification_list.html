@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Уведомления — ZarinPay{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/notifications.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="notifications-page">
+  <div class="notifications-header">
+    <h1>🔔 Уведомления</h1>
+    {% if unread_count > 0 %}
+    <form method="post" action="{% url 'notifications:mark_all_as_read' %}" class="mark-all-form">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-secondary mark-all-btn">
+        Пометить все как прочитанные
+      </button>
+    </form>
+    {% endif %}
+  </div>
+
+  {% if messages %}
+    <div class="notifications-messages">
+      {% for message in messages %}
+        <div class="notification-message notification-message--{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if notifications %}
+    <div class="notifications-list">
+      {% for notification in notifications %}
+        <div class="notification-card {% if not notification.is_read %}notification-card--unread{% endif %}" data-id="{{ notification.pk }}">
+          <div class="notification-icon">
+            {% if notification.notification_type == 'transaction' %}💰{% elif notification.notification_type == 'security' %}🛡️{% elif notification.notification_type == 'loan' %}💳{% else %}ℹ️{% endif %}
+          </div>
+          <div class="notification-content">
+            <h3 class="notification-title">{{ notification.title }}</h3>
+            <p class="notification-message">{{ notification.message }}</p>
+            <span class="notification-time">{{ notification.created_at|date:"d.m.Y H:i" }}</span>
+          </div>
+          {% if not notification.is_read %}
+            <form method="post" action="{% url 'notifications:mark_as_read' notification.pk %}" class="mark-read-form">
+              {% csrf_token %}
+              <button type="submit" class="mark-read-btn" aria-label="Пометить как прочитанное">
+                ✔️
+              </button>
+            </form>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+      <div class="pagination">
+        {% if page_obj.has_previous %}
+          <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-secondary pagination-btn">← Предыдущая</a>
+        {% endif %}
+        <span class="pagination-info">Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}" class="btn btn-secondary pagination-btn">Следующая →</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  {% else %}
+    <div class="notifications-empty">
+      <div class="notifications-empty-icon">🔔</div>
+      <p>У вас нет уведомлений</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/notifications.js' %}"></script>
+{% endblock %}
