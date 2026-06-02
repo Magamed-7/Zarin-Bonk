@@ -1,10 +1,11 @@
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views import generic
-from django.shortcuts import render
-from django.db.models import Count, Sum
+from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models import Q, Count, Sum
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
+from django.contrib import messages
 import json
 
 from accounts.models import User
@@ -63,4 +64,102 @@ class AdminDashboardView(generic.View):
         }
 
         return render(request, self.template_name, context)
+
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(admin_required, name='dispatch')
+class UserListView(generic.ListView):
+    model = User
+    template_name = 'administration/user_list.html'
+    context_object_name = 'users'
+    ordering = ['-date_joined']
+    paginate_by = 20
+
+    def get_queryset(self):
+        queryset = User.objects.filter(is_deleted=False)
+        role_filter = self.request.GET.get('role', '')
+        search_query = self.request.GET.get('search', '')
+        
+        if role_filter:
+            queryset = queryset.filter(role=role_filter)
+            
+        if search_query:
+            queryset = queryset.filter(
+                Q(username__icontains=search_query) |
+                Q(email__icontains=search_query) |
+                Q(first_name__icontains=search_query) |
+                Q(last_name__icontains=search_query) |
+                Q(phone__icontains=search_query)
+            )
+        
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['role_filter'] = self.request.GET.get('role', '')
+        context['search_query'] = self.request.GET.get('search', '')
+        return context
+
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(admin_required, name='dispatch')
+class UserDetailView(generic.DetailView):
+    model = User
+    template_name = 'administration/user_detail.html'
+    context_object_name = 'user_profile'
+    pk_url_kwarg = 'user_id'
+
+    def get_queryset(self):
+        return User.objects.filter(is_deleted=False)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user_profile = self.get_object()
+        context['accounts'] = Account.objects.filter(user=user_profile, is_deleted=False)
+        context['loans'] = Loan.objects.filter(user=user_profile)
+        context['transactions'] = Transaction.objects.filter(
+            Q(sender_account__user=user_profile) | Q(receiver_account__user=user_profile)
+        ).order_by('-created_at')[:20]
+        return context
+
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(admin_required, name='dispatch')
+class ChangeRoleView(generic.View):
+    def post(self, request, user_id):
+        user = get_object_or_404(User, id=user_id, is_deleted=False)
+        
+        if user == request.user:
+            messages.error(request, 'Вы не можете изменить свою роль!')
+            return redirect('administration:user_detail', user_id=user.id)
+        
+        new_role = request.POST.get('role')
+        if new_role in [choice[0] for choice in User.Role.choices]:
+            old_role = user.get_role_display()
+            user.role = new_role
+            user.save()
+            messages.success(request, f'Роль пользователя {user.username} изменена с {old_role} на {user.get_role_display()}')
+        
+        return redirect('administration:user_detail', user_id=user.id)
+
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(admin_required, name='dispatch')
+class ToggleBlockView(generic.View):
+    def post(self, request, user_id):
+        user = get_object_or_404(User, id=user_id, is_deleted=False)
+        
+        if user == request.user:
+            messages.error(request, 'Вы не можете заблокировать самого себя!')
+            return redirect('administration:user_detail', user_id=user.id)
+        
+        user.is_active = not user.is_active
+        user.save()
+        
+        if user.is_active:
+            messages.success(request, f'Пользователь {user.username} разблокирован')
+        else:
+            messages.success(request, f'Пользователь {user.username} заблокирован')
+        
+        return redirect('administration:user_detail', user_id=user.id)
 

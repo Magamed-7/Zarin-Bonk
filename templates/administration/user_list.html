@@ -1,0 +1,346 @@
+{% extends 'base.html' %}
+
+{% block title %}Управление пользователями - ZarinPay{% endblock %}
+
+{% block content %}
+<div class="admin-page">
+    <div class="container">
+        <nav class="admin-nav">
+            <a href="{% url 'administration:dashboard' %}" class="admin-nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                Дашборд
+            </a>
+            <a href="{% url 'administration:user_list' %}" class="admin-nav-link {% if request.resolver_match.url_name == 'user_list' %}active{% endif %}">
+                Пользователи
+            </a>
+        </nav>
+        <h1 class="page-title">Управление пользователями</h1>
+        
+        <div class="filter-bar glass-card">
+            <div class="filters">
+                <form method="GET" action="" class="filters-form">
+                    <div class="filter-group">
+                        <input type="text" name="search" value="{{ search_query }}" placeholder="Поиск" class="filter-input">
+                    </div>
+                    <div class="filter-group">
+                        <select name="role" class="filter-select">
+                            <option value="">Все роли</option>
+                            {% for role, role_display in request.user.Role.choices %}
+                            <option value="{{ role }}" {% if role_filter == role %}selected{% endif %}>{{ role_display }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <button type="submit" class="btn-primary">🔍 Найти</button>
+                        {% if search_query or role_filter %}
+                        <a href="{% url 'administration:user_list' %}" class="btn-secondary">✖️ Сброс</a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="users-list">
+            {% if users %}
+                {% for user in users %}
+                <div class="user-card glass-card">
+                    <div class="user-header">
+                        <div class="user-info">
+                            <h3>{{ user.first_name }} {{ user.last_name }}</h3>
+                            <p class="user-username">@{{ user.username }}</p>
+                            <p class="user-email">{{ user.email }}</p>
+                            <p class="user-meta">
+                                <span class="badge role-badge">{{ user.get_role_display }}</span>
+                                {% if user.is_active %}
+                                    <span class="badge status-badge active">Активен</span>
+                                {% else %}
+                                    <span class="badge status-badge blocked">Заблокирован</span>
+                                {% endif %}
+                                {% if user.is_verified %}
+                                    <span class="badge verified-badge">Верифицирован</span>
+                                {% else %}
+                                    <span class="badge verified-badge not">Не верифицирован</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="user-actions">
+                        <a href="{% url 'administration:user_detail' user.id %}" class="btn-primary">
+                            Просмотр профиля
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+                
+                {% if is_paginated %}
+                <div class="pagination glass-card">
+                    <div class="pagination-links">
+                        {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}" class="btn-secondary">← Предыдущая</a>
+                        {% endif %}
+                        
+                        <span class="pagination-info">
+                            Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+                        </span>
+                        
+                        {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}" class="btn-secondary">Следующая →</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="no-data glass-card">
+                    <p>Пользователей не найдено</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.admin-page {
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0a0a1a 100%);
+    min-height: 100vh;
+}
+
+.admin-nav {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    flex-wrap: wrap;
+}
+
+.admin-nav-link {
+    padding: 10px 20px;
+    color: #888;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.admin-nav-link:hover {
+    color: #ffd700;
+    background: rgba(255, 215, 0, 0.1);
+}
+
+.admin-nav-link.active {
+    color: #0a0a1a;
+    background: linear-gradient(135deg, #ffd700, #ffaa00);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.page-title {
+    color: #ffd700;
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 40px;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(255, 215, 0, 0.2);
+}
+
+.filter-bar {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.filters-form {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.filter-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.filter-input, .filter-select {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 10px;
+    padding: 12px 15px;
+    color: #fff;
+    font-size: 1rem;
+    outline: none;
+}
+
+.filter-input::placeholder {
+    color: #888;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%);
+    color: #0a0a1a;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 215, 0, 0.1);
+    color: #ffd700;
+}
+
+.user-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.user-info h3 {
+    color: #ffd700;
+    margin: 0 0 8px 0;
+    font-size: 1.4rem;
+}
+
+.user-username {
+    color: #aaa;
+    margin: 0 0 5px 0;
+    font-size: 0.9rem;
+}
+
+.user-email {
+    color: #ccc;
+    margin: 0 0 10px 0;
+    font-size: 0.9rem;
+}
+
+.user-meta {
+    margin: 0;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+.role-badge {
+    background: rgba(255, 215, 0, 0.2);
+    color: #ffd700;
+    border: 1px solid rgba(255, 215, 0, 0.5);
+}
+
+.status-badge {
+    border: 1px solid;
+}
+
+.status-badge.active {
+    background: rgba(72, 199, 116, 0.2);
+    color: #48c774;
+    border-color: #48c774;
+}
+
+.status-badge.blocked {
+    background: rgba(255, 107, 107, 0.2);
+    color: #ff6b6b;
+    border-color: #ff6b6b;
+}
+
+.verified-badge {
+    border: 1px solid;
+}
+
+.verified-badge {
+    background: rgba(72, 199, 116, 0.2);
+    color: #48c774;
+    border-color: #48c774;
+}
+
+.verified-badge.not {
+    background: rgba(255, 165, 0, 0.2);
+    color: #ffa500;
+    border-color: #ffa500;
+}
+
+.user-actions {
+    margin-top: 20px;
+    text-align: right;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.pagination-links {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.pagination-info {
+    color: #ccc;
+    font-size: 1rem;
+}
+
+.no-data {
+    text-align: center;
+    color: #888;
+    padding: 40px;
+    font-size: 1.2rem;
+}
+</style>
+{% endblock %}
