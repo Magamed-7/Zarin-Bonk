@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Удалить цель — ZarinPay{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/goals.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="goals-delete-page">
+  <h1>🗑️ Удалить цель</h1>
+
+  {# Messages #}
+  {% if messages %}
+    <div class="goals-messages">
+      {% for message in messages %}
+        <div class="goals-message goals-message--{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="goals-delete-card">
+    <div class="goals-delete-warning">
+      <p>Вы уверены, что хотите удалить следующую цель?</p>
+    </div>
+
+    <div class="goals-delete-info">
+      <div class="goals-delete-icon">{{ goal.icon }}</div>
+      <div class="goals-delete-details">
+        <h3>{{ goal.title }}</h3>
+        <p>Целевая сумма: {{ goal.target_amount }} TJS</p>
+        <p>Накоплено: {{ goal.current_amount }} TJS</p>
+        <p>Прогресс: {{ goal.progress_percent|floatformat:0 }}%</p>
+        {% if goal.deadline %}
+          <p>Дедлайн: {{ goal.deadline|date:"d.m.Y" }}</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <form method="post" class="goals-delete-form">
+      {% csrf_token %}
+      <div class="form-actions">
+        <button type="submit" class="btn btn-danger">🗑️ Удалить</button>
+        <a href="{% url 'goals:goal_list' %}" class="btn btn-secondary">Отмена</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

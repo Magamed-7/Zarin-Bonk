@@ -1,4 +1,6 @@
 from decimal import Decimal
+from django.utils import timezone
+import secrets
 
 from django.conf import settings
 from django.db import models
@@ -34,7 +36,10 @@ class Goal(models.Model):
         default='🎯',
         help_text='Эмодзи-иконка цели',
     )
-    created_at = models.DateTimeField(auto_now_add=True)
+    slug = models.SlugField(max_length=50, unique=True, editable=False, default='')
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(default=timezone.now, blank=True, null=True)
     is_completed = models.BooleanField(default=False)
 
     class Meta:
@@ -44,6 +49,25 @@ class Goal(models.Model):
 
     def __str__(self):
         return f'{self.icon} {self.title} — {self.user}'
+
+    def save(self, *args, **kwargs):
+        if not self.slug or self.slug == '':
+            self.slug = self.generate_slug()
+        
+        if self.current_amount >= self.target_amount and self.target_amount > 0:
+            self.is_completed = True
+        super().save(*args, **kwargs)
+
+    def generate_slug(self):
+        while True:
+            slug = secrets.token_urlsafe(16)
+            if not Goal.objects.filter(slug=slug).exists():
+                return slug
+
+    def delete(self, *args, **kwargs):
+        self.is_deleted = True
+        self.deleted_at = timezone.now()
+        self.save()
 
     @property
     def progress_percent(self):
@@ -56,8 +80,3 @@ class Goal(models.Model):
     def remaining_amount(self):
         remaining = self.target_amount - self.current_amount
         return max(remaining, Decimal('0.00'))
-
-    def save(self, *args, **kwargs):
-        if self.current_amount >= self.target_amount and self.target_amount > 0:
-            self.is_completed = True
-        super().save(*args, **kwargs)

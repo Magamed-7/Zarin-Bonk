@@ -9,7 +9,7 @@
 .budget-page h1 {
   font-size: 1.8rem;
   font-weight: 700;
-  color: var(--text-primary, #e8eaf6);
+  color: var(--text);
   margin: 0 0 2rem;
 }
 
@@ -66,13 +66,13 @@
 
 .budget-alert p {
   margin: 0.5rem 0;
-  color: var(--text-primary, #e8eaf6);
+  color: var(--text);
 }
 
 .budget-alert ul {
   margin: 0.5rem 0;
   padding-left: 1.5rem;
-  color: var(--text-secondary, #8892b0);
+  color: var(--muted);
 }
 
 /* Chart Section */
@@ -88,7 +88,7 @@
 .budget-chart-section h2 {
   font-size: 1.2rem;
   font-weight: 600;
-  color: var(--text-primary, #e8eaf6);
+  color: var(--text);
   margin: 0 0 1.5rem;
 }
 
@@ -100,7 +100,7 @@
 
 .budget-chart-empty {
   text-align: center;
-  color: var(--text-secondary, #8892b0);
+  color: var(--muted);
   font-size: 0.875rem;
   padding: 2rem;
 }
@@ -122,7 +122,7 @@
 .budget-section-header h2 {
   font-size: 1.2rem;
   font-weight: 600;
-  color: var(--text-primary, #e8eaf6);
+  color: var(--text);
   margin: 0;
 }
 
@@ -170,13 +170,13 @@
 .budget-card-title h3 {
   font-size: 1.1rem;
   font-weight: 600;
-  color: var(--text-primary, #e8eaf6);
+  color: var(--text);
   margin: 0 0 0.25rem;
 }
 
 .budget-card-subtitle {
   font-size: 0.875rem;
-  color: var(--text-secondary, #8892b0);
+  color: var(--muted);
   margin: 0;
 }
 
@@ -212,7 +212,7 @@
   display: flex;
   justify-content: space-between;
   font-size: 0.875rem;
-  color: var(--text-secondary, #8892b0);
+  color: var(--muted);
 }
 
 /* Stats */
@@ -229,12 +229,12 @@
 }
 
 .budget-stat-label {
-  color: var(--text-secondary, #8892b0);
+  color: var(--muted);
 }
 
 .budget-stat-value {
   font-weight: 600;
-  color: var(--text-primary, #e8eaf6);
+  color: var(--text);
 }
 
 .budget-stat-value--negative {
@@ -244,20 +244,20 @@
 /* Empty State */
 .budget-empty {
   text-align: center;
-  padding: 3rem;
+  padding: 2rem;
   background: rgba(255, 255, 255, 0.02);
   border: 1px dashed rgba(255, 215, 0, 0.2);
   border-radius: 16px;
 }
 
 .budget-empty p {
-  color: var(--text-secondary, #8892b0);
+  color: var(--muted);
   font-size: 0.875rem;
   margin: 0;
 }
 
 .budget-empty a {
-  color: var(--gold, #ffd700);
+  color: var(--gold);
   text-decoration: none;
   font-weight: 600;
 }
@@ -280,7 +280,7 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--gold, #ffd700), #e6ac00);
+  background: linear-gradient(135deg, var(--gold), #e6ac00);
   color: #0b1020;
 }
 
@@ -291,11 +291,12 @@
 
 .btn-secondary {
   background: rgba(255, 255, 255, 0.1);
-  color: var(--text-primary, #e8eaf6);
+  color: var(--muted);
 }
 
 .btn-secondary:hover {
   background: rgba(255, 255, 255, 0.15);
+  color: var(--text);
 }
 
 .btn-danger {
@@ -324,7 +325,7 @@
 .budget-form-page h1 {
   font-size: 1.6rem;
   font-weight: 700;
-  color: var(--text-primary, #e8eaf6);
+  color: var(--text);
   margin: 0 0 2rem;
 }
 
@@ -351,7 +352,7 @@
 .form-label {
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--text-secondary, #8892b0);
+  color: var(--muted);
   letter-spacing: 0.03em;
   text-transform: uppercase;
 }
@@ -362,7 +363,7 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   padding: 0.75rem 1rem;
-  color: var(--text-primary, #e8eaf6);
+  color: var(--text);
   font-size: 0.95rem;
   font-family: inherit;
   outline: none;
@@ -408,7 +409,7 @@
 }
 
 .budget-delete-confirm p {
-  color: var(--text-primary, #e8eaf6);
+  color: var(--text);
   font-size: 0.95rem;
   margin: 0;
 }
@@ -424,11 +425,12 @@
   display: flex;
   justify-content: space-between;
   margin: 0.5rem 0;
-  color: var(--text-secondary, #8892b0);
+  color: var(--muted);
 }
 
 .budget-delete-label {
   font-weight: 600;
+  color: var(--text);
 }
 
 .budget-delete-form {
@@ -459,19 +461,19 @@
   border-radius: 8px;
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--text-secondary, #8892b0);
+  color: var(--muted);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .budget-tab:hover {
-  color: var(--text-primary, #e8eaf6);
+  color: var(--text);
   background: rgba(255, 255, 255, 0.05);
 }
 
 .budget-tab--active {
   background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.08));
-  color: var(--gold, #ffd700);
+  color: var(--gold);
   border: 1px solid rgba(255, 215, 0, 0.3);
 }
 
@@ -491,7 +493,7 @@
 .budget-total-label {
   display: block;
   font-size: 0.875rem;
-  color: var(--text-secondary, #8892b0);
+  color: var(--muted);
   margin-bottom: 0.5rem;
 }
 

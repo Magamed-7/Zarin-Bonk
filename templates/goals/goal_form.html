@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if is_update %}Редактировать цель{% else %}Создать цель{% endif %} — ZarinPay{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/goals.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="goals-form-page">
+  <h1>{% if is_update %}✏️ Редактировать цель{% else %}➕ Создать цель{% endif %}</h1>
+
+  {# Messages #}
+  {% if messages %}
+    <div class="goals-messages">
+      {% for message in messages %}
+        <div class="goals-message goals-message--{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="goals-form-card">
+    <form method="post" class="goals-form">
+      {% csrf_token %}
+
+      <div class="form-field">
+        <label class="form-label" for="id_title">Название цели</label>
+        {{ form.title }}
+        {% if form.title.errors %}
+          <div class="form-error">{{ form.title.errors }}</div>
+        {% endif %}
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="id_icon">Иконка</label>
+        {{ form.icon }}
+        {% if form.icon.errors %}
+          <div class="form-error">{{ form.icon.errors }}</div>
+        {% endif %}
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="id_target_amount">Целевая сумма (TJS)</label>
+        {{ form.target_amount }}
+        {% if form.target_amount.errors %}
+          <div class="form-error">{{ form.target_amount.errors }}</div>
+        {% endif %}
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="id_deadline">Дедлайн</label>
+        {{ form.deadline }}
+        {% if form.deadline.errors %}
+          <div class="form-error">{{ form.deadline.errors }}</div>
+        {% endif %}
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="id_description">Описание</label>
+        {{ form.description }}
+        {% if form.description.errors %}
+          <div class="form-error">{{ form.description.errors }}</div>
+        {% endif %}
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">
+          {% if is_update %}💾 Сохранить изменения{% else %}✅ Создать цель{% endif %}
+        </button>
+        <a href="{% url 'goals:goal_list' %}" class="btn btn-secondary">Отмена</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

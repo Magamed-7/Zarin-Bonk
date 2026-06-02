@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Цели накопления — ZarinPay{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/goals.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="goals-page">
+  <h1>🎯 Цели накопления</h1>
+
+  {# Messages #}
+  {% if messages %}
+    <div class="goals-messages">
+      {% for message in messages %}
+        <div class="goals-message goals-message--{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {# Уведомление о достижении цели #}
+  {% if completed_goals %}
+    <div class="goals-alert goals-alert--success">
+      <h3>🎉 Поздравляем!</h3>
+      <p>Вы достигли следующих целей:</p>
+      <ul>
+        {% for goal in completed_goals %}
+          <li>{{ goal.icon }} {{ goal.title }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <div class="goals-section-header">
+    <h2>Мои цели</h2>
+    <a href="{% url 'goals:goal_create' %}" class="btn btn-primary">➕ Создать цель</a>
+  </div>
+
+  {% if goals %}
+    <div class="goals-grid">
+      {% for goal in goals %}
+        <div class="goal-card {% if goal.is_completed %}goal-card--completed{% endif %}">
+          <div class="goal-card-header">
+            <div class="goal-card-icon">{{ goal.icon }}</div>
+            <div class="goal-card-title">
+              <h3>{{ goal.title }}</h3>
+              {% if goal.deadline %}
+                <p class="goal-card-deadline">Дедлайн: {{ goal.deadline|date:"d.m.Y" }}</p>
+              {% endif %}
+            </div>
+            <div class="goal-card-actions">
+              <a href="{% url 'goals:goal_deposit' goal.slug %}" class="btn btn-sm btn-primary">💰 Пополнить</a>
+              <a href="{% url 'goals:goal_update' goal.slug %}" class="btn btn-sm btn-secondary">✏️</a>
+              <a href="{% url 'goals:goal_delete' goal.slug %}" class="btn btn-sm btn-danger">🗑️</a>
+            </div>
+          </div>
+
+          {% if goal.description %}
+            <p class="goal-card-description">{{ goal.description }}</p>
+          {% endif %}
+
+          <div class="goal-card-body">
+            <div class="goal-progress">
+              <div class="goal-progress-bar">
+                <div class="goal-progress-fill {% if goal.is_completed %}goal-progress-fill--completed{% endif %}" style="width: {{ goal.progress_percent }}%;"></div>
+              </div>
+              <div class="goal-progress-text">
+                <span>Накоплено: {{ goal.current_amount }} TJS</span>
+                <span>{{ goal.progress_percent|floatformat:0 }}%</span>
+              </div>
+            </div>
+
+            <div class="goal-card-stats">
+              <div class="goal-stat">
+                <span class="goal-stat-label">Цель:</span>
+                <span class="goal-stat-value">{{ goal.target_amount }} TJS</span>
+              </div>
+              <div class="goal-stat">
+                <span class="goal-stat-label">Осталось:</span>
+                <span class="goal-stat-value {% if goal.remaining_amount <= 0 %}goal-stat-value--completed{% endif %}">
+                  {{ goal.remaining_amount }} TJS
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {% if goal.is_completed %}
+            <div class="goal-card-completed">
+              <span class="goal-completed-badge">✅ Достигнуто!</span>
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="goals-empty">
+      <p>У вас пока нет целей. <a href="{% url 'goals:goal_create' %}">Создайте первую цель</a></p>
+    </div>
+  {% endif %}
+</div>
+<script src="{% static 'js/goals.js' %}"></script>
+{% endblock %}

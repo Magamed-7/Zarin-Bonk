@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Пополнить цель — ZarinPay{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/goals.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="goals-deposit-page">
+  <h1>💰 Пополнить цель</h1>
+
+  {# Messages #}
+  {% if messages %}
+    <div class="goals-messages">
+      {% for message in messages %}
+        <div class="goals-message goals-message--{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="goals-deposit-card">
+    <div class="goals-deposit-info">
+      <div class="goals-deposit-icon">{{ goal.icon }}</div>
+      <div class="goals-deposit-details">
+        <h3>{{ goal.title }}</h3>
+        <p>Целевая сумма: {{ goal.target_amount }} TJS</p>
+        <p>Накоплено: {{ goal.current_amount }} TJS</p>
+        <p>Осталось: {{ goal.remaining_amount }} TJS</p>
+        <p>Прогресс: {{ goal.progress_percent|floatformat:0 }}%</p>
+        {% if goal.deadline %}
+          <p>Дедлайн: {{ goal.deadline|date:"d.m.Y" }}</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="goals-deposit-progress">
+      <div class="goal-progress-bar">
+        <div class="goal-progress-fill {% if goal.is_completed %}goal-progress-fill--completed{% endif %}" style="width: {{ goal.progress_percent }}%;"></div>
+      </div>
+    </div>
+
+    <form method="post" class="goals-deposit-form">
+      {% csrf_token %}
+
+      <div class="form-field">
+        <label class="form-label" for="id_amount">Сумма пополнения (TJS)</label>
+        {{ form.amount }}
+        {% if form.amount.errors %}
+          <div class="form-error">{{ form.amount.errors }}</div>
+        {% endif %}
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">💰 Пополнить</button>
+        <a href="{% url 'goals:goal_list' %}" class="btn btn-secondary">Отмена</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

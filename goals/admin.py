@@ -12,13 +12,17 @@ class GoalAdmin(admin.ModelAdmin):
         'user',
         'target_amount',
         'current_amount',
+        'remaining_amount',
+        'progress_percent',
         'deadline',
         'is_completed',
+        'is_deleted',
+        'deleted_at',
         'created_at',
     )
-    list_filter = ('is_completed', 'deadline', 'created_at')
+    list_filter = ('is_completed', 'is_deleted', 'deadline', 'created_at')
     search_fields = ('title', 'user__username', 'user__email')
-    readonly_fields = ('created_at', 'is_completed')
+    readonly_fields = ('slug', 'created_at', 'deleted_at', 'progress_percent', 'remaining_amount')
 
     fieldsets = (
         (
@@ -38,6 +42,8 @@ class GoalAdmin(admin.ModelAdmin):
                 'fields': (
                     'target_amount',
                     'current_amount',
+                    'remaining_amount',
+                    'progress_percent',
                     'deadline',
                 ),
             },
@@ -47,7 +53,17 @@ class GoalAdmin(admin.ModelAdmin):
             {
                 'fields': (
                     'is_completed',
+                    'is_deleted',
+                    'deleted_at',
                     'created_at',
+                ),
+            },
+        ),
+        (
+            'Система',
+            {
+                'fields': (
+                    'slug',
                 ),
             },
         ),
