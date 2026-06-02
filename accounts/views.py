@@ -434,11 +434,21 @@ def profile_view(request):
     login_history = LoginHistory.objects.filter(user=user)[:10]
  
     if request.method == 'POST':
+        avatar = request.FILES.get('avatar')
+        
+        
+        if avatar and not 'first_name' in request.POST:
+            if user.avatar and os.path.isfile(user.avatar.path):
+                os.remove(user.avatar.path)
+            user.avatar = avatar
+            user.save()
+            messages.success(request, 'Фото профиля успешно обновлено.')
+            return redirect('accounts:profile')
+            
         first_name = request.POST.get('first_name', '').strip()
         last_name  = request.POST.get('last_name', '').strip()
         phone      = request.POST.get('phone', '').strip()
         address    = request.POST.get('address', '').strip()
-        avatar     = request.FILES.get('avatar')
  
         if not first_name or not last_name:
             messages.error(request, 'Имя и фамилия обязательны.')

@@ -6,13 +6,14 @@
   const avatarInput = document.querySelector('.avatar-input');
   const avatarImg   = document.querySelector('.avatar-img');
   const avatarPlaceholder = document.querySelector('.avatar-placeholder');
+  const avatarForm  = document.querySelector('#avatar-form');
 
   if (avatarWrap && avatarInput) {
     avatarWrap.addEventListener('click', () => {
       avatarInput.click();
     });
 
-    // Предпросмотр выбранного аватара
+    // Предпросмотр выбранного аватара и отправка формы
     avatarInput.addEventListener('change', () => {
       const file = avatarInput.files[0];
       if (!file) return;
@@ -27,6 +28,10 @@
           img.src       = e.target.result;
           img.className = 'avatar-img';
           avatarPlaceholder.replaceWith(img);
+        }
+        // Отправляем форму с аватаром
+        if (avatarForm) {
+          avatarForm.submit();
         }
       };
       reader.readAsDataURL(file);

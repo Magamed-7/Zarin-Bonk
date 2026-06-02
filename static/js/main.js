@@ -7,6 +7,40 @@
     document.documentElement.style.scrollBehavior = "smooth";
   }
 
+  // Loading Overlay Functions
+  const loadingOverlay = document.getElementById("loadingOverlay");
+  window.showLoading = () => {
+    if (loadingOverlay) {
+      loadingOverlay.style.display = "flex";
+    }
+  };
+  window.hideLoading = () => {
+    if (loadingOverlay) {
+      loadingOverlay.style.display = "none";
+    }
+  };
+
+  // Page Transition on click
+  document.addEventListener("click", (e) => {
+    const link = e.target.closest("a[href]");
+    if (link && link.href && !link.href.startsWith("javascript:") && !link.target) {
+      const url = new URL(link.href, window.location.origin);
+      if (url.origin === window.location.origin && !link.href.includes("#")) {
+        e.preventDefault();
+        const page = document.querySelector(".page");
+        if (page) {
+          page.classList.add("fade-out");
+          setTimeout(() => {
+            window.location.href = link.href;
+          }, 300);
+        } else {
+          window.location.href = link.href;
+        }
+      }
+    }
+  });
+
+  // Close flash messages
   document.querySelectorAll(".flash-close").forEach((btn) => {
     btn.addEventListener("click", () => {
       const el = btn.closest(".flash");
@@ -18,6 +52,7 @@
     });
   });
 
+  // Card 3D tilt effect
   const state = {
     tiltEnabled: !prefersReducedMotion,
   };
@@ -55,6 +90,7 @@
     });
   }
 
+  // Optional mini chart (if Chart.js is available)
   const canvas = document.getElementById("miniChart");
   if (canvas && window.Chart) {
     const ctx = canvas.getContext("2d");

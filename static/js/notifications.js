@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const notificationId = form.closest('[data-id]').dataset.id;
         const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
 
+        window.showLoading();
         fetch(form.action, {
           method: 'POST',
           headers: {
@@ -63,7 +64,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
           }
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => console.error('Error:', error))
+        .finally(() => window.hideLoading());
       });
     });
   }
@@ -82,6 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
 
+        window.showLoading();
         fetch(form.action, {
           method: 'POST',
           headers: {
@@ -114,7 +117,8 @@ document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.mark-all-form, .mark-all-panel-form').forEach(el => el.remove());
           }
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => console.error('Error:', error))
+        .finally(() => window.hideLoading());
       });
     });
   }

@@ -21,6 +21,70 @@
   }
 }
 
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pageFadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes skeletonPulse {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes buttonPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(255, 215, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+  }
+}
+
+@keyframes inputFocus {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(255, 215, 0, 0.15);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+  }
+}
+
 .bg-glow {
   animation: glowFloat 14s ease-in-out infinite;
 }
@@ -29,28 +93,109 @@
   animation: popIn 0.35s ease both;
 }
 
+.page-transition {
+  animation: pageFadeIn 0.4s ease-out forwards;
+}
+
+.page-transition.fade-out {
+  animation: pageFadeOut 0.3s ease-in forwards;
+}
+
+.spinner {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(255, 215, 0, 0.3);
+  border-top-color: #ffd700;
+  border-radius: 50%;
+  animation: spinner 0.8s linear infinite;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.05) 75%);
+  background-size: 200% 100%;
+  animation: skeletonPulse 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+.skeleton-text {
+  height: 16px;
+  margin-bottom: 8px;
+}
+
+.skeleton-text:last-child {
+  margin-bottom: 0;
+  width: 60%;
+}
+
+.skeleton-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+}
+
+.skeleton-card {
+  padding: 20px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
 .nav-link {
   transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
 }
 
 .nav-link:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.92);
-  transform: translateY(-1px);
+  background: rgba(255, 215, 0, 0.08);
+  color: #ffd700;
+  transform: translateY(-2px);
 }
 
 .btn {
   transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease,
     box-shadow 0.18s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255,255,255,0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.4s ease, height 0.4s ease;
+}
+
+.btn:active::after {
+  width: 200px;
+  height: 200px;
 }
 
 .btn:hover {
-  transform: translateY(-1px);
-  border-color: rgba(255, 215, 0, 0.28);
+  transform: translateY(-2px) scale(1.02);
+  border-color: rgba(255, 215, 0, 0.4);
+  box-shadow: 0 12px 32px rgba(255, 215, 0, 0.15);
 }
 
 .btn:active {
-  transform: translateY(0);
+  transform: translateY(0) scale(0.98);
+}
+
+.btn-pulse {
+  animation: buttonPulse 2s infinite;
+}
+
+input, select, textarea {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+  animation: inputFocus 0.6s ease-out;
 }
 
 .flash-close {
@@ -66,13 +211,15 @@
 .feature-card,
 .step-card,
 .price-card {
-  transition: transform 0.25s ease, border-color 0.25s ease;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .feature-card:hover,
 .step-card:hover,
 .price-card:hover {
   border-color: rgba(255, 215, 0, 0.32);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.3);
 }
 
 .footer-link {
@@ -81,7 +228,7 @@
 
 .footer-link:hover {
   color: rgba(255, 215, 0, 0.92);
-  transform: translateX(2px);
+  transform: translateX(4px);
 }
 
 .reveal {
@@ -107,13 +254,35 @@
   transition-delay: 0.24s;
 }
 
+/* Loading overlay */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 16, 32, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(8px);
+}
+
+.loading-overlay .spinner {
+  width: 48px;
+  height: 48px;
+  border-width: 4px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
 
   .bg-glow,
-  .flash {
+  .flash,
+  .page-transition,
+  .btn-pulse,
+  .spinner,
+  .skeleton {
     animation: none !important;
   }
 
@@ -124,7 +293,8 @@
   .step-card,
   .price-card,
   .footer-link,
-  .reveal {
+  .reveal,
+  input, select, textarea {
     transition: none !important;
   }
 

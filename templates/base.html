@@ -5,7 +5,31 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#0b1020" />
+    
+    <!-- Title and Description -->
     <title>{% block title %}ZarinPay{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}ZarinPay — современный банк с AI-ассистентом, мгновенными переводами и полным контролем над финансами. Темная тема, стеклянный дизайн, золотые акценты.{% endblock %}" />
+    <meta name="author" content="ZarinPay Team" />
+    <meta name="keywords" content="банк, финансы, переводы, AI, кредит, депозит, бюджет, цели, ZarinPay" />
+
+    <!-- Open Graph Tags -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ZarinPay" />
+    <meta property="og:title" content="{% block og_title %}ZarinPay — Банкинг будущего{% endblock %}" />
+    <meta property="og:description" content="{% block og_description %}Современный банк с AI-ассистентом, мгновенными переводами и полным контролем над финансами.{% endblock %}" />
+    <meta property="og:locale" content="ru_RU" />
+    <meta property="og:url" content="{{ request.build_absolute_uri }}" />
+    
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="{% block twitter_title %}ZarinPay — Банкинг будущего{% endblock %}" />
+    <meta name="twitter:description" content="{% block twitter_description %}Современный банк с AI-ассистентом, мгновенными переводами и полным контролем над финансами.{% endblock %}" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}" />
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon-32x32.png' %}" />
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon-16x16.png' %}" />
+    <link rel="apple-touch-icon" href="{% static 'apple-touch-icon.png' %}" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -113,6 +137,11 @@
       </nav>
     </header>
 
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+      <div class="spinner"></div>
+    </div>
+
     <main class="container">
       {% if messages %}
         <section class="flash-stack" aria-live="polite" aria-atomic="true">
@@ -128,7 +157,7 @@
         </section>
       {% endif %}
 
-      <section class="page">
+      <section class="page page-transition">
         {% block content %}
           <div class="glass pad card-3d">
             <h2 class="section-title">Базовый шаблон ZarinPay</h2>

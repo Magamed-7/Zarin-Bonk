@@ -9,8 +9,14 @@ from django.http import HttpResponse
 def test_view(request):
     return HttpResponse("<html><body style='background:#0a0a1a;color:#ffd700;font-size:3rem;text-align:center;padding:2rem;'><h1>TEST PAGE WORKS!</h1><p>ZarinPay server is up!</p><a href='/' style='color:white;'>Go to landing page</a></body></html>")
 
+def robots_txt_view(request):
+    from django.template.loader import render_to_string
+    content = render_to_string('robots.txt', request=request)
+    return HttpResponse(content, content_type='text/plain')
+
 urlpatterns = [
     path('test/', test_view, name='test'),
+    path('robots.txt', robots_txt_view, name='robots_txt'),
     path('', TemplateView.as_view(template_name='landing.html'), name='landing'),
     path('about/', TemplateView.as_view(template_name='about.html'), name='about'),
     path('contacts/', TemplateView.as_view(template_name='contacts.html'), name='contacts'),
