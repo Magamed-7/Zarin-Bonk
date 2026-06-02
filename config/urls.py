@@ -15,6 +15,7 @@ urlpatterns = [
     path('goals/', include('goals.urls')),
     path('loans/', include('loans.urls')),
     path('notifications/', include('notifications.urls')),
+    path('support/', include('support.urls')),
     path('manager/', include('manager.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+
+{% block title %}Тикет #{{ ticket.id }} - Поддержка{% endblock %}
+
+{% block content %}
+<div class="support-page">
+    <div class="container">
+        <a href="{% url 'support:ticket_list' %}" class="back-btn">← Назад к моим тикетам</a>
+        
+        <div class="ticket-header glass-card">
+            <div class="ticket-info">
+                <h1>{{ ticket.subject }}</h1>
+                <p>Дата создания: {{ ticket.created_at|date:"d.m.Y H:i" }}</p>
+            </div>
+            <div class="ticket-status {{ ticket.status }}">
+                {{ ticket.get_status_display }}
+            </div>
+        </div>
+        
+        <div class="chat-container glass-card">
+            <div class="chat-messages">
+                {% for message in ticket.messages.all %}
+                <div class="message {% if message.sender == request.user %}message-outgoing{% else %}message-incoming{% endif %}">
+                    <div class="message-header">
+                        <span class="sender-name">
+                            {% if message.sender.role == 'manager' %}
+                                Поддержка
+                            {% else %}
+                                Вы
+                            {% endif %}
+                        </span>
+                        <span class="message-time">{{ message.created_at|date:"d.m.Y H:i" }}</span>
+                    </div>
+                    <p class="message-text">{{ message.message }}</p>
+                </div>
+                {% empty %}
+                <div class="no-messages">
+                    <p>Нет сообщений. Начните общение!</p>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="chat-input">
+                {% if ticket.status == 'open' %}
+                <form method="POST" action="">
+                    {% csrf_token %}
+                    <textarea name="message" placeholder="Введите сообщение..." required></textarea>
+                    <button type="submit" class="btn-primary">Отправить</button>
+                </form>
+                {% else %}
+                <p class="ticket-closed">Тикет закрыт</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.support-page {
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0a0a1a 100%);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.back-btn {
+    color: #ffd700;
+    text-decoration: none;
+    font-weight: bold;
+    display: inline-block;
+    margin-bottom: 30px;
+    font-size: 1.1rem;
+}
+
+.back-btn:hover {
+    color: #fff;
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.ticket-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.ticket-header h1 {
+    color: #ffd700;
+    margin: 0 0 10px 0;
+    font-size: 1.8rem;
+}
+
+.ticket-header p {
+    color: #ccc;
+    margin: 5px 0;
+}
+
+.ticket-status {
+    padding: 10px 25px;
+    border-radius: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.ticket-status.open {
+    background: rgba(72, 199, 116, 0.2);
+    color: #48c774;
+    border: 1px solid #48c774;
+}
+
+.ticket-status.closed {
+    background: rgba(136, 136, 136, 0.2);
+    color: #888;
+    border: 1px solid #888;
+}
+
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 600px;
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    padding-right: 10px;
+}
+
+.chat-messages::-webkit-scrollbar {
+    width: 8px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background: rgba(255, 215, 0, 0.3);
+    border-radius: 4px;
+}
+
+.message {
+    padding: 15px 20px;
+    border-radius: 15px;
+    margin-bottom: 15px;
+    max-width: 70%;
+}
+
+.message-incoming {
+    background: rgba(255, 255, 255, 0.05);
+    align-self: flex-start;
+    margin-right: auto;
+}
+
+.message-outgoing {
+    background: linear-gradient(135deg, #ffd700, #ffaa00);
+    color: #0a0a1a;
+    align-self: flex-end;
+    margin-left: auto;
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.message-incoming .message-header {
+    color: #888;
+}
+
+.message-outgoing .message-header {
+    color: #0a0a1a;
+}
+
+.message-text {
+    margin: 0;
+    line-height: 1.5;
+}
+
+.no-messages {
+    text-align: center;
+    color: #888;
+    padding: 30px;
+}
+
+.chat-input {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.chat-input form {
+    display: flex;
+    gap: 15px;
+}
+
+.chat-input textarea {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 10px;
+    padding: 15px;
+    color: #fff;
+    font-size: 1rem;
+    outline: none;
+    resize: none;
+    height: 60px;
+    font-family: inherit;
+}
+
+.chat-input textarea::placeholder {
+    color: #888;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%);
+    color: #0a0a1a;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+}
+
+.ticket-closed {
+    text-align: center;
+    color: #888;
+    font-size: 1.1rem;
+    margin: 0;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chatMessages = document.querySelector('.chat-messages');
+    if (chatMessages) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+});
+</script>
+{% endblock %}

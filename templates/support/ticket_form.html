@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}Создать тикет - Поддержка{% endblock %}
+
+{% block content %}
+<div class="support-page">
+    <div class="container">
+        <a href="{% url 'support:ticket_list' %}" class="back-btn">← Назад</a>
+        
+        <div class="form-card glass-card">
+            <h1 class="page-title">Создать тикет</h1>
+            <form method="POST" action="">
+                {% csrf_token %}
+                <div class="form-field">
+                    <label for="id_subject">Тема</label>
+                    <input type="text" id="id_subject" name="subject" placeholder="Введите тему..." required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Создать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.support-page {
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0a0a1a 100%);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.back-btn {
+    color: #ffd700;
+    text-decoration: none;
+    font-weight: bold;
+    display: inline-block;
+    margin-bottom: 30px;
+    font-size: 1.1rem;
+}
+
+.back-btn:hover {
+    color: #fff;
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: 20px;
+    padding: 35px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.page-title {
+    color: #ffd700;
+    font-size: 2rem;
+    margin-top: 0;
+    margin-bottom: 30px;
+}
+
+.form-field {
+    margin-bottom: 25px;
+}
+
+.form-field label {
+    display: block;
+    color: #888;
+    margin-bottom: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.form-field input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 12px;
+    padding: 15px;
+    color: #fff;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+
+.form-field input:focus {
+    border-color: rgba(255, 215, 0, 0.7);
+}
+
+.form-field input::placeholder {
+    color: #888;
+}
+
+.form-actions {
+    margin-top: 25px;
+    text-align: center;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%);
+    color: #0a0a1a;
+    border: none;
+    padding: 14px 40px;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+}
+</style>
+{% endblock %}

@@ -47,11 +47,17 @@
           <a class="nav-link" href="{% url 'transactions:services' %}">Оплата услуг</a>
           <a class="nav-link" href="{% url 'loans:loans_page' %}"> Кредиты </a>
           <a class="nav-link" href="{% url 'banking:currency' %}"> Калькулятор </a>
+                <a class="nav-link" href="{% url 'support:ticket_list' %}"> Поддержка </a>
         </div>
 
         <div class="nav-actions">
-          {% if user.is_authenticated %}
-          <div class="notification-dropdown">
+            {% if user.is_authenticated and user.role == 'manager' %}
+            <a href="{% url 'manager:dashboard' %}" class="btn btn-ghost" style="padding: 0.6rem 1rem; border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 10px;">
+                📊 Панель менеджера
+            </a>
+            {% endif %}
+            {% if user.is_authenticated %}
+            <div class="notification-dropdown">
             <button id="notification-btn" class="notification-bell" type="button">
               🔔
               {% if unread_count > 0 %}

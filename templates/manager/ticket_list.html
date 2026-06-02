@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Заявки на кредиты - ZarinPay{% endblock %}
+{% block title %}Тикеты поддержки - ZarinPay{% endblock %}
 
 {% block content %}
 <div class="manager-page">
@@ -19,46 +19,33 @@
                 Тикеты поддержки
             </a>
         </nav>
-        <h1 class="page-title">Заявки на кредиты</h1>
+        <h1 class="page-title">Тикеты поддержки</h1>
         
-        <div class="loans-list">
-            {% if loans %}
-                {% for loan in loans %}
-                <div class="loan-card glass-card">
-                    <div class="loan-header">
-                        <div class="loan-info">
-                            <h3>Кредит #{{ loan.id }}</h3>
-                            <p class="client-name">Клиент: {{ loan.user.username }}</p>
-                            <p class="client-email">Email: {{ loan.user.email }}</p>
+        <div class="tickets-list">
+            {% if tickets %}
+                {% for ticket in tickets %}
+                <div class="ticket-card glass-card">
+                    <div class="ticket-header">
+                        <div class="ticket-info">
+                            <h3>{{ ticket.subject }}</h3>
+                            <p class="client-name">Клиент: {{ ticket.user.username }}</p>
+                            <p class="ticket-date">{{ ticket.created_at|date:"d.m.Y H:i" }}</p>
                         </div>
-                        <div class="loan-status {{ loan.status }}">
-                            {{ loan.get_status_display }}
+                        <div class="ticket-status {{ ticket.status }}">
+                            {{ ticket.get_status_display }}
                         </div>
                     </div>
                     
-                    <div class="loan-details">
-                        <p><strong>Сумма:</strong> {{ loan.amount }} TJS</p>
-                        <p><strong>Срок:</strong> {{ loan.term_months }} месяцев</p>
-                        <p><strong>Ставка:</strong> {{ loan.interest_rate }}%</p>
-                        <p><strong>Ежемесячный платёж:</strong> {{ loan.monthly_payment }} TJS</p>
-                        <p><strong>Дата заявки:</strong> {{ loan.created_at|date:"d.m.Y H:i" }}</p>
-                        {% if loan.manager_comment %}
-                        <p><strong>Комментарий менеджера:</strong> {{ loan.manager_comment }}</p>
-                        {% endif %}
-                    </div>
-                    
-                    {% if loan.status == 'pending' %}
-                    <div class="loan-actions">
-                        <a href="{% url 'manager:loan_request_detail' loan.id %}" class="btn-primary">
-                            Рассмотреть заявку
+                    <div class="ticket-actions">
+                        <a href="{% url 'manager:ticket_detail' ticket.id %}" class="btn-primary">
+                            Открыть чат
                         </a>
                     </div>
-                    {% endif %}
                 </div>
                 {% endfor %}
             {% else %}
-                <div class="no-loans">
-                    <p>Нет заявок на кредиты</p>
+                <div class="no-data glass-card">
+                    <p>Нет тикетов</p>
                 </div>
             {% endif %}
         </div>
@@ -120,7 +107,7 @@
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 215, 0, 0.2);
     border-radius: 20px;
-    padding: 30px;
+    padding: 25px;
     margin-bottom: 20px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -131,78 +118,53 @@
     box-shadow: 0 12px 40px rgba(255, 215, 0, 0.2);
 }
 
-.loan-header {
+.ticket-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 20px;
 }
 
-.loan-info h3 {
+.ticket-info h3 {
     color: #ffd700;
-    margin: 0 0 10px 0;
-    font-size: 1.5rem;
+    margin: 0 0 8px 0;
+    font-size: 1.3rem;
 }
 
-.loan-info p {
+.ticket-info .client-name {
     color: #ccc;
-    margin: 5px 0;
+    margin: 0 0 5px 0;
 }
 
-.loan-status {
+.ticket-info .ticket-date {
+    color: #888;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.ticket-status {
     padding: 8px 20px;
     border-radius: 20px;
     font-weight: bold;
     text-transform: uppercase;
 }
 
-.loan-status.pending {
-    background: rgba(255, 165, 0, 0.2);
-    color: #ffa500;
-    border: 1px solid #ffa500;
+.ticket-status.open {
+    background: rgba(72, 199, 116, 0.2);
+    color: #48c774;
+    border: 1px solid #48c774;
 }
 
-.loan-status.approved {
-    background: rgba(0, 255, 0, 0.2);
-    color: #00ff00;
-    border: 1px solid #00ff00;
-}
-
-.loan-status.active {
-    background: rgba(0, 255, 0, 0.2);
-    color: #00ff00;
-    border: 1px solid #00ff00;
-}
-
-.loan-status.rejected {
-    background: rgba(255, 0, 0, 0.2);
-    color: #ff0000;
-    border: 1px solid #ff0000;
-}
-
-.loan-status.closed {
-    background: rgba(255, 255, 255, 0.1);
+.ticket-status.closed {
+    background: rgba(136, 136, 136, 0.2);
     color: #888;
     border: 1px solid #888;
 }
 
-.loan-details {
-    margin: 20px 0;
-}
-
-.loan-details p {
-    color: #ccc;
-    margin: 10px 0;
-}
-
-.loan-details strong {
-    color: #ffd700;
-}
-
-.loan-actions {
-    margin-top: 20px;
+.ticket-actions {
+    margin-top: 15px;
     text-align: right;
 }
 
@@ -225,7 +187,7 @@
     box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
 }
 
-.no-loans {
+.no-data {
     text-align: center;
     color: #888;
     padding: 40px;

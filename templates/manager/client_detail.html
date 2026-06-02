@@ -1,0 +1,365 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ client.first_name }} {{ client.last_name }} - Профиль клиента{% endblock %}
+
+{% block content %}
+<div class="manager-page">
+    <div class="container">
+        <nav class="manager-nav">
+            <a href="{% url 'manager:dashboard' %}" class="manager-nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                Дашборд
+            </a>
+            <a href="{% url 'manager:client_list' %}" class="manager-nav-link {% if request.resolver_match.url_name == 'client_list' %}active{% endif %}">
+                Клиенты
+            </a>
+            <a href="{% url 'manager:loan_requests' %}" class="manager-nav-link {% if request.resolver_match.url_name == 'loan_requests' %}active{% endif %}">
+                Заявки на кредит
+            </a>
+            <a href="{% url 'manager:ticket_list' %}" class="manager-nav-link {% if request.resolver_match.url_name == 'ticket_list' %}active{% endif %}">
+                Тикеты поддержки
+            </a>
+        </nav>
+        <a href="{% url 'manager:client_list' %}" class="back-btn">← Назад к списку клиентов</a>
+        
+        <div class="client-profile-header glass-card">
+            <div class="profile-avatar">
+                {% if client.avatar %}
+                    <img src="{{ client.avatar.url }}" alt="{{ client.first_name }}">
+                {% else %}
+                    <span class="avatar-placeholder">{{ client.first_name.0 }}{{ client.last_name.0 }}</span>
+                {% endif %}
+            </div>
+            <div class="profile-info">
+                <h1>{{ client.first_name }} {{ client.last_name }}</h1>
+                <p class="username">@{{ client.username }}</p>
+                <p class="email">{{ client.email }}</p>
+                {% if client.phone %}
+                    <p class="phone">📱 {{ client.phone }}</p>
+                {% endif %}
+                <div class="profile-status {% if client.is_verified %}verified{% else %}not-verified{% endif %}">
+                    {% if client.is_verified %}✓ Верифицирован{% else %}○ Не верифицирован{% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="client-sections">
+            <div class="section-card glass-card">
+                <h2 class="section-title">🏦 Счета</h2>
+                {% if accounts %}
+                    <div class="accounts-list">
+                        {% for account in accounts %}
+                        <div class="account-item">
+                            <div class="account-info">
+                                <p class="account-number">{{ account.account_number }}</p>
+                                <p class="account-type">{{ account.get_account_type_display }}</p>
+                            </div>
+                            <div class="account-balance">
+                                {{ account.balance }} {{ account.currency }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="no-data">Нет счетов</p>
+                {% endif %}
+            </div>
+            
+            <div class="section-card glass-card">
+                <h2 class="section-title">💳 Кредиты</h2>
+                {% if loans %}
+                    <div class="loans-list">
+                        {% for loan in loans %}
+                        <div class="loan-item">
+                            <p><strong>Кредит #{{ loan.id }}</strong> - {{ loan.get_status_display }}</p>
+                            <p>{{ loan.amount }} TJS на {{ loan.term_months }} месяцев</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="no-data">Нет кредитов</p>
+                {% endif %}
+            </div>
+            
+            <div class="section-card glass-card">
+                <h2 class="section-title">📊 Последние транзакции</h2>
+                {% if transactions %}
+                    <div class="transactions-list">
+                        {% for tx in transactions %}
+                        <div class="transaction-item">
+                            <div class="tx-info">
+                                <p>{{ tx.description }}</p>
+                                <span class="tx-date">{{ tx.created_at|date:"d.m.Y H:i" }}</span>
+                            </div>
+                            <span class="tx-amount {% if tx.sender_account and tx.sender_account.user == client %}expense{% else %}income{% endif %}">
+                                {{ tx.amount }} TJS
+                            </span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="no-data">Нет транзакций</p>
+                {% endif %}
+            </div>
+            
+            <div class="section-card glass-card">
+                <h2 class="section-title">🎫 Тикеты поддержки</h2>
+                {% if tickets %}
+                    <div class="tickets-list">
+                        {% for ticket in tickets %}
+                        <div class="ticket-item">
+                            <div class="ticket-info">
+                                <p><strong>{{ ticket.subject }}</strong></p>
+                                <span class="ticket-date">{{ ticket.created_at|date:"d.m.Y H:i" }}</span>
+                            </div>
+                            <span class="ticket-status {{ ticket.status }}">{{ ticket.get_status_display }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="no-data">Нет тикетов</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.manager-page {
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0a0a1a 100%);
+    min-height: 100vh;
+}
+
+.manager-nav {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    flex-wrap: wrap;
+}
+
+.manager-nav-link {
+    padding: 10px 20px;
+    color: #888;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.manager-nav-link:hover {
+    color: #ffd700;
+    background: rgba(255, 215, 0, 0.1);
+}
+
+.manager-nav-link.active {
+    color: #0a0a1a;
+    background: linear-gradient(135deg, #ffd700, #ffaa00);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.back-btn {
+    color: #ffd700;
+    text-decoration: none;
+    font-weight: bold;
+    display: inline-block;
+    margin-bottom: 30px;
+    font-size: 1.1rem;
+}
+
+.back-btn:hover {
+    color: #fff;
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.client-profile-header {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #ffd700;
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #ffd700, #ffaa00);
+    color: #0a0a1a;
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+.profile-info h1 {
+    color: #ffd700;
+    margin: 0 0 10px 0;
+    font-size: 2rem;
+}
+
+.profile-info .username {
+    color: #aaa;
+    margin: 0 0 5px 0;
+    font-size: 1rem;
+}
+
+.profile-info .email, .profile-info .phone {
+    color: #ccc;
+    margin: 5px 0;
+}
+
+.profile-status {
+    margin-top: 15px;
+    padding: 8px 15px;
+    border-radius: 15px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    display: inline-block;
+}
+
+.profile-status.verified {
+    background: rgba(72, 199, 116, 0.2);
+    color: #48c774;
+    border: 1px solid #48c774;
+}
+
+.profile-status.not-verified {
+    background: rgba(255, 165, 0, 0.2);
+    color: #ffa500;
+    border: 1px solid #ffa500;
+}
+
+.section-title {
+    color: #ffd700;
+    font-size: 1.5rem;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+.accounts-list, .loans-list, .transactions-list, .tickets-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.account-item, .loan-item, .ticket-item {
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border-left: 3px solid #ffd700;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.account-info p, .loan-item p {
+    margin: 5px 0;
+}
+
+.account-number {
+    color: #fff;
+    font-weight: bold;
+}
+
+.account-type {
+    color: #888;
+    font-size: 0.9rem;
+}
+
+.account-balance {
+    color: #ffd700;
+    font-size: 1.3rem;
+    font-weight: bold;
+}
+
+.tx-info p {
+    color: #fff;
+    margin: 0 0 5px 0;
+}
+
+.tx-date {
+    color: #888;
+    font-size: 0.85rem;
+}
+
+.tx-amount {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.tx-amount.expense {
+    color: #ff6b6b;
+}
+
+.tx-amount.income {
+    color: #48c774;
+}
+
+.ticket-info p {
+    color: #fff;
+    margin: 0 0 5px 0;
+}
+
+.ticket-date {
+    color: #888;
+    font-size: 0.85rem;
+}
+
+.ticket-status {
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+.ticket-status.open {
+    background: rgba(72, 199, 116, 0.2);
+    color: #48c774;
+    border: 1px solid #48c774;
+}
+
+.ticket-status.closed {
+    background: rgba(136, 136, 136, 0.2);
+    color: #888;
+    border: 1px solid #888;
+}
+
+.no-data {
+    color: #888;
+    text-align: center;
+    padding: 20px;
+}
+</style>
+{% endblock %}
