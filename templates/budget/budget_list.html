@@ -57,7 +57,10 @@
   <div class="budget-cards-section">
     <div class="budget-section-header">
       <h2>Лимиты по категориям</h2>
-      <a href="{% url 'budget:budget_create' %}" class="btn btn-primary">➕ Добавить бюджет</a>
+      <div style="display: flex; gap: 10px;">
+        <a href="{% url 'budget:financial_advisor' %}" class="btn btn-gold">🔍 Анализ моих расходов</a>
+        <a href="{% url 'budget:budget_create' %}" class="btn btn-primary">➕ Добавить бюджет</a>
+      </div>
     </div>
 
     {% if budgets %}

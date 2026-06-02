@@ -516,6 +516,155 @@
   display: none;
 }
 
+/* ── Financial Advisor Page ──────────────────────────────────────── */
+.advisor-page {
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.advisor-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.advisor-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 1rem 0 0.5rem;
+}
+
+.advisor-subtitle {
+  color: var(--muted);
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Stats Cards */
+.advisor-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.advisor-stat-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 215, 0, 0.12);
+  border-radius: 16px;
+  padding: 1.5rem;
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.advisor-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(255, 215, 0, 0.15);
+}
+
+.advisor-stat-card--income {
+  border-color: rgba(72, 199, 116, 0.3);
+  background: rgba(72, 199, 116, 0.05);
+}
+
+.advisor-stat-card--expense {
+  border-color: rgba(255, 107, 107, 0.3);
+  background: rgba(255, 107, 107, 0.05);
+}
+
+.advisor-stat-card--balance {
+  border-color: rgba(255, 215, 0, 0.3);
+  background: rgba(255, 215, 0, 0.05);
+}
+
+.advisor-stat-icon {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+
+.advisor-stat-content {
+  flex: 1;
+}
+
+.advisor-stat-label {
+  font-size: 0.875rem;
+  color: var(--muted);
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+}
+
+.advisor-stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.advisor-stat-value--negative {
+  color: #ff6b6b;
+}
+
+/* Tips Section */
+.advisor-tips {
+  margin-bottom: 2rem;
+}
+
+.advisor-tips h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 1.5rem;
+  text-align: center;
+}
+
+.advisor-tips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.25rem;
+}
+
+.advisor-tip-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 215, 0, 0.12);
+  border-radius: 14px;
+  padding: 1.5rem;
+  backdrop-filter: blur(12px);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.4s ease;
+}
+
+.advisor-tip-card.fade-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.advisor-tip-card:hover {
+  border-color: rgba(255, 215, 0, 0.3);
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.advisor-tip-content {
+  color: var(--text);
+  font-size: 0.975rem;
+  line-height: 1.6;
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold), #e6ac00);
+  color: #0b1020;
+}
+
+.btn-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .budget-cards-grid {
@@ -530,5 +679,13 @@
   .form-actions,
   .budget-delete-form {
     flex-direction: column;
+  }
+
+  .advisor-tips-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .advisor-stats {
+    grid-template-columns: 1fr;
   }
 }

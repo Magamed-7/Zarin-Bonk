@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Финансовый советник — ZarinPay{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/budget.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="advisor-page">
+  <div class="advisor-header">
+    <a href="{% url 'budget:budget_list' %}" class="btn btn-secondary">← Назад к бюджету</a>
+    <h1>🤖 Финансовый советник</h1>
+    <p class="advisor-subtitle">Анализ ваших расходов за {{ month }}</p>
+  </div>
+
+  <div class="advisor-stats">
+    <div class="advisor-stat-card advisor-stat-card--income">
+      <div class="advisor-stat-icon">💵</div>
+      <div class="advisor-stat-content">
+        <div class="advisor-stat-label">Доход</div>
+        <div class="advisor-stat-value">{{ total_income|floatformat:2 }} TJS</div>
+      </div>
+    </div>
+    <div class="advisor-stat-card advisor-stat-card--expense">
+      <div class="advisor-stat-icon">💰</div>
+      <div class="advisor-stat-content">
+        <div class="advisor-stat-label">Расход</div>
+        <div class="advisor-stat-value">{{ total_expense|floatformat:2 }} TJS</div>
+      </div>
+    </div>
+    <div class="advisor-stat-card advisor-stat-card--balance">
+      <div class="advisor-stat-icon">📊</div>
+      <div class="advisor-stat-content">
+        <div class="advisor-stat-label">Баланс</div>
+        <div class="advisor-stat-value {% if balance < 0 %}advisor-stat-value--negative{% endif %}">{{ balance|floatformat:2 }} TJS</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="advisor-tips">
+    <h2>💡 Советы по экономии</h2>
+    <div class="advisor-tips-grid">
+      {% for tip in advice %}
+        <div class="advisor-tip-card">
+          <div class="advisor-tip-content">{{ tip }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const tipCards = document.querySelectorAll('.advisor-tip-card');
+  
+  tipCards.forEach((card, index) => {
+    card.style.animationDelay = `${index * 0.15}s`;
+    card.classList.add('fade-in');
+  });
+});
+</script>
+{% endblock %}

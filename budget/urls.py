@@ -8,4 +8,5 @@ urlpatterns = [
     path('create/', views.BudgetCreateView.as_view(), name='budget_create'),
     path('<slug:slug>/update/', views.BudgetUpdateView.as_view(), name='budget_update'),
     path('<slug:slug>/delete/', views.BudgetDeleteView.as_view(), name='budget_delete'),
+    path('financial-advisor/', views.FinancialAdvisorView.as_view(), name='financial_advisor'),
 ]
