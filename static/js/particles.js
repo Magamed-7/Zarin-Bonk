@@ -4,7 +4,7 @@
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const mount = document.getElementById("bg3d");
-  if (!mount || !window.THREE || prefersReducedMotion) return;
+  if (!mount || typeof window.THREE === "undefined" || prefersReducedMotion) return;
 
   const THREE = window.THREE;
   const renderer = new THREE.WebGLRenderer({

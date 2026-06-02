@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Лицензии — ZarinPay{% endblock %}
+
+{% block extra_css %}
+<style>
+.doc-page {
+    padding: 5rem 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+.doc-title {
+    color: #ffd700;
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 3rem;
+}
+.doc-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,215,0,0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+.doc-card h2 {
+    color: #fff;
+    margin-top:0;
+}
+.reveal {
+    opacity:0;
+    transform: translateY(30px);
+    transition: all 0.6s ease-out;
+}
+.reveal.visible {
+    opacity:1;
+    transform: translateY(0);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="doc-page">
+    <h1 class="doc-title reveal">Лицензии</h1>
+    <div class="doc-card reveal">
+        <h2>MIT License</h2>
+        <p class="muted">ZarinPay использует компоненты с открытым исходным кодом под лицензией MIT.</p>
+        <p>Copyright © 2026 ZarinPay</p>
+        <p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
+        <p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</p>
+    </div>
+    <div class="doc-card reveal delay-1">
+        <h2>Используемые библиотеки</h2>
+        <ul class="muted">
+            <li>Django — BSD-3-Clause</li>
+            <li>Three.js — MIT</li>
+            <li>Chart.js — MIT</li>
+            <li>Inter font — SIL Open Font License</li>
+        </ul>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const reveals = document.querySelectorAll('.reveal');
+const obs = new IntersectionObserver(e => {
+    e.forEach(i => i.isIntersecting && i.target.classList.add('visible'));
+}, { threshold: 0.1 });
+reveals.forEach(el => obs.observe(el));
+</script>
+{% endblock %}

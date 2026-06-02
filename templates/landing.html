@@ -1,239 +1,116 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% load static %}
 
 {% block title %}ZarinPay — Будущее банкинга{% endblock %}
 
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/landing.css' %}" />
-  <style>
-    .hero-3d-wrapper {
-      position: relative;
-      overflow: hidden;
-    }
-    #landing3D {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      pointer-events: none;
-    }
-    .hero-content {
-      position: relative;
-      z-index: 1;
-    }
-  </style>
+<link rel="stylesheet" href="{% static 'css/landing.css' %}">
+<style>
+/* Fallback: show content even if JS is not loaded */
+.reveal {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+</style>
 {% endblock %}
 
 {% block content %}
-  <section class="hero parallax-layer hero-3d-wrapper" data-speed="0.18">
-    <canvas id="landing3D"></canvas>
-    <div class="hero-content" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem; align-items: center;">
-      <div class="hero-card glass card-3d reveal">
-        <div class="hero-kicker">ZarinPay</div>
-        <h1 class="hero-title">
-          Умный банкинг в стиле
-          <span class="hero-accent">Dark Gold</span>
-        </h1>
-        <p class="hero-subtitle">
-          Управляйте финансами красиво: 3D интерфейс, быстрые переводы и контроль
-          бюджета в одном месте.
-        </p>
-        <div class="hero-actions">
-          <a class="btn btn-gold" href="#">Открыть счёт</a>
-          <a class="btn btn-ghost" href="#">Войти</a>
+  <section class="hero">
+    <!-- No Three.js canvas, use static CSS background -->
+    <div class="hero-content">
+      <div class="hero-left reveal">
+        <h1>Банкинг будущего<br><span>создаётся здесь</span></h1>
+        <p>Современный интерфейс, AI-ассистент, мгновенные переводы и полный контроль над финансами. Всё, что нужно, в одном месте.</p>
+        <div class="hero-buttons">
+          <a href="{% url 'accounts:login' %}" class="btn-primary">Начать пользоваться</a>
+          <a href="{% url 'about' %}" class="btn-secondary">Узнать больше</a>
         </div>
       </div>
-
-      <div class="hero-card glass card-3d reveal delay-1">
-        <div class="hero-kicker">3D Analytics</div>
-        <div class="chart-wrap">
-          <canvas id="miniChart" height="150"></canvas>
-        </div>
-        <div class="hero-metrics">
-          <div class="metric">
-            <div class="metric-label">Активные клиенты</div>
-            <div class="metric-value">12,4K</div>
-          </div>
-          <div class="metric">
-            <div class="metric-label">Транзакций сегодня</div>
-            <div class="metric-value metric-good">+8.1%</div>
-          </div>
-          <div class="metric">
-            <div class="metric-label">Доступность</div>
-            <div class="metric-value">99.98%</div>
+      <div class="hero-right reveal delay-1">
+        <div class="hero-card">
+          <h3>📊 Наш рост</h3>
+          <!-- Static SVG chart instead of Chart.js -->
+          <svg id="heroChart" height="180" viewBox="0 0 400 180" style="width: 100%;">
+            <defs>
+              <linearGradient id="goldGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color:rgba(255,215,0,0.4);stop-opacity:1" />
+                <stop offset="100%" style="stop-color:rgba(255,215,0,0);stop-opacity:1" />
+              </linearGradient>
+            </defs>
+            <g stroke="rgba(255,255,255,0.1)" stroke-width="1">
+              <line x1="0" y1="30" x2="400" y2="30"/>
+              <line x1="0" y1="75" x2="400" y2="75"/>
+              <line x1="0" y1="120" x2="400" y2="120"/>
+              <line x1="0" y1="165" x2="400" y2="165"/>
+            </g>
+            <path d="M0,165 L66,145 L133,155 L200,130 L266,100 L333,80 L400,70 L400,180 L0,180 Z" fill="url(#goldGradient)"/>
+            <path d="M0,165 L66,145 L133,155 L200,130 L266,100 L333,80 L400,70" stroke="#ffd700" stroke-width="3" fill="none"/>
+          </svg>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <div class="hero-stat-number">12.4K</div>
+              <div class="hero-stat-label">Пользователей</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-number">+8.1%</div>
+              <div class="hero-stat-label">Транзакций</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-number">99.98%</div>
+              <div class="hero-stat-label">Доступность</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="landing-section reveal" id="advantages">
-    <h2 class="landing-title">Наши преимущества</h2>
-    <div class="feature-grid">
-      <article class="glass feature-card card-3d reveal">
-        <span class="feature-icon">🔐</span>
-        <h3>Максимальная безопасность</h3>
-        <p>Многоуровневая защита данных и подтверждение операций.</p>
-      </article>
-      <article class="glass feature-card card-3d reveal delay-1">
-        <span class="feature-icon">⚡</span>
-        <h3>Мгновенные переводы</h3>
-        <p>Переводите средства внутри банка за секунды 24/7.</p>
-      </article>
-      <article class="glass feature-card card-3d reveal delay-2">
-        <span class="feature-icon">📊</span>
-        <h3>Умная аналитика</h3>
-        <p>Визуальные отчёты и прогнозы по расходам в реальном времени.</p>
-      </article>
-      <article class="glass feature-card card-3d reveal delay-3">
-        <span class="feature-icon">🌍</span>
-        <h3>Международные платежи</h3>
-        <p>Удобные платежи и выгодные курсы в разных валютах.</p>
-      </article>
-    </div>
-  </section>
-
-  <section class="landing-section reveal parallax-layer" data-speed="0.08" id="how-it-works">
-    <h2 class="landing-title">Как это работает</h2>
-    <div class="steps-grid">
-      <article class="glass step-card card-3d reveal">
-        <span class="step-index">01</span>
-        <h3>Регистрация</h3>
-        <p>Создайте аккаунт и подтвердите личность за пару минут.</p>
-      </article>
-      <article class="glass step-card card-3d reveal delay-1">
-        <span class="step-index">02</span>
-        <h3>Открытие счёта</h3>
-        <p>Выберите подходящий счёт и настройте лимиты и уведомления.</p>
-      </article>
-      <article class="glass step-card card-3d reveal delay-2">
-        <span class="step-index">03</span>
-        <h3>Управление</h3>
-        <p>Платежи, переводы и финансовые цели в одном дашборде.</p>
-      </article>
-    </div>
-  </section>
-
-  <section class="landing-section reveal" id="pricing">
-    <h2 class="landing-title">Тарифы</h2>
-    <div class="pricing-grid">
-      <article class="glass price-card card-3d reveal">
-        <h3>Start</h3>
-        <div class="price">$0<span>/мес</span></div>
-        <ul>
-          <li>Базовый счёт</li>
-          <li>Переводы внутри банка</li>
-          <li>Email уведомления</li>
-        </ul>
-        <a class="btn btn-ghost" href="#">Выбрать</a>
-      </article>
-      <article class="glass price-card card-3d reveal delay-1 featured">
-        <div class="badge">Популярный</div>
-        <h3>Gold</h3>
-        <div class="price">$12<span>/мес</span></div>
-        <ul>
-          <li>Все возможности Start</li>
-          <li>Международные платежи</li>
-          <li>Расширенная аналитика</li>
-        </ul>
-        <a class="btn btn-gold" href="#">Открыть счёт</a>
-      </article>
-      <article class="glass price-card card-3d reveal delay-2">
-        <h3>Business</h3>
-        <div class="price">$29<span>/мес</span></div>
-        <ul>
-          <li>Мульти-аккаунты</li>
-          <li>Приоритетная поддержка</li>
-          <li>API интеграции</li>
-        </ul>
-        <a class="btn btn-ghost" href="#">Войти</a>
-      </article>
+  <section class="section">
+    <h2 class="section-title reveal">Почему выбирают ZarinPay</h2>
+    <div class="features-grid">
+      <div class="feature-card reveal">
+        <div class="feature-icon">🔐</div>
+        <h3>Безопасность</h3>
+        <p>Современное шифрование, 2FA, круглосуточный мониторинг — ваши данные под надёжной защитой.</p>
+      </div>
+      <div class="feature-card reveal delay-1">
+        <div class="feature-icon">⚡</div>
+        <h3>Скорость</h3>
+        <p>Переводы между счетами — мгновенные, между банками — до 5 минут.</p>
+      </div>
+      <div class="feature-card reveal delay-2">
+        <div class="feature-icon">🤖</div>
+        <h3>AI-ассистент</h3>
+        <p>Умный помощник анализирует расходы, даёт советы по экономии и отвечает на вопросы.</p>
+      </div>
+      <div class="feature-card reveal delay-3">
+        <div class="feature-icon">✨</div>
+        <h3>Интерфейс</h3>
+        <p>Стильный темный интерфейс с золотыми акцентами — работать одно удовольствие.</p>
+      </div>
+      <div class="feature-card reveal delay-1">
+        <div class="feature-icon">📊</div>
+        <h3>Аналитика</h3>
+        <p>Подробная статистика расходов и доходов, красивые диаграммы, анализ финансов.</p>
+      </div>
+      <div class="feature-card reveal delay-2">
+        <div class="feature-icon">🎯</div>
+        <h3>Цели</h3>
+        <p>Создавайте финансовые цели, отслеживайте прогресс, достигайте их быстрее!</p>
+      </div>
     </div>
   </section>
 {% endblock %}
 
 {% block extra_js %}
-  <script src="{% static 'js/landing.js' %}"></script>
-  <script src="https://unpkg.com/three@0.165.0/build/three.min.js"></script>
   <script>
-    const canvas = document.getElementById('landing3D');
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    renderer.setSize(canvas.clientWidth, canvas.clientHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
-
-    const particlesCount = 2000;
-    const positions = new Float32Array(particlesCount * 3);
-    const colors = new Float32Array(particlesCount * 3);
-    for (let i = 0; i < particlesCount; i++) {
-      const i3 = i * 3;
-      positions[i3] = (Math.random() - 0.5) * 30;
-      positions[i3 + 1] = (Math.random() - 0.5) * 30;
-      positions[i3 + 2] = (Math.random() - 0.5) * 30;
-      const goldness = Math.random() * 0.5 + 0.5;
-      colors[i3] = 1 * goldness;
-      colors[i3 + 1] = 0.84 * goldness;
-      colors[i3 + 2] = 0 * goldness;
-    }
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    const material = new THREE.PointsMaterial({
-      size: 0.12,
-      vertexColors: true,
-      transparent: true,
-      opacity: 0.9
-    });
-    const particles = new THREE.Points(geometry, material);
-    scene.add(particles);
-
-    const torusGeo = new THREE.TorusKnotGeometry(2.5, 0.7, 128, 32);
-    const torusMat = new THREE.MeshBasicMaterial({
-      color: 0xffd700,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.3
-    });
-    const torus = new THREE.Mesh(torusGeo, torusMat);
-    scene.add(torus);
-
-    const boxGeo = new THREE.BoxGeometry(1.5, 1.5, 1.5);
-    const boxMat = new THREE.MeshBasicMaterial({
-      color: 0xffaa00,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.35
-    });
-    const box = new THREE.Mesh(boxGeo, boxMat);
-    scene.add(box);
-
-    camera.position.z = 8;
-
-    function resize() {
-      const w = canvas.clientWidth;
-      const h = canvas.clientHeight;
-      renderer.setSize(w, h);
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-    }
-    window.addEventListener('resize', resize);
-
-    let time = 0;
-    function animate() {
-      requestAnimationFrame(animate);
-      time += 0.005;
-      particles.rotation.y = time * 0.3;
-      particles.rotation.x = time * 0.2;
-      torus.rotation.x = time * 0.5;
-      torus.rotation.y = time * 0.4;
-      box.rotation.x = time * -0.4;
-      box.rotation.y = time * 0.6;
-      box.position.y = Math.sin(time * 1.5) * 1.2;
-      renderer.render(scene, camera);
-    }
-    animate();
+    // Reveal animations (no external dependencies)
+    const reveals = document.querySelectorAll('.reveal');
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('in-view');
+      });
+    }, { threshold:0.15 });
+    reveals.forEach(el => obs.observe(el));
   </script>
 {% endblock %}

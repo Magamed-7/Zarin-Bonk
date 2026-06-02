@@ -16,7 +16,6 @@
 
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" href="{% static 'css/animations.css' %}">
-    <link rel="stylesheet" href="{% static 'css/verify_email.css' %}">
     <link rel="stylesheet" href="{% static 'css/notifications.css' %}">
     {% block extra_css %}{% endblock %}
   </head>
@@ -31,7 +30,7 @@
     <div class="bg-glow" aria-hidden="true"></div>
 
     <header class="site-header">
-      <nav class="nav">
+      <nav class="nav container">
         <a class="brand" href="/">
           <span class="brand-mark" aria-hidden="true">Z</span>
           <span class="brand-text">
@@ -42,31 +41,24 @@
 
         <div class="nav-links">
           <a class="nav-link" href="/">Главная</a>
-          <a class="nav-link" href="{% url 'about' %}">О нас</a>
-          <a class="nav-link" href="{% url 'contacts' %}">Контакты</a>
           <a class="nav-link" href="{% url 'banking:accounts' %}">Счета</a>
-          <a class="nav-link" href="{% url 'banking:transfer' %}">Транзакции</a>
-          <a class="nav-link" href="{% url 'transactions:services' %}">Оплата услуг</a>
-          <a class="nav-link" href="{% url 'loans:loans_page' %}"> Кредиты </a>
-          <a class="nav-link" href="{% url 'banking:currency' %}"> Калькулятор </a>
-          <a class="nav-link" href="{% url 'support:ticket_list' %}"> Поддержка </a>
-          <a class="nav-link" href="{% url 'ai_assistant:chat' %}"> 🤖 AI Ассистент </a>
+          <a class="nav-link" href="{% url 'banking:transfer' %}">Переводы</a>
+          <a class="nav-link" href="{% url 'loans:loans_page' %}">Кредиты</a>
+          <a class="nav-link" href="{% url 'budget:budget_list' %}">Бюджет</a>
+          <a class="nav-link" href="{% url 'goals:goal_list' %}">Цели</a>
+          <a class="nav-link" href="{% url 'ai_assistant:chat' %}">🤖 Ассистент</a>
         </div>
 
         <div class="nav-actions">
             {% if user.is_authenticated and user.role == 'admin' %}
-            <a href="{% url 'administration:dashboard' %}" class="btn btn-ghost" style="padding: 0.6rem 1rem; border: 1px solid rgba(255, 215, 0, 0.5); border-radius: 10px;">
-                👑 Панель администратора
-            </a>
+            <a href="{% url 'administration:dashboard' %}" class="btn btn-ghost">👑 Админ</a>
             {% endif %}
             {% if user.is_authenticated and user.role == 'manager' %}
-            <a href="{% url 'manager:dashboard' %}" class="btn btn-ghost" style="padding: 0.6rem 1rem; border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 10px;">
-                📊 Панель менеджера
-            </a>
+            <a href="{% url 'manager:dashboard' %}" class="btn btn-ghost">📊 Менеджер</a>
             {% endif %}
             {% if user.is_authenticated %}
             <div class="notification-dropdown">
-            <button id="notification-btn" class="notification-bell" type="button">
+            <button id="notification-btn" class="notification-bell">
               🔔
               {% if unread_count > 0 %}
               <span class="notification-count">{{ unread_count }}</span>
@@ -78,15 +70,13 @@
                 {% if unread_count > 0 %}
                 <form method="post" action="{% url 'notifications:mark_all_as_read' %}" class="mark-all-panel-form">
                   {% csrf_token %}
-                  <button type="submit" class="mark-all-panel-btn">
-                    Пометить все
-                  </button>
+                  <button type="submit" class="mark-all-panel-btn">Пометить все</button>
                 </form>
                 {% endif %}
               </div>
               <div class="notification-panel-list">
                 {% for notification in recent_notifications %}
-                <div class="notification-panel-item {% if not notification.is_read %}notification-panel-item--unread{% endif %}" data-id="{{ notification.pk }}">
+                <div class="notification-panel-item {% if not notification.is_read %}notification-panel-item--unread{% endif %}" data-id="{{ notification.id }}">
                   <div class="notification-panel-icon">
                     {% if notification.notification_type == 'transaction' %}💰{% elif notification.notification_type == 'security' %}🛡️{% elif notification.notification_type == 'loan' %}💳{% else %}ℹ️{% endif %}
                   </div>
@@ -95,9 +85,9 @@
                     <span class="notification-panel-time">{{ notification.created_at|date:"d.m.Y H:i" }}</span>
                   </div>
                   {% if not notification.is_read %}
-                  <form method="post" action="{% url 'notifications:mark_as_read' notification.pk %}" class="mark-read-panel-form">
+                  <form method="post" action="{% url 'notifications:mark_as_read' notification.pk %}">
                     {% csrf_token %}
-                    <button type="submit" class="mark-read-panel-btn" aria-label="Пометить как прочитанное">✔️</button>
+                    <button type="submit" class="mark-read-panel-btn">✔️</button>
                   </form>
                   {% endif %}
                 </div>
@@ -112,13 +102,13 @@
               </div>
             </div>
           </div>
-          {% endif %}
-          {% if not user.is_authenticated %}
-          <a class="btn btn-gold" href="{% url 'accounts:login' %}">Dashboard </a>
-          {% else %}
-          <a class="btn btn-gold" href="{% url 'accounts:profile' %}"> Profile </a>
-          <a class="btn btn-gold" href="{% url 'accounts:logout' %}"> Log out</a>
-          {% endif %}
+            {% endif %}
+            {% if not user.is_authenticated %}
+          <a class="btn btn-gold" href="{% url 'accounts:login' %}">Войти</a>
+            {% else %}
+          <a href="{% url 'accounts:profile' %}" class="btn btn-ghost">Профиль</a>
+          <a href="{% url 'accounts:logout' %}" class="btn btn-ghost">Выйти</a>
+            {% endif %}
         </div>
       </nav>
     </header>
@@ -149,49 +139,48 @@
     </main>
 
     <footer class="site-footer">
-      <div class="container footer-inner glass">
-        <div class="footer-col">
-          <div class="footer-brand">
-            <span class="brand-mark small" aria-hidden="true">Z</span>
-            <span class="footer-title">ZarinPay</span>
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-col">
+            <div class="footer-brand">
+              <span class="brand-mark">Z</span>
+              <span class="footer-title">ZarinPay</span>
+            </div>
+            <p class="footer-text">
+              Банкинг будущего — красиво, безопасно, современно.
+            </p>
           </div>
-          <p class="muted">
-            Демонстрационный банковский сайт. Темная тема, золото и аккуратная
-            анимация — фирменный стиль.
-          </p>
+          <div class="footer-col">
+            <h4 class="footer-head">Информация</h4>
+            <a href="{% url 'about' %}" class="footer-link">О нас</a>
+            <a href="{% url 'contacts' %}" class="footer-link">Контакты</a>
+            <a href="{% url 'licenses' %}" class="footer-link">Лицензии</a>
+            <a href="{% url 'policy' %}" class="footer-link">Политика конфиденциальности</a>
+            <a href="{% url 'security' %}" class="footer-link">Безопасность</a>
+          </div>
+          <div class="footer-col">
+            <h4 class="footer-head">Сервисы</h4>
+            <a href="{% url 'banking:accounts' %}" class="footer-link">Счета</a>
+            <a href="{% url 'banking:transfer' %}" class="footer-link">Переводы</a>
+            <a href="{% url 'loans:loans_page' %}" class="footer-link">Кредиты</a>
+            <a href="{% url 'budget:budget_list' %}" class="footer-link">Бюджет</a>
+            <a href="{% url 'goals:goal_list' %}" class="footer-link">Цели</a>
+          </div>
+          <div class="footer-col">
+            <h4 class="footer-head">Контакты</h4>
+            <p class="footer-text">📧 support@zarinpay.local</p>
+            <p class="footer-text">📞 +992 44 123 45 67</p>
+            <p class="footer-text">📍 Душанбе, Рудаки 1</p>
+          </div>
         </div>
-        <div class="footer-col">
-          <div class="footer-head">Инфо</div>
-          <a class="footer-link" href="{% url 'about' %}">ℹ️ О банке</a>
-          <a class="footer-link" href="{% url 'contacts' %}">📞 Контакты</a>
-          <a class="footer-link" href="{% url 'budget:budget_list' %}">📊 Бюджет</a>
-          <a class="footer-link" href="{% url 'goals:goal_list' %}">🎯 Цели</a>
-          <a class="footer-link" href="#">Лицензии</a>
-          <a class="footer-link" href="#">Политика</a>
-          <a class="footer-link" href="#">Безопасность</a>
-          {% if user.is_authenticated and user.role == 'manager' %}
-          <a class="footer-link" href="{% url 'manager:loan_requests' %}" style="color: #ffd700;">Кабинет менеджера</a>
-          {% endif %}
-          {% if user.is_authenticated and user.role == 'admin' %}
-          <a class="footer-link" href="{% url 'manager:loan_requests' %}" style="color: #ffd700;">Кабинет менеджера</a>
-          <a class="footer-link" href="{% url 'administration:dashboard' %}" style="color: #ffd700;">👑 Панель администратора</a>
-          {% endif %}
+        <div class="footer-bottom">
+          <span>© {% now 'Y' %} ZarinPay — Все права защищены</span>
+          <span class="sep">•</span>
+          <span>Dark • Glass • Gold</span>
         </div>
-        <div class="footer-col">
-          <div class="footer-head">Контакты</div>
-          <div class="footer-text">Asia/Dushanbe</div>
-          <div class="footer-text">support@zarinpay.local</div>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <span>© {% now 'Y' %} ZarinPay</span>
-        <span class="sep">•</span>
-        <span class="muted">Dark • Glass • Gold</span>
       </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-    <script src="https://unpkg.com/three@0.165.0/build/three.min.js"></script>
     <script src="{% static 'js/particles.js' %}"></script>
     <script src="{% static 'js/main.js' %}"></script>
     <script src="{% static 'js/notifications.js' %}"></script>

@@ -1,8 +1,7 @@
-a s g i r e f = = 3 . 1 1 . 1 
- D j a n g o = = 6 . 0 . 5 
- p i l l o w = = 1 2 . 2 . 0 
- p y t h o n - d e c o u p l e = = 3 . 8 
- s q l p a r s e = = 0 . 5 . 5 
- t z d a t a = = 2 0 2 6 . 2 
+asgiref==3.11.1
+Django==6.0.5
+pillow==12.2.0
+python-decouple==3.8
+sqlparse==0.5.5
+tzdata==2026.2
 reportlab==4.5.1
- 
