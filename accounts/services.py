@@ -3,6 +3,18 @@ from dateutil.relativedelta import relativedelta
 from .models import FinancialScore
 
 
+def check_and_update_score(user):
+    try:
+        score_obj = FinancialScore.objects.get(user=user)
+        seven_days_ago = timezone.now() - relativedelta(days=7)
+        if score_obj.calculated_at < seven_days_ago:
+            return calculate_score(user)
+        level_enum = FinancialScore.Level(score_obj.level)
+        return score_obj.score, level_enum, score_obj.score_details
+    except FinancialScore.DoesNotExist:
+        return calculate_score(user)
+
+
 def get_level(score):
     if score <= 25:
         return FinancialScore.Level.BRONZE

@@ -14,6 +14,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.shortcuts import redirect, render
 from django.utils import timezone
+from accounts.services import check_and_update_score
  
 from banking.models import Account, Card
 from notifications.models import Notification
@@ -453,6 +454,7 @@ def password_reset_new_view(request):
 @login_required
 def profile_view(request):
     user = request.user
+    check_and_update_score(user)
     login_history = LoginHistory.objects.filter(user=user)[:10]
  
     if request.method == 'POST':

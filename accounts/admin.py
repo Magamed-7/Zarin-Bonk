@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import User, LoginHistory
+from .models import User, LoginHistory, FinancialScore
 
 
 @admin.register(User)
@@ -77,6 +77,41 @@ class LoginHistoryAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
  
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(FinancialScore)
+class FinancialScoreAdmin(admin.ModelAdmin):
+    list_display = ('user', 'score', 'level', 'calculated_at')
+    list_filter = ('level',)
+    search_fields = ('user__username', 'user__email')
+    readonly_fields = ('user', 'score', 'level', 'calculated_at', 'score_details')
+
+    fieldsets = (
+        (
+            'Основное',
+            {
+                'fields': ('user',),
+            },
+        ),
+        (
+            'Рейтинг',
+            {
+                'fields': ('score', 'level', 'calculated_at'),
+            },
+        ),
+        (
+            'Детали',
+            {
+                'fields': ('score_details',),
+            },
+        ),
+    )
+
+    def has_add_permission(self, request):
+        return False
+
     def has_change_permission(self, request, obj=None):
         return False
  
