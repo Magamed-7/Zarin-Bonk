@@ -1,35 +1,35 @@
-(() => {
-  const prefersReducedMotion =
+(function() {
+  var prefersReducedMotion =
     window.matchMedia &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // ── 3D tilt на карточках ──────────────────────────────────
   if (!prefersReducedMotion) {
-    document.querySelectorAll('.detail-card').forEach((card) => {
-      card.addEventListener('mousemove', (e) => {
-        const rect = card.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / rect.width  - 0.5;
-        const y = (e.clientY - rect.top)  / rect.height - 0.5;
-        card.style.transform = `perspective(900px) rotateX(${(-y * 4).toFixed(2)}deg) rotateY(${(x * 6).toFixed(2)}deg)`;
+    document.querySelectorAll('.detail-card').forEach(function(card) {
+      card.addEventListener('mousemove', function(e) {
+        var rect = card.getBoundingClientRect();
+        var x = (e.clientX - rect.left) / rect.width  - 0.5;
+        var y = (e.clientY - rect.top)  / rect.height - 0.5;
+        card.style.transform = 'perspective(900px) rotateX(' + (-y * 4).toFixed(2) + 'deg) rotateY(' + (x * 6).toFixed(2) + 'deg)';
       });
 
-      card.addEventListener('mouseleave', () => {
+      card.addEventListener('mouseleave', function() {
         card.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg)';
       });
     });
   }
 
   // ── График баланса за 30 дней ─────────────────────────────
-  const canvas = document.getElementById('balanceChart');
+  var canvas = document.getElementById('balanceChart');
   if (!canvas || !window.Chart) return;
 
-  const labels = window.BALANCE_LABELS || [];
-  const data   = window.BALANCE_DATA   || [];
+  var labels = window.BALANCE_LABELS || [];
+  var data   = window.BALANCE_DATA   || [];
 
-  const ctx  = canvas.getContext('2d');
+  var ctx = canvas.getContext('2d');
 
   // Градиент под линией
-  const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+  var gradient = ctx.createLinearGradient(0, 0, 0, 200);
   gradient.addColorStop(0, 'rgba(255, 215, 0, 0.30)');
   gradient.addColorStop(1, 'rgba(255, 215, 0, 0.01)');
 
@@ -72,8 +72,8 @@
           padding: 10,
           callbacks: {
             // Форматируем сумму в тултипе
-            label(ctx) {
-              return ` ${ctx.parsed.y.toFixed(2)}`;
+            label: function(ctx) {
+              return ' ' + ctx.parsed.y.toFixed(2);
             },
           },
         },
@@ -97,7 +97,7 @@
           ticks: {
             color: 'rgba(255, 255, 255, 0.4)',
             font: { size: 11 },
-            callback(value) {
+            callback: function(value) {
               // Сокращаем большие числа: 12000 → 12K
               if (Math.abs(value) >= 1000) {
                 return (value / 1000).toFixed(1) + 'K';

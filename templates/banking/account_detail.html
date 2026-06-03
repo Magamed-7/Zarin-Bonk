@@ -104,7 +104,7 @@
                 <input type="date" name="start_date" style="width:100%; background:rgba(255,255,255,0.05); border:1.5px solid rgba(255,255,255,0.1); border-radius:8px; padding:0.4rem; color:white; font-size:0.85rem;" required>
               </div>
               <div style="flex: 1;">
-                <label style="font-size: 0.72rem; color: var(--muted); display: block; margin-bottom: 0.2rem;">По дату</label>
+                <label style="font-size: 0.72rem; color: var(--muted); display: block; margin-bottom: 0.2rem;">По даты</label>
                 <input type="date" name="end_date" style="width:100%; background:rgba(255,255,255,0.05); border:1.5px solid rgba(255,255,255,0.1); border-radius:8px; padding:0.4rem; color:white; font-size:0.85rem;" required>
               </div>
             </div>
@@ -184,5 +184,6 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{% static 'js/account_detail.js' %}"></script>
 {% endblock %}

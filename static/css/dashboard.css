@@ -537,3 +537,131 @@ cursor:pointer;
 
 }
 
+/* ── 3D Card Carousel ────────────────────────────────────────── */
+.card-carousel-wrap {
+  perspective: 1400px;
+  animation: fadeUp 0.5s 0.1s ease both;
+}
+
+.card-carousel {
+  position: relative;
+  height: 280px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.carousel-card {
+  position: absolute;
+  width: 340px;
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform-origin: center center;
+  opacity: 0.5;
+  filter: blur(3px);
+}
+
+.carousel-card.active {
+  opacity: 1;
+  filter: blur(0);
+  z-index: 10;
+  transform: scale(1) translateX(0);
+}
+
+/* Let's use JS to apply styles based on index, but for now, let's handle the simple approach */
+
+.carousel-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+.carousel-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  background: rgba(255, 215, 0, 0.1);
+  color: var(--gold);
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.carousel-btn:hover {
+  background: rgba(255, 215, 0, 0.2);
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+.carousel-dots {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.carousel-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.carousel-dot.active {
+  width: 32px;
+  border-radius: 8px;
+  background: var(--gold);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+/* ── NFC Wave Animation ────────────────────────────────────── */
+.nfc-icon {
+  position: absolute;
+  top: 50%;
+  right: 30px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  z-index: 2;
+}
+
+.nfc-icon span {
+  font-size: 1.5rem;
+  position: relative;
+  z-index: 2;
+}
+
+.nfc-wave {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 2px solid rgba(255, 215, 0, 0.6);
+  border-radius: 50%;
+  opacity: 0;
+  animation: nfcWave 2s infinite;
+}
+
+.nfc-wave:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+.nfc-wave:nth-child(3) {
+  animation-delay: 1s;
+}
+
+@keyframes nfcWave {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
