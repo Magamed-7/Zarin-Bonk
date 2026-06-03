@@ -18,7 +18,8 @@ from .forms import TopUpForm
 from .currency_service import (
     get_latest_rates,
     get_rates_last_7_days,
-    get_rate_change
+    get_rate_change,
+    check_and_update_rates
 )
 from .forms import CurrencyConvertForm
 from django.http import JsonResponse
@@ -244,86 +245,36 @@ def topup_account_view(request):
 
 @login_required
 def currency_convert_view(request):
-
+    check_and_update_rates()
     converted = None
     rate = None
+    latest_rates = get_latest_rates()
 
-    form = CurrencyConvertForm(
-        request.POST or None
-    )
+    form = CurrencyConvertForm(request.POST or None)
 
     if request.method == 'POST':
-
         if form.is_valid():
+            amount = form.cleaned_data['amount']
+            source = form.cleaned_data['from_currency']
+            target = form.cleaned_data['to_currency']
 
-            amount = form.cleaned_data[
-                'amount'
-            ]
+            # Calculate rate
+            if source == target:
+                rate = 1.0
+            else:
+                usd_to_source = Decimal(str(latest_rates.get(source, 1.0))) if source != 'USD' else Decimal('1.0')
+                usd_to_target = Decimal(str(latest_rates.get(target, 1.0))) if target != 'USD' else Decimal('1.0')
+                rate = (usd_to_target / usd_to_source).quantize(Decimal('0.0004'))
 
-            source = form.cleaned_data[
-                'from_currency'
-            ]
-
-            target = form.cleaned_data[
-                'to_currency'
-            ]
-
-            url = (
-
-                'https://api.exchangerate.host/convert'
-
-                f'?from={source}'
-
-                f'&to={target}'
-
-                f'&amount={amount}'
-
-            )
-
-            response = requests.get(
-                url,
-                timeout=5
-            )
-
-            data = response.json()
-
-            converted = round(
-
-                data.get(
-                    'result',
-                    0
-                ),
-
-                2
-
-            )
-
-            rate = data.get(
-                'info',
-                {}
-            ).get(
-                'rate'
-            )
+            converted = convert_currency(amount, source, target, latest_rates)
 
     context = {
-
-        'form':form,
-
-        'converted':converted,
-
-        'rate':rate,
-
+        'form': form,
+        'converted': converted,
+        'rate': rate,
     }
 
-    return render(
-
-        request,
-
-        'banking/currency.html',
-
-        context
-
-    )
+    return render(request, 'banking/currency.html', context)
 
 
 
@@ -353,14 +304,27 @@ def delete_account_view(request, account_id):
 
 @login_required
 def rates_view(request):
+    check_and_update_rates()
     latest_rates = get_latest_rates()
     currency_info = [
         ('USD', '🇺🇸'),
         ('EUR', '🇪🇺'),
         ('RUB', '🇷🇺'),
+        ('TJS', '🇹🇯'),
+        ('GBP', '🇬🇧'),
+        ('CNY', '🇨🇳'),
+        ('JPY', '🇯🇵'),
+        ('AUD', '🇦🇺'),
+        ('CAD', '🇨🇦'),
+        ('CHF', '🇨🇭'),
+        ('TRY', '🇹🇷'),
+        ('BRL', '🇧🇷'),
+        ('INR', '🇮🇳'),
+        ('KRW', '🇰🇷'),
     ]
     
     rates_data = []
+    rates_for_js = {}
     for currency_code, flag in currency_info:
         if currency_code in latest_rates:
             rate_data = latest_rates[currency_code]
@@ -375,12 +339,16 @@ def rates_view(request):
                 'chart_labels': json.dumps(labels),
                 'chart_data': json.dumps(chart_data),
             })
+            rates_for_js[currency_code] = rate_data['rate']
+    # Add USD as 1.0 for JS
+    rates_for_js['USD'] = 1.0
     
     return render(
         request,
         'banking/rates.html',
         {
             'rates_data': rates_data,
+            'rates_for_js': rates_for_js,
         }
     )
 
@@ -392,10 +360,10 @@ def receiver_lookup_view(request):
         account_number=number,
         is_deleted=False
     ).select_related('user').first()
- 
+
     if not account:
         return JsonResponse({'found': False})
- 
+
     return JsonResponse({
         'found':    True,
         'name':     account.user.get_full_name() or account.user.username,
@@ -403,20 +371,30 @@ def receiver_lookup_view(request):
     })
 
 
-EXCHANGE_RATES = {
-    'TJS': 1.0,
-    'USD': 10.92,  
-    'EUR': 11.80,   
-}
- 
- 
-def convert_currency(amount, from_currency, to_currency):
+def api_rates_view(request):
+    check_and_update_rates()
+    latest_rates = get_latest_rates()
+    rates_dict = {'USD': 1.0}
+    for currency_code, data in latest_rates.items():
+        rates_dict[currency_code] = data['rate']
+    return JsonResponse(rates_dict)
+
+
+def convert_currency(amount, from_currency, to_currency, rates=None):
     if from_currency == to_currency:
         return amount
- 
-    amount_in_tjs     = amount * Decimal(str(EXCHANGE_RATES[from_currency]))
-    converted_amount  = amount_in_tjs / Decimal(str(EXCHANGE_RATES[to_currency]))
- 
+
+    if rates is None:
+        rates = get_latest_rates()
+
+    # Get rates relative to USD
+    usd_to_from = Decimal(str(rates.get(from_currency, 1.0))) if from_currency != 'USD' else Decimal('1.0')
+    usd_to_to = Decimal(str(rates.get(to_currency, 1.0))) if to_currency != 'USD' else Decimal('1.0')
+
+    # Convert amount to USD, then to target
+    amount_in_usd = amount / usd_to_from if from_currency != 'USD' else amount
+    converted_amount = amount_in_usd * usd_to_to if to_currency != 'USD' else amount_in_usd
+
     return converted_amount.quantize(Decimal('0.01'))
  
  

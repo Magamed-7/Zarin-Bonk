@@ -110,12 +110,156 @@
     color: var(--muted);
     text-align: center;
 }
+
+/* Converter */
+.converter-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 215, 0, 0.15);
+    border-radius: 24px;
+    padding: 40px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    margin-bottom: 40px;
+}
+
+.converter-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.converter-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.converter-input {
+    flex: 1;
+    background: #FFFFFF; /* Белый фон */
+    border: 2px solid rgba(0, 0, 0, 0.3);
+    border-radius: 16px;
+    padding: 18px 22px;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #000000; /* Чёрный текст */
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.converter-input:focus {
+    border-color: #ffd700;
+}
+
+.converter-select {
+    background: #FFFFFF; /* Белый фон */
+    border: 2px solid rgba(0, 0, 0, 0.3);
+    border-radius: 16px;
+    padding: 18px 22px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #000000; /* Чёрный текст */
+    outline: none;
+    cursor: pointer;
+    min-width: 120px;
+}
+
+.swap-btn {
+    background: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%);
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.swap-btn:hover {
+    transform: rotate(180deg);
+    box-shadow: 0 8px 24px rgba(255, 215, 0, 0.3);
+}
+
+.converter-rate {
+    text-align: center;
+    font-size: 1.1rem;
+    color: var(--muted);
+    margin-top: 20px;
+}
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="rates-page">
     <h1 class="rates-title">Курсы валют</h1>
+
+    <div class="converter-card">
+        <h2 class="converter-title">Калькулятор</h2>
+
+        <div class="converter-row">
+            <input 
+                type="number" 
+                id="amount-from" 
+                class="converter-input" 
+                placeholder="0.00"
+                value="1"
+            >
+            <select id="currency-from" class="converter-select">
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="TJS">TJS</option>
+                <option value="RUB">RUB</option>
+                <option value="GBP">GBP</option>
+                <option value="CNY">CNY</option>
+                <option value="JPY">JPY</option>
+                <option value="AUD">AUD</option>
+                <option value="CAD">CAD</option>
+                <option value="CHF">CHF</option>
+                <option value="TRY">TRY</option>
+                <option value="BRL">BRL</option>
+                <option value="INR">INR</option>
+                <option value="KRW">KRW</option>
+            </select>
+        </div>
+
+        <div class="converter-row">
+            <button id="swap-btn" class="swap-btn">⇄</button>
+        </div>
+
+        <div class="converter-row">
+            <input 
+                type="number" 
+                id="amount-to" 
+                class="converter-input" 
+                placeholder="0.00"
+                readonly
+            >
+            <select id="currency-to" class="converter-select">
+                <option value="TJS">TJS</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="RUB">RUB</option>
+                <option value="GBP">GBP</option>
+                <option value="CNY">CNY</option>
+                <option value="JPY">JPY</option>
+                <option value="AUD">AUD</option>
+                <option value="CAD">CAD</option>
+                <option value="CHF">CHF</option>
+                <option value="TRY">TRY</option>
+                <option value="BRL">BRL</option>
+                <option value="INR">INR</option>
+                <option value="KRW">KRW</option>
+            </select>
+        </div>
+
+        <div id="converter-rate" class="converter-rate">1 USD = 1.00 USD</div>
+    </div>
 
     <div class="rates-grid">
         {% for rate in rates_data %}
@@ -155,13 +299,14 @@
         {% endfor %}
     </div>
 </div>
-
 {% endblock %}
 
 {% block extra_js %}
+{{ rates_for_js|json_script:"rates-data" }}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Chart setup
     {% for rate in rates_data %}
         const ctx{{ forloop.counter }} = document.getElementById('chart-{{ rate.code }}').getContext('2d');
         new Chart(ctx{{ forloop.counter }}, {
@@ -183,17 +328,60 @@ document.addEventListener('DOMContentLoaded', function() {
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    x: {
-                        display: false
-                    },
-                    y: {
-                        display: false,
-                        beginAtZero: false
-                    }
+                    x: { display: false },
+                    y: { display: false, beginAtZero: false }
                 }
             }
         });
     {% endfor %}
+
+    // Converter
+    const ratesData = JSON.parse(document.getElementById('rates-data').textContent);
+    const amountFromInput = document.getElementById('amount-from');
+    const amountToInput = document.getElementById('amount-to');
+    const currencyFromSelect = document.getElementById('currency-from');
+    const currencyToSelect = document.getElementById('currency-to');
+    const swapBtn = document.getElementById('swap-btn');
+    const converterRateText = document.getElementById('converter-rate');
+
+    function convertCurrency() {
+        const from = currencyFromSelect.value;
+        const to = currencyToSelect.value;
+        const amount = parseFloat(amountFromInput.value) || 0;
+
+        if (from === to) {
+            amountToInput.value = amount.toFixed(2);
+            converterRateText.textContent = `1 ${from} = 1.00 ${to}`;
+            return;
+        }
+
+        // Get rates relative to USD
+        const usdToFrom = ratesData[from] || 1;
+        const usdToTo = ratesData[to] || 1;
+
+        const rate = usdToTo / usdToFrom;
+        const result = amount * rate;
+
+        amountToInput.value = result.toFixed(2);
+        converterRateText.textContent = `1 ${from} = ${rate.toFixed(4)} ${to}`;
+    }
+
+    swapBtn.addEventListener('click', function() {
+        const tempCurrency = currencyFromSelect.value;
+        currencyFromSelect.value = currencyToSelect.value;
+        currencyToSelect.value = tempCurrency;
+
+        const tempAmount = amountFromInput.value;
+        amountFromInput.value = amountToInput.value;
+        
+        convertCurrency();
+    });
+
+    amountFromInput.addEventListener('input', convertCurrency);
+    currencyFromSelect.addEventListener('change', convertCurrency);
+    currencyToSelect.addEventListener('change', convertCurrency);
+
+    convertCurrency();
 });
 </script>
 {% endblock %}

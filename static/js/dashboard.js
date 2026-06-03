@@ -3,6 +3,33 @@
 
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // Fetch and update rates widget
+  async function updateRatesWidget() {
+    try {
+      const response = await fetch('/banking/api/rates/');
+      if (!response.ok) return;
+      const rates = await response.json();
+
+      const usdEl = document.getElementById('rate-usd');
+      const eurEl = document.getElementById('rate-eur');
+      const rubEl = document.getElementById('rate-rub');
+      const tjsEl = document.getElementById('rate-tjs');
+      const gbpEl = document.getElementById('rate-gbp');
+
+      if (usdEl) usdEl.textContent = rates.USD ? rates.USD.toFixed(2) : '-';
+      if (eurEl) eurEl.textContent = rates.EUR ? rates.EUR.toFixed(4) : '-';
+      if (rubEl) rubEl.textContent = rates.RUB ? rates.RUB.toFixed(4) : '-';
+      if (tjsEl) tjsEl.textContent = rates.TJS ? rates.TJS.toFixed(4) : '-';
+      if (gbpEl) gbpEl.textContent = rates.GBP ? rates.GBP.toFixed(4) : '-';
+    } catch (err) {
+      console.warn('Failed to fetch rates:', err);
+    }
+  }
+
+  // Initial load and refresh every 60s
+  updateRatesWidget();
+  setInterval(updateRatesWidget, 60000);
+
   // ── Анимация счётчика баланса ─────────────────────────────
   const balanceEl = document.querySelector('.balance-amount');
 

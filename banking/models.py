@@ -19,6 +19,16 @@ class Account(models.Model):
         USD = 'USD', 'USD'
         EUR = 'EUR', 'EUR'
         RUB = 'RUB', 'RUB'
+        GBP = 'GBP', 'GBP'
+        CNY = 'CNY', 'CNY'
+        JPY = 'JPY', 'JPY'
+        AUD = 'AUD', 'AUD'
+        CAD = 'CAD', 'CAD'
+        CHF = 'CHF', 'CHF'
+        TRY = 'TRY', 'TRY'
+        BRL = 'BRL', 'BRL'
+        INR = 'INR', 'INR'
+        KRW = 'KRW', 'KRW'
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
