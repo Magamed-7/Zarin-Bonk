@@ -454,9 +454,52 @@ def password_reset_new_view(request):
 @login_required
 def profile_view(request):
     user = request.user
-    check_and_update_score(user)
+    # Always recalculate score to show latest info
+    from accounts.services import calculate_score
+    score, level, score_details = calculate_score(user)
+    
+    # Get or create financial score object
+    try:
+        financial_score = user.financial_score
+    except:
+        from accounts.models import FinancialScore
+        financial_score, _ = FinancialScore.objects.get_or_create(user=user, defaults={'score': score, 'level': level})
+    
+    # Generate tips to improve score
+    tips = []
+    if not score_details.get('regular_deposits', {}).get('achieved'):
+        tips.append({
+            'text': 'Сделайте регулярные пополнения +20 баллов',
+            'url': None,
+            'icon': '💰'
+        })
+    if not score_details.get('no_overdue_loans', {}).get('achieved'):
+        tips.append({
+            'text': 'Погасите просроченный кредит +25 баллов',
+            'url': '/loans/',
+            'icon': '💳'
+        })
+    if not score_details.get('active_saving_account', {}).get('achieved'):
+        tips.append({
+            'text': 'Откройте сберегательный счёт +20 баллов',
+            'url': '/banking/accounts/',
+            'icon': '🏦'
+        })
+    if not score_details.get('budget_and_goals', {}).get('achieved'):
+        tips.append({
+            'text': 'Создайте бюджет и цели +15 баллов',
+            'url': '/budget/',
+            'icon': '📊'
+        })
+    if not score_details.get('long_registration', {}).get('achieved'):
+        tips.append({
+            'text': 'Чем дольше вы с нами — тем больше баллов',
+            'url': None,
+            'icon': '⏳'
+        })
+
     login_history = LoginHistory.objects.filter(user=user)[:10]
- 
+
     if request.method == 'POST':
         avatar = request.FILES.get('avatar')
         
@@ -473,7 +516,7 @@ def profile_view(request):
         last_name  = request.POST.get('last_name', '').strip()
         phone      = request.POST.get('phone', '').strip()
         address    = request.POST.get('address', '').strip()
- 
+
         if not first_name or not last_name:
             messages.error(request, 'Имя и фамилия обязательны.')
         else:
@@ -481,19 +524,33 @@ def profile_view(request):
             user.last_name  = last_name
             user.phone      = phone
             user.address    = address
- 
+
             if avatar:
                 if user.avatar and os.path.isfile(user.avatar.path):
                     os.remove(user.avatar.path)
                 user.avatar = avatar
- 
+
             user.save()
             messages.success(request, 'Профиль успешно обновлён.')
             return redirect('accounts:profile')
- 
+
+    # Map level to color
+    level_colors = {
+        'bronze': '#CD7F32',
+        'silver': '#C0C0C0',
+        'gold': '#FFD700',
+        'platinum': '#E5E4E2'
+    }
+
     return render(request, 'accounts/profile.html', {
         'user': user,
         'login_history': login_history,
+        'financial_score': financial_score,
+        'score': score,
+        'level': level,
+        'level_color': level_colors.get(level if isinstance(level, str) else level.value, '#CD7F32'),
+        'score_details': score_details,
+        'tips': tips
     })
  
  
