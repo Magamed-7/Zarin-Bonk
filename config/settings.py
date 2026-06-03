@@ -28,11 +28,7 @@ config = Config(RepositoryEnv(_env_path)) if _env_path.exists() else Config()
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = config(
-    'ALLOWED_HOSTS',
-    default='127.0.0.1,localhost',
-    cast=lambda v: [h.strip() for h in v.split(',') if h.strip()],
-)
+ALLOWED_HOSTS = ['*']
 
 
 INSTALLED_APPS = [
