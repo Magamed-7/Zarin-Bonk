@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class User(AbstractUser):
     class Role(models.TextChoices):
@@ -61,3 +62,32 @@ class LoginHistory(models.Model):
     def __str__(self):
         status = 'успешно' if self.is_successful else 'неудачно'
         return f'{self.user} — {self.ip_address} ({status}) {self.created_at:%d.%m.%Y %H:%M}'
+
+
+class FinancialScore(models.Model):
+    class Level(models.TextChoices):
+        BRONZE = 'bronze', 'Бронза'
+        SILVER = 'silver', 'Серебро'
+        GOLD = 'gold', 'Золото'
+        PLATINUM = 'platinum', 'Платина'
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='financial_score'
+    )
+    score = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(100)])
+    level = models.CharField(
+        max_length=20,
+        choices=Level.choices,
+        default=Level.BRONZE,
+    )
+    calculated_at = models.DateTimeField(auto_now=True)
+    score_details = models.JSONField(default=dict)
+
+    class Meta:
+        verbose_name = 'финансовый рейтинг'
+        verbose_name_plural = 'финансовые рейтинги'
+
+    def __str__(self):
+        return f'{self.user} — {self.level} ({self.score}/100)'
