@@ -46,6 +46,33 @@ body {
   overflow-x: hidden;
 }
 
+/* Cormorant Garamond for headings - luxury look */
+h1, h2, h3, h4, h5, h6,
+.brand-name,
+.dashboard-title,
+.accounts-header h1,
+.create-account-card h1,
+.section-heading,
+.info-label {
+  font-family: "Cormorant Garamond", Georgia, serif;
+}
+
+/* DM Mono for numbers, card numbers, balances */
+.balance-amount,
+.account-balance,
+.info-balance,
+.card-number-full,
+.account-number,
+.mono,
+.tx-amount,
+.total-banner-amount,
+.converter-input,
+.card-item-number,
+.card-item-expiry,
+.rates-widget-value {
+  font-family: "DM Mono", "Courier New", monospace;
+}
+
 /* Кастомный скроллбар (WebKit) */
 ::-webkit-scrollbar {
   width: 10px;
