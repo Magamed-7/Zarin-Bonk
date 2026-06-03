@@ -851,3 +851,106 @@ transform:scale(1);
 }
 
 }
+
+/* ===== UNVERIFIED EMAIL BANNER ===== */
+.unverified-banner {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(255, 100, 100, 0.08));
+  border-bottom: 1px solid rgba(255, 215, 0, 0.35);
+  backdrop-filter: blur(16px);
+  z-index: 1001;
+  animation: slideDown 0.45s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.unverified-banner-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(255, 100, 100, 0.15));
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  display: grid;
+  place-items: center;
+  font-size: 1.3rem;
+}
+
+.unverified-banner-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.unverified-banner-text strong {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.unverified-banner-text span {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.unverified-banner-btn {
+  position: relative;
+  padding: 10px 20px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 215, 0, 0.45);
+  background: linear-gradient(135deg, rgba(255, 231, 106, 0.98), rgba(255, 215, 0, 0.88));
+  color: rgba(10, 10, 18, 0.95);
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.25s ease;
+  box-shadow: 0 8px 24px rgba(255, 215, 0, 0.25);
+}
+
+.unverified-banner-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 70%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transition: 0.6s ease;
+}
+
+.unverified-banner-btn:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 12px 32px rgba(255, 215, 0, 0.38);
+}
+
+.unverified-banner-btn:hover::before {
+  left: 150%;
+}
+
+.unverified-banner-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.unverified-banner-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none;
+}
+
+@media (max-width: 768px) {
+  .unverified-banner {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    text-align: center;
+  }
+  .unverified-banner-icon {
+    margin: 0 auto;
+  }
+}

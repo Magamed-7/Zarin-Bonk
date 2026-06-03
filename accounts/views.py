@@ -54,8 +54,8 @@ def register_view(request):
 
         login(request, user)
         send_verification_email(user, request)
-        messages.success(request, f'Добро пожаловать, {user.first_name}!')
-        return redirect('accounts:login')
+        messages.success(request, f'Добро пожаловать, {user.first_name}! Проверьте почту для подтверждения.')
+        return redirect('accounts:profile')
 
     return render(request, 'accounts/register.html', {'form': form})
 
@@ -63,6 +63,11 @@ def register_view(request):
 
 
 def send_verification_email(user, request):
+    # Check cooldown - 60 seconds between resend
+    cooldown_key = f'verify_resend_{user.id}'
+    if cache.get(cooldown_key):
+        return False, "Повторно отправить письмо можно через 60 секунд."
+        
     token = str(uuid.uuid4())
     cache.set(f'email_verify_{token}', user.id, 24 * 60 * 60) 
 
@@ -81,6 +86,8 @@ def send_verification_email(user, request):
         recipient_list=[user.email],
         fail_silently=True,
     )
+    cache.set(cooldown_key, True, 60)
+    return True, "Письмо успешно отправлено! Проверьте почту."
 
 
 def verify_email_view(request, token):
@@ -115,11 +122,25 @@ def resend_verification_view(request):
         return redirect('accounts:login')
 
     if request.user.is_verified:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            from django.http import JsonResponse
+            return JsonResponse({'success': False, 'message': 'Ваш email уже подтверждён.'}, status=400)
         messages.info(request, 'Ваш email уже подтверждён.')
         return redirect('accounts:profile')
 
-    send_verification_email(request.user, request)
-    messages.success(request, 'Письмо отправлено повторно. Проверьте почту.')
+    success, message = send_verification_email(request.user, request)
+    
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        from django.http import JsonResponse
+        if success:
+            return JsonResponse({'success': True, 'message': message, 'cooldown': 60})
+        else:
+            return JsonResponse({'success': False, 'message': message}, status=429)
+    
+    if success:
+        messages.success(request, message)
+    else:
+        messages.warning(request, message)
     return redirect('accounts:profile')
 
 

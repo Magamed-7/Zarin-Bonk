@@ -41,9 +41,32 @@
     <div class="avatar-info">
       <h2>{{ user.get_full_name }}</h2>
       <p>{{ user.email }}</p>
-      <span class="avatar-badge">{{ user.get_role_display }}</span>
+      <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin-top: 0.5rem;">
+        <span class="avatar-badge">{{ user.get_role_display }}</span>
+        {% if not user.is_verified %}
+          <span class="avatar-badge" style="background: rgba(255, 100, 100, 0.12); border-color: rgba(255, 100, 100, 0.35); color: #ff6b6b;">
+            Не подтверждён
+          </span>
+        {% else %}
+          <span class="avatar-badge" style="background: rgba(72, 199, 116, 0.12); border-color: rgba(72, 199, 116, 0.35); color: #48c774;">
+            Подтверждён
+          </span>
+        {% endif %}
+      </div>
     </div>
   </div>
+
+  {% if not user.is_verified %}
+    <div class="profile-card" style="border-color: rgba(255, 215, 0, 0.3); background: linear-gradient(135deg, rgba(255, 215, 0, 0.08), rgba(255, 100, 100, 0.04));">
+      <h2>Подтверждение почты</h2>
+      <p style="color: var(--text-secondary, #8892b0); margin: 0 0 1rem 0; font-size: 0.9rem;">
+        Подтвердите свою электронную почту, чтобы получить доступ ко всем функциям ZarinPay.
+      </p>
+      <button class="profile-save-btn" id="resendProfileBtn" onclick="resendVerification()">
+        📧 Отправить письмо повторно
+      </button>
+    </div>
+  {% endif %}
 
   {# Форма редактирования #}
   <div class="profile-card">

@@ -45,10 +45,18 @@
   </head>
   <body>
     {% if user.is_authenticated and not user.is_verified %}
-      <div class="unverified-banner">
-      ⚠️ Подтвердите ваш email, чтобы получить полный доступ.
-      <a href="{% url 'accounts:resend_verification' %}">Отправить письмо</a>
-    </div>
+      <div class="unverified-banner" id="unverifiedBanner">
+        <div class="unverified-banner-icon">
+          ⚠️
+        </div>
+        <div class="unverified-banner-text">
+          <strong>Подтвердите ваш email</strong>
+          <span>Для получения полного доступа к ZarinPay подтвердите свою почту.</span>
+        </div>
+        <button class="unverified-banner-btn" id="resendBannerBtn" onclick="resendVerification()">
+          Отправить письмо
+        </button>
+      </div>
     {% endif %}
     <div id="bg3d" aria-hidden="true"></div>
     <div class="bg-glow" aria-hidden="true"></div>

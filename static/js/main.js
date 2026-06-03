@@ -1,3 +1,107 @@
+// Resend Verification Email
+window.resendVerification = async () => {
+  const bannerBtn = document.getElementById('resendBannerBtn');
+  const profileBtn = document.getElementById('resendProfileBtn');
+  const banner = document.getElementById('unverifiedBanner');
+
+  const disableButtons = (text) => {
+    if (bannerBtn) {
+      bannerBtn.disabled = true;
+      bannerBtn.textContent = text;
+    }
+    if (profileBtn) {
+      profileBtn.disabled = true;
+      profileBtn.textContent = text;
+    }
+  };
+
+  const enableButtons = () => {
+    if (bannerBtn) {
+      bannerBtn.disabled = false;
+      bannerBtn.textContent = 'Отправить письмо';
+    }
+    if (profileBtn) {
+      profileBtn.disabled = false;
+      profileBtn.textContent = '📧 Отправить письмо повторно';
+    }
+  };
+
+  const showFlash = (message, type = 'success') => {
+    const container = document.querySelector('.page');
+    if (!container) return;
+
+    const flash = document.createElement('div');
+    flash.className = `flash flash-${type}`;
+    flash.style.marginTop = '1rem';
+    flash.innerHTML = `
+      <div class="flash-dot" aria-hidden="true"></div>
+      <div class="flash-text">${message}</div>
+      <button class="flash-close" type="button" aria-label="Закрыть">✕</button>
+    `;
+
+    container.insertBefore(flash, container.firstChild);
+
+    // Auto-remove flash after 5 seconds
+    setTimeout(() => {
+      flash.style.opacity = '0';
+      flash.style.transform = 'translateY(-6px)';
+      flash.style.transition = 'opacity .18s ease, transform .18s ease';
+      setTimeout(() => flash.remove(), 190);
+    }, 5000);
+
+    // Close button
+    const closeBtn = flash.querySelector('.flash-close');
+    closeBtn.addEventListener('click', () => {
+      flash.style.opacity = '0';
+      flash.style.transform = 'translateY(-6px)';
+      flash.style.transition = 'opacity .18s ease, transform .18s ease';
+      setTimeout(() => flash.remove(), 190);
+    });
+  };
+
+  try {
+    disableButtons('Отправка...');
+
+    const response = await fetch('/accounts/resend-verification/', {
+      method: 'GET',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      showFlash(data.message, 'success');
+
+      // Start cooldown timer
+      const cooldownSeconds = data.cooldown || 60;
+      let remaining = cooldownSeconds;
+
+      const countdown = setInterval(() => {
+        remaining--;
+        const text = `Подождите ${remaining}с`;
+        if (bannerBtn) bannerBtn.textContent = text;
+        if (profileBtn) profileBtn.textContent = `⌛ Подождите ${remaining}с`;
+
+        if (remaining <= 0) {
+          clearInterval(countdown);
+          enableButtons();
+        }
+      }, 1000);
+
+    } else {
+      showFlash(data.message || 'Ошибка отправки письма', 'warning');
+      enableButtons();
+    }
+
+  } catch (error) {
+    console.error('Error resending verification:', error);
+    showFlash('Произошла ошибка при отправке', 'error');
+    enableButtons();
+  }
+};
+
 (() => {
   const prefersReducedMotion =
     window.matchMedia &&
