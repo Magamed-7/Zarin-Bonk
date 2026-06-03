@@ -151,12 +151,12 @@ class ExchangeRate(models.Model):
     updated_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('base_currency', 'target_currency')
         verbose_name = 'курс валют'
         verbose_name_plural = 'курсы валют'
+        ordering = ['-updated_at']
 
     def __str__(self):
-        return f'{self.base_currency} → {self.target_currency}: {self.rate}'
+        return f'{self.base_currency} → {self.target_currency}: {self.rate} ({self.updated_at})'
 
 
 class BankSettings(models.Model):

@@ -1,47 +1,199 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+.rates-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.rates-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--gold);
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.rates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 25px;
+}
+
+.rate-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 215, 0, 0.15);
+    border-radius: 24px;
+    padding: 30px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.rate-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 48px rgba(255, 215, 0, 0.15);
+}
+
+.rate-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.rate-flag {
+    font-size: 3rem;
+}
+
+.rate-code {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.rate-main {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.rate-value {
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: var(--gold);
+    font-variant-numeric: tabular-nums;
+}
+
+.rate-base {
+    font-size: 1.1rem;
+    color: var(--muted);
+}
+
+.rate-change {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+}
+
+.rate-change.up {
+    background: rgba(72, 199, 116, 0.12);
+    color: #48c774;
+}
+
+.rate-change.down {
+    background: rgba(255, 80, 80, 0.1);
+    color: #ff6b6b;
+}
+
+.rate-change.same {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--muted);
+}
+
+.rate-chart {
+    height: 150px;
+}
+
+.rate-updated {
+    margin-top: 20px;
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-align: center;
+}
+</style>
+{% endblock %}
 
 {% block content %}
-{% load static %}
-<div class="glass rates-page">
+<div class="rates-page">
+    <h1 class="rates-title">Курсы валют</h1>
 
-<h1>
-
-Курсы валют
-
-</h1>
-
-{% for base,data in rates.items %}
-
-<div class="rate-card">
-
-<h3>
-
-{{ base }}
-
-</h3>
-
-{% for cur,value in data.items %}
-
-<div>
-
-{{ cur }}
-
-:
-
-<span class="rate-value">
-
-{{ value }}
-
-</span>
-
+    <div class="rates-grid">
+        {% for rate in rates_data %}
+            <div class="rate-card">
+                <div class="rate-header">
+                    <span class="rate-flag">{{ rate.flag }}</span>
+                    <span class="rate-code">USD/{{ rate.code }}</span>
+                </div>
+                
+                <div class="rate-main">
+                    <span class="rate-value">{{ rate.rate }}</span>
+                    <span class="rate-base">за 1 USD</span>
+                </div>
+                
+                <div class="rate-change {{ rate.change }}">
+                    {% if rate.change == 'up' %}
+                        ▲ Вырос
+                    {% elif rate.change == 'down' %}
+                        ▼ Упал
+                    {% else %}
+                        — Без изменений
+                    {% endif %}
+                </div>
+                
+                <div class="rate-chart">
+                    <canvas id="chart-{{ rate.code }}"></canvas>
+                </div>
+                
+                <div class="rate-updated">
+                    Обновлено: {{ rate.updated_at|date:"d.m.Y H:i" }}
+                </div>
+            </div>
+        {% empty %}
+            <div class="empty-text" style="text-align: center; padding: 60px; grid-column: 1/-1;">
+                Курсы валют пока не загружены
+            </div>
+        {% endfor %}
+    </div>
 </div>
 
-{% endfor %}
+{% endblock %}
 
-</div>
-
-{% endfor %}
-
-</div>
-
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% for rate in rates_data %}
+        const ctx{{ forloop.counter }} = document.getElementById('chart-{{ rate.code }}').getContext('2d');
+        new Chart(ctx{{ forloop.counter }}, {
+            type: 'line',
+            data: {
+                labels: {{ rate.chart_labels|safe }},
+                datasets: [{
+                    data: {{ rate.chart_data|safe }},
+                    borderColor: 'rgba(255, 215, 0, 0.9)',
+                    backgroundColor: 'rgba(255, 215, 0, 0.2)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    pointRadius: 0,
+                    fill: true,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: {
+                        display: false
+                    },
+                    y: {
+                        display: false,
+                        beginAtZero: false
+                    }
+                }
+            }
+        });
+    {% endfor %}
+});
+</script>
 {% endblock %}

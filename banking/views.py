@@ -15,8 +15,11 @@ from django.utils import timezone
 from transactions.models import Transaction
 from .models import Account, Card
 from .forms import TopUpForm
-from .services import get_rates
-from .constants import EXCHANGE_RATES
+from .currency_service import (
+    get_latest_rates,
+    get_rates_last_7_days,
+    get_rate_change
+)
 from .forms import CurrencyConvertForm
 from django.http import JsonResponse
 from .forms import TransferForm
@@ -349,22 +352,36 @@ def delete_account_view(request, account_id):
 
 
 @login_required
-def currency_rates_view(request):
-
-    rates = get_rates()
-
+def rates_view(request):
+    latest_rates = get_latest_rates()
+    currency_info = [
+        ('USD', '🇺🇸'),
+        ('EUR', '🇪🇺'),
+        ('RUB', '🇷🇺'),
+    ]
+    
+    rates_data = []
+    for currency_code, flag in currency_info:
+        if currency_code in latest_rates:
+            rate_data = latest_rates[currency_code]
+            change, _ = get_rate_change(currency_code)
+            labels, chart_data = get_rates_last_7_days(currency_code)
+            rates_data.append({
+                'code': currency_code,
+                'flag': flag,
+                'rate': rate_data['rate'],
+                'updated_at': rate_data['updated_at'],
+                'change': change,
+                'chart_labels': json.dumps(labels),
+                'chart_data': json.dumps(chart_data),
+            })
+    
     return render(
-
         request,
-
         'banking/rates.html',
-
         {
-
-            'rates':rates
-
+            'rates_data': rates_data,
         }
-
     )
 
 
