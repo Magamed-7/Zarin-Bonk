@@ -68,6 +68,7 @@
         {% if cards %}
           {% for card in cards %}
             <div class="card-item card-item--{{ account.account_type }}">
+              <div class="liquid-metal"></div>
               <div class="card-item-top">
                 <span class="card-item-type">{{ card.get_card_type_display }}</span>
                 <span class="card-item-frozen {% if card.is_frozen %}visible{% endif %}">

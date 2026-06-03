@@ -163,6 +163,41 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+/* Liquid Metal Effect for Card Items */
+.card-item .liquid-metal {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(255,215,0,0.0) 0deg,
+    rgba(255,215,0,0.2) 90deg,
+    rgba(255,215,0,0.4) 180deg,
+    rgba(255,215,0,0.2) 270deg,
+    rgba(255,215,0,0.0) 360deg
+  );
+  animation: liquidRotate 4s linear infinite;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.card-item:hover .liquid-metal {
+  opacity: 1;
+}
+
+@keyframes liquidRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .card-item:last-child {
   margin-bottom: 0;
 }

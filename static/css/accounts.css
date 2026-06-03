@@ -129,6 +129,65 @@
 
 .account-card:hover::after { opacity: 1; }
 
+/* Liquid Metal Effect for Account Cards */
+.account-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 20px 20px 0 0;
+  z-index: 1;
+}
+
+.account-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* New liquid metal overlay */
+.account-card .liquid-metal {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(255,215,0,0.0) 0deg,
+    rgba(255,215,0,0.2) 90deg,
+    rgba(255,215,0,0.4) 180deg,
+    rgba(255,215,0,0.2) 270deg,
+    rgba(255,215,0,0.0) 360deg
+  );
+  animation: liquidRotate 4s linear infinite;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.account-card:hover .liquid-metal {
+  opacity: 1;
+}
+
+@keyframes liquidRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Card content */
 .account-card-top {
   display: flex;
