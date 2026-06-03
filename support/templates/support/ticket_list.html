@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Поддержка — ZarinPay{% endblock %}
+
+{% block extra_css %}
+<style>
+.tickets-page {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.tickets-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.tickets-title {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 2.5rem;
+    color: var(--text);
+    font-weight: 700;
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.ticket-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 215, 0, 0.15);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.ticket-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255, 215, 0, 0.4);
+    box-shadow: 0 10px 40px rgba(255, 215, 0, 0.08);
+}
+
+.ticket-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+}
+
+.ticket-subject {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.ticket-status {
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.status-open {
+    background: rgba(72, 199, 116, 0.15);
+    border: 1px solid rgba(72, 199, 116, 0.4);
+    color: #48c774;
+}
+
+.status-in-progress {
+    background: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    color: #3b82f6;
+}
+
+.status-resolved {
+    background: rgba(255, 215, 0, 0.15);
+    border: 1px solid rgba(255, 215, 0, 0.4);
+    color: #FFD700;
+}
+
+.status-closed {
+    background: rgba(148, 163, 184, 0.15);
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    color: #94a3b8;
+}
+
+.ticket-meta {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.ticket-empty {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-secondary);
+}
+
+.btn-gold {
+    background: linear-gradient(135deg, #FFE76A, #FFD700);
+    border: none;
+    color: #0b1020;
+    font-weight: 700;
+    padding: 0.75rem 1.75rem;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-gold:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(255, 215, 0, 0.3);
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="tickets-page">
+    <div class="tickets-header">
+        <h1 class="tickets-title">💬 Поддержка</h1>
+        <a href="{% url 'support:ticket_create' %}" class="btn-gold">➕ Создать тикет</a>
+    </div>
+
+    {% if tickets %}
+    {% for ticket in tickets %}
+    <a href="{% url 'support:ticket_detail' ticket_id=ticket.pk %}" style="text-decoration: none;">
+        <div class="ticket-card">
+            <div class="ticket-top">
+                <div class="ticket-subject">{{ ticket.subject }}</div>
+                <div class="ticket-status status-{{ ticket.status|lower }}">
+                    {% if ticket.status == 'open' %}Открыт{% elif ticket.status == 'in_progress' %}В работе{% elif ticket.status == 'resolved' %}Решено{% else %}Закрыто{% endif %}
+                </div>
+            </div>
+            <div class="ticket-meta">
+                Создан: {{ ticket.created_at|date:"d.m.Y H:i" }}
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+    {% else %}
+    <div class="glass pad card-3d">
+        <div class="ticket-empty">
+            <h2 style="margin-bottom: 1rem; font-size: 1.5rem;">У вас нет открытых тикетов</h2>
+            <p style="margin-bottom: 1.5rem;">Если у вас возникнут вопросы — создайте тикет!</p>
+            <a href="{% url 'support:ticket_create' %}" class="btn-gold">Создать первый тикет</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

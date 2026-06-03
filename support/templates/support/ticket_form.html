@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Новый тикет — ZarinPay{% endblock %}
+
+{% block extra_css %}
+<style>
+.ticket-form-page {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.ticket-form-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 215, 0, 0.15);
+    border-radius: 16px;
+    padding: 2.5rem;
+    transition: all 0.3s ease;
+}
+
+.ticket-form-title {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 2.2rem;
+    color: var(--text);
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.form-group {
+    margin-bottom: 1.75rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.6rem;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text);
+}
+
+.form-input, .form-textarea {
+    width: 100%;
+    padding: 0.9rem 1.2rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-input:focus, .form-textarea:focus {
+    outline: none;
+    border-color: rgba(255, 215, 0, 0.6);
+    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
+}
+
+.form-textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+.btn-gold {
+    background: linear-gradient(135deg, #FFE76A, #FFD700);
+    border: none;
+    color: #0b1020;
+    font-weight: 700;
+    padding: 0.9rem 2rem;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.btn-gold:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(255, 215, 0, 0.3);
+}
+
+.btn-ghost {
+    display: inline-block;
+    margin-top: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-ghost:hover {
+    color: var(--text);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ticket-form-page">
+    <div class="ticket-form-card">
+        <h1 class="ticket-form-title">✉️ Новый тикет</h1>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_subject" class="form-label">Тема тикета</label>
+                {{ form.subject }}
+            </div>
+            <div class="form-group">
+                <label for="id_message" class="form-label">Сообщение</label>
+                <textarea id="id_message" name="message" class="form-textarea" placeholder="Опишите вашу проблему или вопрос..."></textarea>
+            </div>
+            <button type="submit" class="btn-gold">Создать тикет</button>
+        </form>
+        <a href="{% url 'support:ticket_list' %}" class="btn-ghost">← Вернуться к списку</a>
+    </div>
+</div>
+{% endblock %}

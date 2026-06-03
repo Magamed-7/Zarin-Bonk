@@ -178,7 +178,7 @@
     <footer class="site-footer">
       <div class="container">
         <div class="footer-grid">
-          <div class="footer-col">
+          <div class="footer-col footer-col-brand">
             <div class="footer-brand">
               <span class="brand-mark">Z</span>
               <span class="footer-title">ZarinPay</span>
@@ -189,26 +189,50 @@
           </div>
           <div class="footer-col">
             <h4 class="footer-head">Информация</h4>
-            <a href="{% url 'about' %}" class="footer-link">О нас</a>
-            <a href="{% url 'contacts' %}" class="footer-link">Контакты</a>
-            <a href="{% url 'licenses' %}" class="footer-link">Лицензии</a>
-            <a href="{% url 'policy' %}" class="footer-link">Политика конфиденциальности</a>
-            <a href="{% url 'security' %}" class="footer-link">Безопасность</a>
+            <div class="footer-links-group">
+              <a href="{% url 'about' %}" class="footer-link">О нас</a>
+              <a href="{% url 'contacts' %}" class="footer-link">Контакты</a>
+              <a href="{% url 'licenses' %}" class="footer-link">Лицензии</a>
+              <a href="{% url 'policy' %}" class="footer-link">Политика конфиденциальности</a>
+              <a href="{% url 'security' %}" class="footer-link">Безопасность</a>
+            </div>
           </div>
           <div class="footer-col">
             <h4 class="footer-head">Сервисы</h4>
-            <a href="{% url 'banking:accounts' %}" class="footer-link">Счета</a>
-            <a href="{% url 'banking:transfer' %}" class="footer-link">Переводы</a>
-            <a href="{% url 'banking:rates' %}" class="footer-link">Курсы валют</a>
-            <a href="{% url 'loans:loans_page' %}" class="footer-link">Кредиты</a>
-            <a href="{% url 'budget:budget_list' %}" class="footer-link">Бюджет</a>
-            <a href="{% url 'goals:goal_list' %}" class="footer-link">Цели</a>
+            <div class="footer-links-group">
+              <a href="{% url 'banking:accounts' %}" class="footer-link">Счета</a>
+              <a href="{% url 'banking:transfer' %}" class="footer-link">Переводы</a>
+              <a href="{% url 'banking:rates' %}" class="footer-link">Курсы валют</a>
+              <a href="{% url 'loans:loans_page' %}" class="footer-link">Кредиты</a>
+              <a href="{% url 'budget:budget_list' %}" class="footer-link">Бюджет</a>
+              <a href="{% url 'goals:goal_list' %}" class="footer-link">Цели</a>
+            </div>
+          </div>
+          <div class="footer-col">
+            <h4 class="footer-head">Помощь</h4>
+            <div class="footer-links-group">
+              <a href="{% url 'support:ticket_list' %}" class="footer-link">💬 Поддержка</a>
+              <a href="#" class="footer-link">FAQ</a>
+              <a href="#" class="footer-link">Документация</a>
+              <a href="#" class="footer-link">Инструкции</a>
+            </div>
           </div>
           <div class="footer-col">
             <h4 class="footer-head">Контакты</h4>
-            <p class="footer-text">📧 support@zarinpay.local</p>
-            <p class="footer-text">📞 +992 44 123 45 67</p>
-            <p class="footer-text">📍 Душанбе, Рудаки 1</p>
+            <div class="footer-contacts">
+              <div class="footer-contact-item">
+                <span class="footer-contact-icon">📧</span>
+                <span class="footer-contact-text">support@zarinpay.local</span>
+              </div>
+              <div class="footer-contact-item">
+                <span class="footer-contact-icon">📞</span>
+                <span class="footer-contact-text">+992 44 123 45 67</span>
+              </div>
+              <div class="footer-contact-item">
+                <span class="footer-contact-icon">📍</span>
+                <span class="footer-contact-text">Душанбе, Рудаки 1</span>
+              </div>
+            </div>
           </div>
         </div>
         <div class="footer-bottom">

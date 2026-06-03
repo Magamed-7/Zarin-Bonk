@@ -23,6 +23,17 @@ class SupportTicketCreateView(LoginRequiredMixin, generic.CreateView):
 
     def form_valid(self, form):
         form.instance.user = self.request.user
+        ticket = form.save()
+        
+        # Create initial message if provided
+        initial_message = self.request.POST.get('message', '')
+        if initial_message:
+            SupportMessage.objects.create(
+                ticket=ticket,
+                sender=self.request.user,
+                message=initial_message
+            )
+        
         messages.success(self.request, 'Тикет создан!')
         return super().form_valid(form)
 

@@ -5,6 +5,8 @@ from django.db import models
 class SupportTicket(models.Model):
     class Status(models.TextChoices):
         OPEN = 'open', 'Открыт'
+        IN_PROGRESS = 'in_progress', 'В работе'
+        RESOLVED = 'resolved', 'Решено'
         CLOSED = 'closed', 'Закрыт'
 
     user = models.ForeignKey(

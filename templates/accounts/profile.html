@@ -5,476 +5,163 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/profile.css' %}">
-<style>
-/* Score widget styles */
-.score-widget {
-    text-align: center;
-    margin: 2rem 0;
-}
-
-.score-circle-wrap {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 1.5rem;
-}
-
-.score-circle {
-    position: relative;
-    width: 200px;
-    height: 200px;
-}
-
-.score-circle svg {
-    transform: rotate(-90deg);
-    width: 200px;
-    height: 200px;
-}
-
-.score-circle-bg {
-    fill: none;
-    stroke: rgba(255, 255, 255, 0.1);
-    stroke-width: 15;
-}
-
-.score-circle-progress {
-    fill: none;
-    stroke-width: 15;
-    stroke-linecap: round;
-    stroke-dasharray: 565.48;
-    stroke-dashoffset: 565.48;
-    transition: stroke-dashoffset 1.5s ease-out;
-}
-
-.score-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.score-number {
-    font-size: 3rem;
-    font-weight: 800;
-    color: var(--text);
-    font-family: "Cormorant Garamond", Georgia, serif;
-}
-
-.score-level {
-    font-size: 1.2rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-/* Score breakdown */
-.score-breakdown {
-    display: grid;
-    gap: 0.75rem;
-    margin: 1.5rem 0;
-}
-
-.score-item {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.75rem 1rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.score-item-icon {
-    font-size: 1.5rem;
-    flex-shrink: 0;
-}
-
-.score-item-content {
-    flex: 1;
-}
-
-.score-item-title {
-    font-weight: 600;
-    font-size: 0.95rem;
-}
-
-.score-item-hint {
-    font-size: 0.8rem;
-    color: var(--text-secondary, #8892b0);
-    margin-top: 0.25rem;
-}
-
-.score-item-status {
-    flex-shrink: 0;
-    font-size: 1.5rem;
-}
-
-/* Tips */
-.tips-section {
-    margin-top: 1.5rem;
-}
-
-.tips-list {
-    display: grid;
-    gap: 0.75rem;
-}
-
-.tip-card {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem;
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(90, 110, 255, 0.08));
-    border-radius: 16px;
-    border: 1px solid rgba(255, 215, 0, 0.2);
-}
-
-.tip-icon {
-    font-size: 2rem;
-}
-
-.tip-content {
-    flex: 1;
-}
-
-.tip-text {
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-.tip-button {
-    padding: 0.5rem 1rem;
-    border-radius: 10px;
-    border: none;
-    background: linear-gradient(135deg, rgba(255, 231, 106, 0.95), rgba(255, 215, 0, 0.85));
-    color: #0b1020;
-    font-weight: 700;
-    font-size: 0.85rem;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
-}
-</style>
 {% endblock %}
 
 {% block content %}
 <div class="profile-page">
 
-    <h1>Мой профиль</h1>
+  <h1>Мой профиль</h1>
 
-    {# Messages #}
-    {% if messages %}
-        <div class="profile-messages">
-            {% for message in messages %}
-                <div class="profile-message profile-message--{{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        </div>
-    {% endif %}
-
-    {# Аватар и имя #}
-    <div class="profile-avatar-section">
-        <form method="post" enctype="multipart/form-data" id="avatar-form">
-            {% csrf_token %}
-            <div class="avatar-wrap" title="Нажмите чтобы сменить фото">
-                {% if user.avatar %}
-                    <img src="{{ user.avatar.url }}" alt="Аватар" class="avatar-img">
-                {% else %}
-                    <div class="avatar-placeholder">
-                        {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
-                    </div>
-                {% endif %}
-                <div class="avatar-overlay">📷</div>
-                <input type="file" name="avatar" class="avatar-input" accept="image/*">
-            </div>
-        </form>
-
-        <div class="avatar-info">
-            <h2>{{ user.get_full_name }}</h2>
-            <p>{{ user.email }}</p>
-            <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin-top: 0.5rem;">
-                <span class="avatar-badge">{{ user.get_role_display }}</span>
-                {% if not user.is_verified %}
-                    <span class="avatar-badge" style="background: rgba(255, 100, 100, 0.12); border: 1px solid rgba(255, 100, 100, 0.35); color: #ff6b6b;">
-                        Не подтверждён
-                    </span>
-                {% else %}
-                    <span class="avatar-badge" style="background: rgba(72, 199, 116, 0.12); border: 1px solid rgba(72, 199, 116, 0.35); color: #48c774;">
-                        Подтверждён
-                    </span>
-                {% endif %}
-            </div>
-        </div>
+  {# Messages #}
+  {% if messages %}
+    <div class="profile-messages">
+      {% for message in messages %}
+        <div class="profile-message profile-message--{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
     </div>
+  {% endif %}
 
-    {% if not user.is_verified %}
-        <div class="profile-card" style="border-color: rgba(255, 215, 0, 0.3); background: linear-gradient(135deg, rgba(255, 215, 0, 0.08), rgba(255, 100, 100, 0.04));">
-            <h2>Подтверждение почты</h2>
-            <p style="color: var(--text-secondary, #8892b0); margin: 0 0 1rem 0; font-size: 0.9rem;">
-                Подтвердите свою электронную почту, чтобы получить доступ ко всем функциям ZarinPay.
-            </p>
-            <button class="profile-save-btn" id="resendProfileBtn" onclick="resendVerification()">
-                📧 Отправить письмо повторно
-            </button>
-        </div>
-    {% endif %}
-
-    {# Score Widget #}
-    <div class="profile-card">
-        <h2>Финансовый рейтинг</h2>
-        <div class="score-widget">
-            <div class="score-circle-wrap">
-                <div class="score-circle">
-                    <svg viewBox="0 0 200 200">
-                        <circle class="score-circle-bg" cx="100" cy="100" r="90"></circle>
-                        <circle class="score-circle-progress" id="score-progress" cx="100" cy="100" r="90" style="stroke: {{ level_color }};"></circle>
-                    </svg>
-                    <div class="score-text">
-                        <div class="score-number">{{ score }}</div>
-                        <div class="score-level" style="color: {{ level_color }};">
-                            {% if level == "bronze" or level.value == "bronze" %}
-                                Бронза
-                            {% elif level == "silver" or level.value == "silver" %}
-                                Серебро
-                            {% elif level == "gold" or level.value == "gold" %}
-                                Золото
-                            {% elif level == "platinum" or level.value == "platinum" %}
-                                Платина
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">Разбивка баллов</h3>
-            <div class="score-breakdown">
-                <div class="score-item">
-                    <div class="score-item-icon">💰</div>
-                    <div class="score-item-content">
-                        <div class="score-item-title">Регулярные пополнения (+20)</div>
-                        {% if score_details.regular_deposits.achieved %}
-                            <div class="score-item-hint">Отлично! Пополняйте дальше!</div>
-                        {% else %}
-                            <div class="score-item-hint">{{ score_details.regular_deposits.reason }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="score-item-status">
-                        {% if score_details.regular_deposits.achieved %}✅{% else %}❌{% endif %}
-                    </div>
-                </div>
-
-                <div class="score-item">
-                    <div class="score-item-icon">💳</div>
-                    <div class="score-item-content">
-                        <div class="score-item-title">Нет просроченных кредитов (+25)</div>
-                        {% if score_details.no_overdue_loans.achieved %}
-                            <div class="score-item-hint">Отлично! Просрочек нет!</div>
-                        {% else %}
-                            <div class="score-item-hint">{{ score_details.no_overdue_loans.reason }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="score-item-status">
-                        {% if score_details.no_overdue_loans.achieved %}✅{% else %}❌{% endif %}
-                    </div>
-                </div>
-
-                <div class="score-item">
-                    <div class="score-item-icon">🏦</div>
-                    <div class="score-item-content">
-                        <div class="score-item-title">Активный сберегательный счёт (+20)</div>
-                        {% if score_details.active_saving_account.achieved %}
-                            <div class="score-item-hint">Отлично! Счёт открыт!</div>
-                        {% else %}
-                            <div class="score-item-hint">{{ score_details.active_saving_account.reason }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="score-item-status">
-                        {% if score_details.active_saving_account.achieved %}✅{% else %}❌{% endif %}
-                    </div>
-                </div>
-
-                <div class="score-item">
-                    <div class="score-item-icon">📊</div>
-                    <div class="score-item-content">
-                        <div class="score-item-title">Бюджет и цели (+15)</div>
-                        {% if score_details.budget_and_goals.achieved %}
-                            <div class="score-item-hint">Отлично! Планируете финансы!</div>
-                        {% else %}
-                            <div class="score-item-hint">{{ score_details.budget_and_goals.reason }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="score-item-status">
-                        {% if score_details.budget_and_goals.achieved %}✅{% else %}❌{% endif %}
-                    </div>
-                </div>
-
-                <div class="score-item">
-                    <div class="score-item-icon">⏳</div>
-                    <div class="score-item-content">
-                        <div class="score-item-title">Стаж в ZarinPay (+20)</div>
-                        {% if score_details.long_registration.achieved %}
-                            <div class="score-item-hint">Отлично! Давно с нами!</div>
-                        {% else %}
-                            <div class="score-item-hint">{{ score_details.long_registration.reason }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="score-item-status">
-                        {% if score_details.long_registration.achieved %}✅{% else %}❌{% endif %}
-                    </div>
-                </div>
-            </div>
-
-            {% if tips %}
-                <div class="tips-section">
-                    <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">Советы по улучшению рейтинга</h3>
-                    <div class="tips-list">
-                        {% for tip in tips %}
-                            <div class="tip-card">
-                                <div class="tip-icon">{{ tip.icon }}</div>
-                                <div class="tip-content">
-                                    <div class="tip-text">{{ tip.text }}</div>
-                                    {% if tip.url %}
-                                        <a href="{{ tip.url }}" class="tip-button">Перейти</a>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            {% endif %}
-        </div>
-    </div>
-
-    {# Форма редактирования #}
-    <div class="profile-card">
-        <h2>Личные данные</h2>
-
-        <form class="profile-form" method="post" enctype="multipart/form-data" novalidate>
-            {% csrf_token %}
-
-            <div class="form-grid">
-
-                <div class="field">
-                    <label class="field-label" for="id_first_name">Имя</label>
-                    <input
-                        id="id_first_name"
-                        class="field-input"
-                        type="text"
-                        name="first_name"
-                        value="{{ user.first_name }}"
-                        placeholder="Иван"
-                    >
-                </div>
-
-                <div class="field">
-                    <label class="field-label" for="id_last_name">Фамилия</label>
-                    <input
-                        id="id_last_name"
-                        class="field-input"
-                        type="text"
-                        name="last_name"
-                        value="{{ user.last_name }}"
-                        placeholder="Иванов"
-                    >
-                </div>
-
-                <div class="field">
-                    <label class="field-label">Email</label>
-                    <div class="field-readonly">{{ user.email }}</div>
-                </div>
-
-                <div class="field">
-                    <label class="field-label" for="id_phone">Телефон</label>
-                    <input
-                        id="id_phone"
-                        class="field-input"
-                        type="tel"
-                        name="phone"
-                        value="{{ user.phone }}"
-                        placeholder="+7 900 000 00 00"
-                    >
-                </div>
-
-                <div class="field field-full">
-                    <label class="field-label" for="id_address">Адрес</label>
-                    <textarea
-                        id="id_address"
-                        class="field-input"
-                        name="address"
-                        placeholder="Город, улица, дом"
-                    >{{ user.address }}</textarea>
-                </div>
-
-            </div>
-
-            <button type="submit" class="profile-save-btn">Сохранить изменения</button>
-
-            <div class="profile-actions">
-                <a href="{% url 'accounts:change_password' %}" class="profile-save-btn profile-save-btn--secondary">
-                    🔐 Сменить пароль
-                </a>
-                <a href="{% url 'accounts:delete_account' %}" class="profile-save-btn profile-save-btn--danger" onclick="return confirm('⚠️ ВНИМАНИЕ: Вы уверены, что хотите удалить свой аккаунт? Все данные будут потеряны!')">
-                    🗑️ Удалить аккаунт
-                </a>
-            </div>
-
-        </form>
-    </div>
-
-    {# История входов #}
-    <div class="profile-card">
-        <h2>История входов</h2>
-
-        {% if login_history %}
-            <table class="history-table">
-                <thead>
-                    <tr>
-                        <th>Дата</th>
-                        <th>IP адрес</th>
-                        <th>Браузер</th>
-                        <th>Статус</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for entry in login_history %}
-                        <tr>
-                            <td>{{ entry.created_at|date:"d.m.Y H:i" }}</td>
-                            <td>{{ entry.ip_address|default:"—" }}</td>
-                            <td>{{ entry.browser|truncatechars:30|default:"—" }}</td>
-                            <td>
-                                {% if entry.is_successful %}
-                                    <span class="status-ok">✓ Успешно</span>
-                                {% else %}
-                                    <span class="status-fail">✗ Неудача</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+  {# Аватар и имя #}
+  <div class="profile-avatar-section">
+    <form method="post" enctype="multipart/form-data" id="avatar-form">
+      {% csrf_token %}
+      <div class="avatar-wrap" title="Нажмите чтобы сменить фото">
+        {% if user.avatar %}
+          <img src="{{ user.avatar.url }}" alt="Аватар" class="avatar-img">
         {% else %}
-            <p style="color: var(--text-secondary, #8892b0); font-size: 0.875rem;">
-                История входов пуста.
-            </p>
+          <div class="avatar-placeholder">
+            {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+          </div>
         {% endif %}
+        <div class="avatar-overlay">📷</div>
+        <input type="file" name="avatar" class="avatar-input" accept="image/*">
+      </div>
+    </form>
+
+    <div class="avatar-info">
+      <h2>{{ user.get_full_name }}</h2>
+      <p>{{ user.email }}</p>
+      <span class="avatar-badge">{{ user.get_role_display }}</span>
     </div>
+  </div>
+
+  {# Форма редактирования #}
+  <div class="profile-card">
+    <h2>Личные данные</h2>
+
+    <form class="profile-form" method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+
+      <div class="form-grid">
+
+        <div class="field">
+          <label class="field-label" for="id_first_name">Имя</label>
+          <input
+            id="id_first_name"
+            class="field-input"
+            type="text"
+            name="first_name"
+            value="{{ user.first_name }}"
+            placeholder="Иван"
+          >
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="id_last_name">Фамилия</label>
+          <input
+            id="id_last_name"
+            class="field-input"
+            type="text"
+            name="last_name"
+            value="{{ user.last_name }}"
+            placeholder="Иванов"
+          >
+        </div>
+
+        <div class="field">
+          <label class="field-label">Email</label>
+          <div class="field-readonly">{{ user.email }}</div>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="id_phone">Телефон</label>
+          <input
+            id="id_phone"
+            class="field-input"
+            type="tel"
+            name="phone"
+            value="{{ user.phone }}"
+            placeholder="+7 900 000 00 00"
+          >
+        </div>
+
+        <div class="field field-full">
+          <label class="field-label" for="id_address">Адрес</label>
+          <textarea
+            id="id_address"
+            class="field-input"
+            name="address"
+            placeholder="Город, улица, дом"
+          >{{ user.address }}</textarea>
+        </div>
+
+      </div>
+
+      <button type="submit" class="profile-save-btn">Сохранить изменения</button>
+
+      <div class="profile-actions">
+        <a href="{% url 'accounts:change_password' %}" class="profile-save-btn profile-save-btn--secondary">
+          🔐 Сменить пароль
+        </a>
+        <a href="{% url 'accounts:delete_account' %}" class="profile-save-btn profile-save-btn--danger" onclick="return confirm('⚠️ ВНИМАНИЕ: Вы уверены, что хотите удалить свой аккаунт? Все данные будут потеряны!')">
+          🗑️ Удалить аккаунт
+        </a>
+      </div>
+
+    </form>
+  </div>
+
+  {# История входов #}
+  <div class="profile-card">
+    <h2>История входов</h2>
+
+    {% if login_history %}
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Дата</th>
+            <th>IP адрес</th>
+            <th>Браузер</th>
+            <th>Статус</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in login_history %}
+            <tr>
+              <td>{{ entry.created_at|date:"d.m.Y H:i" }}</td>
+              <td>{{ entry.ip_address|default:"—" }}</td>
+              <td>{{ entry.browser|truncatechars:30|default:"—" }}</td>
+              <td>
+                {% if entry.is_successful %}
+                  <span class="status-ok">✓ Успешно</span>
+                {% else %}
+                  <span class="status-fail">✗ Неудача</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p style="color: var(--text-secondary, #8892b0); font-size: .875rem;">
+        История входов пуста.
+      </p>
+    {% endif %}
+  </div>
 
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script src="{% static 'js/profile.js' %}"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const score = {{ score }};
-    const circumference = 2 * Math.PI * 90;
-    const offset = circumference - (score / 100) * circumference;
-    const progressCircle = document.getElementById('score-progress');
-    
-    setTimeout(() => {
-        progressCircle.style.strokeDashoffset = offset;
-    }, 100);
-});
-</script>
 {% endblock %}
