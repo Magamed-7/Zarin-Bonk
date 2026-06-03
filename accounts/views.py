@@ -12,7 +12,6 @@ from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.core.mail import send_mail
 from django.conf import settings
-DEFAULT_FROM_EMAIL = settings.DEFAULT_FROM_EMAIL
 from django.shortcuts import redirect, render
 from django.utils import timezone
  
@@ -21,7 +20,7 @@ from notifications.models import Notification
 from .forms import LoginForm, RegisterForm, TwoFactorForm
 from .models import LoginHistory
 from .decorators import client_required, manager_required, admin_required
-
+DEFAULT_FROM_EMAIL = settings.DEFAULT_FROM_EMAIL
 
 User = get_user_model()
 

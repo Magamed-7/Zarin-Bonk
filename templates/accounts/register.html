@@ -133,6 +133,7 @@
               autocomplete="new-password"
             >
             <span class="field-icon">🔒</span>
+            <button type="button" class="field-toggle" aria-label="Показать пароль">👁️</button>
           </div>
           <div class="password-strength">
             <div class="strength-bar">
@@ -157,6 +158,7 @@
               autocomplete="new-password"
             >
             <span class="field-icon">🔒</span>
+            <button type="button" class="field-toggle" aria-label="Показать пароль">👁️</button>
           </div>
           <span class="field-hint">
             {% if form.password_confirm.errors %}{{ form.password_confirm.errors.0 }}{% endif %}

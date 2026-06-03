@@ -99,6 +99,24 @@
     }, { passive: true });
   }
 
+  // ── Password toggles ───────────────────────────────────────
+  function setupPasswordToggle(inputId) {
+    const input = document.getElementById(inputId);
+    const fieldWrap = input ? input.closest('.field-input-wrap') : null;
+    const toggle = fieldWrap ? fieldWrap.querySelector('.field-toggle') : null;
+
+    if (input && toggle) {
+      toggle.addEventListener('click', () => {
+        const isText = input.type === 'text';
+        input.type = isText ? 'password' : 'text';
+        toggle.textContent = isText ? '👁️' : '🙈';
+      });
+    }
+  }
+
+  setupPasswordToggle('id_password');
+  setupPasswordToggle('id_password_confirm');
+
   function validateField(input, strict = false) {
     const rule  = RULES[input.id];
     if (!rule) return true;

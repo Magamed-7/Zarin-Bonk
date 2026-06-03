@@ -156,7 +156,7 @@
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  padding: 0.75rem 0.9rem 0.75rem 2.6rem;
+  padding: 0.75rem 3rem 0.75rem 2.6rem;
   color: var(--text-primary, #e8eaf6);
   font-size: 0.95rem;
   font-family: inherit;
@@ -179,6 +179,24 @@
 .field-input-wrap:focus-within .field-icon {
   opacity: 1;
 }
+
+/* Password toggle */
+.field-toggle {
+  position: absolute;
+  right: 0.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+  padding: 0;
+  line-height: 1;
+}
+
+.field-toggle:hover { opacity: 1; }
 
 /* Validation states */
 .field.is-valid .field-input {
