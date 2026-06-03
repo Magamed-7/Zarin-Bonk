@@ -18,6 +18,7 @@ class Account(models.Model):
         TJS = 'TJS', 'TJS'
         USD = 'USD', 'USD'
         EUR = 'EUR', 'EUR'
+        RUB = 'RUB', 'RUB'
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -135,27 +136,27 @@ class Card(models.Model):
 
 
 class ExchangeRate(models.Model):
-    from_currency = models.CharField(
+    base_currency = models.CharField(
         max_length=3,
         choices=Account.Currency.choices,
     )
-    to_currency = models.CharField(
+    target_currency = models.CharField(
         max_length=3,
         choices=Account.Currency.choices,
     )
     rate = models.DecimalField(
-        max_digits=12,
-        decimal_places=6,
+        max_digits=10,
+        decimal_places=4,
     )
-    updated_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('from_currency', 'to_currency')
+        unique_together = ('base_currency', 'target_currency')
         verbose_name = 'курс валют'
         verbose_name_plural = 'курсы валют'
 
     def __str__(self):
-        return f'{self.from_currency} → {self.to_currency}: {self.rate}'
+        return f'{self.base_currency} → {self.target_currency}: {self.rate}'
 
 
 class BankSettings(models.Model):

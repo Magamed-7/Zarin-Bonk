@@ -25,9 +25,9 @@ class BankSettingsForm(forms.ModelForm):
 class ExchangeRateForm(forms.ModelForm):
     class Meta:
         model = ExchangeRate
-        fields = ['from_currency', 'to_currency', 'rate']
+        fields = ['base_currency', 'target_currency', 'rate']
         widgets = {
-            'rate': forms.NumberInput(attrs={'step': '0.000001'}),
+            'rate': forms.NumberInput(attrs={'step': '0.0001'}),
         }
 
 

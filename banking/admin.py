@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Account, Card
+from .models import Account, Card, ExchangeRate
 
 
 class CardInline(admin.TabularInline):
@@ -51,3 +51,17 @@ class CardAdmin(admin.ModelAdmin):
     @admin.display(description='Номер карты')
     def masked_number(self, obj):
         return obj.masked_number
+
+
+# ExchangeRate panel
+@admin.register(ExchangeRate)
+class ExchangeRateAdmin(admin.ModelAdmin):
+    list_display = (
+        'base_currency',
+        'target_currency',
+        'rate',
+        'updated_at',
+    )
+    list_filter = ('base_currency', 'target_currency')
+    search_fields = ('base_currency', 'target_currency')
+    readonly_fields = ('updated_at',)

@@ -33,12 +33,12 @@
             {% for rate in rates %}
             <div class="rate-card glass-card">
                 <div class="rate-pair">
-                    <span class="currency from">{{ rate.from_currency }}</span>
+                    <span class="currency from">{{ rate.base_currency }}</span>
                     <span class="arrow">→</span>
-                    <span class="currency to">{{ rate.to_currency }}</span>
+                    <span class="currency to">{{ rate.target_currency }}</span>
                 </div>
                 <div class="rate-value">
-                    1 {{ rate.from_currency }} = <strong>{{ rate.rate }}</strong> {{ rate.to_currency }}
+                    1 {{ rate.base_currency }} = <strong>{{ rate.rate }}</strong> {{ rate.target_currency }}
                 </div>
                 <div class="rate-meta">
                     Обновлено: {{ rate.updated_at|date:"d.m.Y H:i" }}
