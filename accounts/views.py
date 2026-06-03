@@ -11,6 +11,8 @@ from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.core.mail import send_mail
+from django.conf import settings
+DEFAULT_FROM_EMAIL = settings.DEFAULT_FROM_EMAIL
 from django.shortcuts import redirect, render
 from django.utils import timezone
  
@@ -76,9 +78,9 @@ def send_verification_email(user, request):
             f'Для подтверждения email перейдите по ссылке:\n{verify_url}\n\n'
             'Ссылка действительна 24 часа.'
         ),
-        from_email='noreply@zarinpay.tj',
+        from_email=DEFAULT_FROM_EMAIL,
         recipient_list=[user.email],
-        fail_silently=False,
+        fail_silently=True,
     )
 
 
@@ -318,9 +320,9 @@ def _send_2fa_code(user, ip):
     send_mail(
         subject='ZarinPay — код подтверждения',
         message=f'Ваш код для входа: {code}\n\nКод действителен 5 минут.',
-        from_email='noreply@zarinpay.tj',
+        from_email=DEFAULT_FROM_EMAIL,
         recipient_list=[user.email],
-        fail_silently=False,
+        fail_silently=True,
     )
  
 
@@ -351,9 +353,9 @@ def forgot_password_view(request):
                 send_mail(
                     subject='ZarinPay — восстановление пароля',
                     message=f'Ваш код для сброса пароля: {code}\n\nКод действителен 10 минут.',
-                    from_email='noreply@zarinpay.tj',
+                    from_email=DEFAULT_FROM_EMAIL,
                     recipient_list=[user.email],
-                    fail_silently=False,
+                    fail_silently=True,
                 )
                 messages.success(request, 'Если email зарегистрирован — код отправлен.')
  
@@ -529,9 +531,9 @@ def change_password_view(request):
                     'Ваш пароль в ZarinPay был успешно изменён.\n\n'
                     'Если это были не вы — немедленно обратитесь в службу поддержки.'
                 ),
-                from_email='noreply@zarinpay.tj',
+                from_email=DEFAULT_FROM_EMAIL,
                 recipient_list=[user.email],
-                fail_silently=False,
+                fail_silently=True,
             )
  
             messages.success(request, 'Пароль успешно изменён!')
