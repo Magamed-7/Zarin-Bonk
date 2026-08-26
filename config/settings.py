@@ -30,6 +30,15 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = ['*']
 
+# За nginx Django видит http, поэтому без этой пары он строит http-ссылки и заворачивает
+# CSRF-проверку на https-формах.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in config('CSRF_TRUSTED_ORIGINS', default='https://zarinpay.glossa.best').split(',')
+    if origin.strip()
+]
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -53,6 +62,10 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # Отдаёт собранную статику прямо из Django. На сервере перед приложением стоит
+    # nginx главного сайта, и заводить ему отдельный корень со статикой ради одного
+    # проекта не хочется — whitenoise закрывает вопрос одной строкой.
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -130,6 +143,12 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+# Куда collectstatic складывает файлы при сборке образа.
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STORAGES = {
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage'},
+}
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
