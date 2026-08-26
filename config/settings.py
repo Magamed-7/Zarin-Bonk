@@ -12,13 +12,16 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 
-from decouple import Config, RepositoryEnv
+from decouple import Config, RepositoryEmpty, RepositoryEnv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Локально настройки лежат в .env, в контейнере их передаёт docker через окружение.
+# Config() без аргументов падает с TypeError, поэтому запасной путь — пустой репозиторий:
+# decouple всё равно сначала смотрит в переменные окружения.
 _env_path = BASE_DIR / '.env'
-config = Config(RepositoryEnv(_env_path)) if _env_path.exists() else Config()
+config = Config(RepositoryEnv(_env_path) if _env_path.exists() else RepositoryEmpty())
 
 
 # Quick-start development settings - unsuitable for production
