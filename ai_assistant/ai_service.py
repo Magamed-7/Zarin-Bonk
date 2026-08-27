@@ -16,6 +16,11 @@ SYSTEM_PROMPT = """Ты — личный финансовый ассистент
 
 class AIService:
     def __init__(self):
+        # Основной ключ — платный DeepSeek. Он пробуется первым и в обычной работе
+        # отвечает всегда; остальные провайдеры ниже остаются на случай, когда он
+        # недоступен.
+        self.primary_deepseek_key = config('API_KEY_deepseek', default=None)
+
         # Claude API ключи (Anthropic)
         self.claude_api_keys = [
             config('CLAUDE_API_KEY_1', default=None),
@@ -59,7 +64,16 @@ class AIService:
         if bank_context:
             full_context += f"\n\n=== ДАННЫЕ ПОЛЬЗОВАТЕЛЯ ===\n{bank_context}\n========================"
         
-        # Пробуем Claude ключ 1, потом ключ 2
+        # Сначала платный DeepSeek — основной провайдер.
+        if self.primary_deepseek_key:
+            try:
+                response = self._call_deepseek(self.primary_deepseek_key, user_message, full_context)
+                logger.info("AI response from DeepSeek (основной платный ключ)")
+                return response
+            except Exception as e:
+                logger.warning(f"DeepSeek (основной платный ключ) error: {e}")
+
+        # Дальше — запасные провайдеры, по очереди.
         for i in range(len(self.claude_api_keys)):
             key = self.claude_api_keys[(self.current_claude_index + i) % len(self.claude_api_keys)]
             if key:

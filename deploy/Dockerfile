@@ -5,8 +5,11 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt ai_requirements.txt ./
+# Второй файл — SDK провайдеров ИИ. Основной провайдер (платный DeepSeek) ходит через
+# библиотеку openai с другим base_url, остальные нужны, чтобы запасные ключи в каскаде
+# действительно срабатывали, а не падали на отсутствующем импорте.
+RUN pip install --no-cache-dir -r requirements.txt -r ai_requirements.txt
 
 COPY . .
 
