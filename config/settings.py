@@ -148,9 +148,13 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 # Куда collectstatic складывает файлы при сборке образа.
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+# Сжатие без манифеста. Манифестное хранилище требует, чтобы каждый файл из
+# {% static %} существовал, и роняет страницу целиком, если чего-то нет. В шаблонах
+# ссылаются на favicon-16x16.png, favicon-32x32.png, apple-touch-icon.png и
+# js/transfer.js, которых в проекте нет — в режиме отладки это были тихие 404.
 STORAGES = {
     'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
-    'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage'},
+    'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage'},
 }
 
 MEDIA_URL = '/media/'
