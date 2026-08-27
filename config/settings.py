@@ -29,9 +29,13 @@ config = Config(RepositoryEnv(_env_path) if _env_path.exists() else RepositoryEm
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY')
-DEBUG = config('DEBUG', default=True, cast=bool)
+DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in config('ALLOWED_HOSTS', default='zarinpay.glossa.best,localhost,127.0.0.1').split(',')
+    if host.strip()
+]
 
 # За nginx Django видит http, поэтому без этой пары он строит http-ссылки и заворачивает
 # CSRF-проверку на https-формах.
